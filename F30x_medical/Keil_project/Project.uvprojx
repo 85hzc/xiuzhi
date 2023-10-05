@@ -416,16 +416,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Arithmetic</GroupName>
-          <Files>
-            <File>
-              <FileName>pmsm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\source\pmsm.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Driver</GroupName>
           <Files>
             <File>

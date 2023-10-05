@@ -147,39 +147,6 @@ void SysTick_Handler(void)
 
 
 /*!
-    \brief      this function handles TIMER2 exception
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void TIMER2_IRQHandler(void)
-{
-    static uint8_t speed_timer_overflow = 0;
-
-    if(timer_interrupt_flag_get(TIMER2, TIMER_INT_FLAG_CH3)){
-        /* clear interrupt flag */
-        timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_CH3);
-        speed_timer_overflow++;
-        hall.speed = 0;
-    }
-    
-    if(timer_interrupt_flag_get(TIMER2, TIMER_INT_FLAG_TRG)){
-        /* clear interrupt flag */
-        timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_TRG);
-
-        /* calculate the speed of the rotor */
-        //hall.speed = hall_speed_update(speed_timer_overflow);
-        speed_timer_overflow = 0;
-    }
-
-    if(timer_interrupt_flag_get(TIMER2, TIMER_INT_FLAG_CH2)){
-        /* clear interrupt flag */
-        timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_CH2);
-        timer_event_software_generate(TIMER2, TIMER_EVENT_SRC_UPG);
-    }
-}
-
-/*!
     \brief      this function handles EXTI5_9 interrupts handler
     \param[in]  none
     \param[out] none
@@ -187,31 +154,26 @@ void TIMER2_IRQHandler(void)
 */
 void EXTI5_9_IRQHandler(void)
 {
-    /* Port IN1 */ //踏频信号
+    //落杯信号中断
     if(exti_interrupt_flag_get(EXTI_6) != RESET){
         exti_interrupt_flag_clear(EXTI_6);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(TOR_IN1_GPIO_PORT, TOR_IN1_GPIO_PIN)){
-            led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+        if(SET == gpio_input_bit_get(LUOBEI_IRQ_GPIO_PORT, LUOBEI_IRQ_GPIO_PIN)){
+            //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             trige_count();
-        }else{
         }
     }
 
-    /* Port IN2 */ //限位控制
+    //限位控制
     if(exti_interrupt_flag_get(EXTI_7) != RESET){
         exti_interrupt_flag_clear(EXTI_7);
         joggle_delay(10000);
-        if(RESET == gpio_input_bit_get(PROTECT_IN2_GPIO_PORT, PROTECT_IN2_GPIO_PIN)){
+        if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
 
-            //bldc_brake();
-            g_generator_gears_pre = GENERATOR_5;
-            g_generator_gears = GENERATOR_5;
-        }else{
         }
     }
 
-    /* Port TP2 */ //轮速信号
+    //流量信号
     if(exti_interrupt_flag_get(EXTI_9) != RESET){
         exti_interrupt_flag_clear(EXTI_9);
         joggle_delay(10000);
@@ -219,6 +181,44 @@ void EXTI5_9_IRQHandler(void)
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_velocity_count++;
         }else{
+        }
+    }
+}
+
+
+
+/*!
+    \brief      this function handles EXTI10_15 interrupts handler
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void EXTI10_15_IRQHandler(void)
+{
+    //位置1中断
+    if(exti_interrupt_flag_get(EXTI_10) != RESET){
+        exti_interrupt_flag_clear(EXTI_10);
+        joggle_delay(10000);
+        if(SET == gpio_input_bit_get(POSITION_1_GPIO_PORT, POSITION_1_GPIO_PIN)){
+            ;
+        }
+    }
+
+    //位置2中断
+    if(exti_interrupt_flag_get(EXTI_11) != RESET){
+        exti_interrupt_flag_clear(EXTI_11);
+        joggle_delay(10000);
+        if(SET == gpio_input_bit_get(POSITION_2_GPIO_PORT, POSITION_2_GPIO_PIN)){
+            ;
+        }
+    }
+
+    //位置3中断
+    if(exti_interrupt_flag_get(EXTI_12) != RESET){
+        exti_interrupt_flag_clear(EXTI_12);
+        joggle_delay(10000);
+        if(SET == gpio_input_bit_get(POSITION_3_GPIO_PORT, POSITION_3_GPIO_PIN)){
+            ;
         }
     }
 }

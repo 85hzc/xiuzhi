@@ -40,37 +40,13 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 
-/* the GPIO configuration of key and other input */
-#define KEY_GENERATOR_UP_PIN            GPIO_PIN_4
-#define KEY_GENERATOR_UP_GPIO_CLK       RCU_GPIOA
-#define KEY_GENERATOR_UP_GPIO_PORT      GPIOA
-
-#define KEY_GENERATOR_DOWN_PIN          GPIO_PIN_5
-#define KEY_GENERATOR_DOWN_GPIO_CLK     RCU_GPIOA
-#define KEY_GENERATOR_DOWN_GPIO_PORT    GPIOA
-
-#define KEY_MODE_UP_PIN                 GPIO_PIN_6
-#define KEY_MODE_UP_GPIO_CLK            RCU_GPIOA
-#define KEY_MODE_UP_GPIO_PORT           GPIOA
-
-#define KEY_MODE_DOWN_PIN               GPIO_PIN_7
-#define KEY_MODE_DOWN_GPIO_CLK          RCU_GPIOA
-#define KEY_MODE_DOWN_GPIO_PORT         GPIOA
-
-
-#define MOTOR_A_PIN                     GPIO_PIN_8
-#define MOTOR_A_GPIO_CLK                RCU_GPIOA
-#define MOTOR_A_GPIO_PORT               GPIOA
-#define MOTOR_B_PIN                     GPIO_PIN_13
-#define MOTOR_B_GPIO_CLK                RCU_GPIOB
-#define MOTOR_B_GPIO_PORT               GPIOB
 
 /* the key enumeration */
 typedef enum {
-    KEY_GENERATOR_UP = 0,
-    KEY_GENERATOR_DOWN,
-    KEY_MODE_UP,
-    KEY_MODE_DOWN,
+    KEY_guangdian,
+    KEY_fuzi,
+    KEY_T1,
+    KEY_T2,
 } key_switch;
 
 /* function declarations */

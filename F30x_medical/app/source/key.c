@@ -52,17 +52,17 @@ static FlagStatus key_read_debouncing(key_switch key_sw);
 void key_init(void)
 {
     /* enable the clock of GPIO and alternate function */
-    rcu_periph_clock_enable(KEY_GENERATOR_UP_GPIO_CLK);
-    rcu_periph_clock_enable(KEY_GENERATOR_DOWN_GPIO_CLK);
-    rcu_periph_clock_enable(KEY_MODE_UP_GPIO_CLK);
-    rcu_periph_clock_enable(KEY_MODE_DOWN_GPIO_CLK);
+    rcu_periph_clock_enable(SWITCH_LUOBEI_GPIO_CLK);
+    rcu_periph_clock_enable(SWITCH_T1_GPIO_CLK);
+    rcu_periph_clock_enable(SWITCH_T2_GPIO_CLK);
+    rcu_periph_clock_enable(SWITCH_WATER_GPIO_CLK);
     rcu_periph_clock_enable(RCU_AF);
 
     /* key initialize */
-    gpio_init(KEY_GENERATOR_UP_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, KEY_GENERATOR_UP_PIN);
-    gpio_init(KEY_GENERATOR_DOWN_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, KEY_GENERATOR_DOWN_PIN);
-    gpio_init(KEY_MODE_UP_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, KEY_MODE_UP_PIN);
-    gpio_init(KEY_MODE_DOWN_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, KEY_MODE_DOWN_PIN);
+    gpio_init(SWITCH_LUOBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_LUOBEI_PIN);
+    gpio_init(SWITCH_T1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T1_PIN);
+    gpio_init(SWITCH_T2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T2_PIN);
+    gpio_init(SWITCH_WATER_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_WATER_PIN);
 }
 
 /*!
@@ -76,17 +76,17 @@ static FlagStatus key_read(key_switch key)
     uint8_t data=0;
 
     switch(key){
-        case KEY_GENERATOR_UP:
-            data = gpio_input_bit_get(KEY_GENERATOR_UP_GPIO_PORT, KEY_GENERATOR_UP_PIN);
+        case KEY_guangdian:
+            data = gpio_input_bit_get(SWITCH_LUOBEI_GPIO_PORT, SWITCH_LUOBEI_PIN);
             break;
-        case KEY_GENERATOR_DOWN:
-            data = gpio_input_bit_get(KEY_GENERATOR_DOWN_GPIO_PORT, KEY_GENERATOR_DOWN_PIN);
+        case KEY_fuzi:
+            data = gpio_input_bit_get(SWITCH_WATER_GPIO_PORT, SWITCH_WATER_PIN);
             break;
-        case KEY_MODE_UP:
-            data = gpio_input_bit_get(KEY_MODE_UP_GPIO_PORT, KEY_MODE_UP_PIN);
+        case KEY_T1:
+            data = gpio_input_bit_get(SWITCH_T1_GPIO_PORT, SWITCH_T1_PIN);
             break;
-        case KEY_MODE_DOWN:
-            data = gpio_input_bit_get(KEY_MODE_DOWN_GPIO_PORT, KEY_MODE_DOWN_PIN);
+        case KEY_T2:
+            data = gpio_input_bit_get(SWITCH_T2_GPIO_PORT, SWITCH_T2_PIN);
             break;
         default: data = 0;
     }
@@ -110,7 +110,25 @@ static FlagStatus key_read_debouncing(key_switch key)
         delay_1ms(10);
         if(key_read(key)){
             /* intermittent examination, press release to start */
-            while(SET == key_read(key));
+            //while(SET == key_read(key));
+            return SET;
+        }
+    }
+    return RESET;
+}
+
+/*!
+    \brief      key read state
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+static FlagStatus key_read_state(key_switch key)
+{
+    if(key_read(key)){
+        delay_1ms(5);
+        if(key_read(key)){
+            /* intermittent examination, press release to start */
             return SET;
         }
     }
@@ -125,78 +143,29 @@ static FlagStatus key_read_debouncing(key_switch key)
 */
 void key_process(void)
 {
-    /* generator up key is pressed */
-    if(key_read_debouncing(KEY_GENERATOR_UP)){
-
-        if (g_generator_gears < GENERATOR_5)
-        {
-            g_generator_gears++;
-            printf("gear=%d\r\n", g_generator_gears);
-        }
-    }
-
-    /* generator down key is pressed */
-    if(key_read_debouncing(KEY_GENERATOR_DOWN)){
-        
-        if (g_generator_gears > GENERATOR_0)
-        {
-            g_generator_gears--;
-            printf("gear=%d\r\n", g_generator_gears);
-        }
-    }
-
     /* drive mode up key is pressed */
-    if(key_read_debouncing(KEY_MODE_UP)){
-
-        if (g_drive_mode < GEAR_5)
-        {
-            g_drive_mode++;
-            printf("drive=%d\r\n", g_drive_mode);
-            fmc_erase_pages(MODE_PAGE);
-            fmc_data_program(MODE_PAGE);
-        }
+    if(key_read_debouncing(KEY_guangdian)){
+        printf("guangdian\r\n");
+        //fmc_erase_pages(MODE_PAGE);
+        //fmc_data_program(MODE_PAGE);
     }
 
-    /* drive mode down key is pressed */
-    if(key_read_debouncing(KEY_MODE_DOWN)){
-        
-        if (g_drive_mode > GEAR_0)
-        {
-            g_drive_mode--;
-            printf("drive=%d\r\n", g_drive_mode);
-            fmc_erase_pages(MODE_PAGE);
-            fmc_data_program(MODE_PAGE);
-        }
-    }
-}
-
-/*
-** 设置放电/充电电路开关比例，调节发电机阻力；
-*/
-void Reluctance_motor_running()
-{
-    //充电电压检测，过压关闭充电电路
-    static uint8_t switch_ON = 0;
-    if ((vbus_f > 42.0) && switch_ON){
-        //关闭发电环路
-        gpio_bit_reset(GENERATE_SWITCH_GPIO_PORT, GENERATE_SWITCH_PIN);
-        switch_ON = 0;
-    } else if (!switch_ON){
-        //打开发电环路
-        gpio_bit_set(GENERATE_SWITCH_GPIO_PORT, GENERATE_SWITCH_PIN);
-        switch_ON = 1;
+    if(key_read_debouncing(KEY_fuzi)){
+        printf("fuzi\r\n");
+        //fmc_erase_pages(MODE_PAGE);
+        //fmc_data_program(MODE_PAGE);
     }
 
-    //阻力档位调节
-    if (g_generator_gears == g_generator_gears_pre)
-        return;
-    
-    //0 ---- 500
-    /* configure TIMER channel output pulse value */
-    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) 500 * g_generator_gears / 5.0f);
+    if(key_read_debouncing(KEY_T1)){
+        printf("t1\r\n");
+        //fmc_erase_pages(MODE_PAGE);
+        //fmc_data_program(MODE_PAGE);
+    }
 
-    g_generator_gears_pre = g_generator_gears;
-    fmc_erase_pages(MODE_PAGE);
-    fmc_data_program(MODE_PAGE);
+    if(key_read_debouncing(KEY_T2)){
+        printf("t2\r\n");
+        //fmc_erase_pages(MODE_PAGE);
+        //fmc_data_program(MODE_PAGE);
+    }
 }
 

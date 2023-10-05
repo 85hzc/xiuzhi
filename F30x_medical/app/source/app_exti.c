@@ -7,8 +7,8 @@
 #include "global.h"
 
 static uint16_t delay_joggle = 0;
-static uint8_t pulse_count = 0, pulse_count_pre = 0;
-uint8_t cadence = 0, cadence_f = 0;
+uint16_t cup_count, water_set;
+uint8_t temperature_set, enyzme_set;
 
 /*!
     \brief      initialize the TOR port
@@ -16,44 +16,105 @@ uint8_t cadence = 0, cadence_f = 0;
     \param[out] none
     \retval     none
 */
-void torque_exti_init(void)
+void luobei_exti_init(void)
 {
     /* enable the clock of GPIO */
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(TOR_IN1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, TOR_IN1_GPIO_PIN);
+    gpio_init(LUOBEI_IRQ_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, LUOBEI_IRQ_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(TOR_IN1_EXTI_SRC_PORT, TOR_IN1_EXTI_SRC_PIN);
+    gpio_exti_source_select(LUOBEI_IRQ_EXTI_SRC_PORT, LUOBEI_IRQ_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(TOR_IN1_EXTI_LINE, EXTI_INTERRUPT, TOR_IN1_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(TOR_IN1_EXTI_LINE);
+    exti_init(LUOBEI_IRQ_EXTI_LINE, EXTI_INTERRUPT, LUOBEI_IRQ_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(LUOBEI_IRQ_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(TOR_IN1_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(LUOBEI_IRQ_EXTI_IRQ, 2U, 0U);
 }
 
-void position_exit_init(void)
+void protect_exit_init(void)
 {
     /* enable the clock of GPIO */
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(PROTECT_IN2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, PROTECT_IN2_GPIO_PIN);
+    gpio_init(PROTECT_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, PROTECT_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(PROTECT_IN2_EXTI_SRC_PORT, PROTECT_IN2_EXTI_SRC_PIN);
+    gpio_exti_source_select(PROTECT_EXTI_SRC_PORT, PROTECT_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(PROTECT_IN2_EXTI_LINE, EXTI_INTERRUPT, PROTECT_IN2_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(PROTECT_IN2_EXTI_LINE);
+    exti_init(PROTECT_EXTI_LINE, EXTI_INTERRUPT, PROTECT_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(PROTECT_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(PROTECT_IN2_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(PROTECT_EXTI_IRQ, 2U, 0U);
+}
+
+
+void position1_exit_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(POSITION_1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_1_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(POSITION_1_EXTI_SRC_PORT, POSITION_1_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(POSITION_1_EXTI_LINE, EXTI_INTERRUPT, POSITION_1_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(POSITION_1_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(POSITION_1_EXTI_IRQ, 2U, 0U);
+}
+
+void position2_exit_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(POSITION_2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_2_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(POSITION_2_EXTI_SRC_PORT, POSITION_2_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(POSITION_2_EXTI_LINE, EXTI_INTERRUPT, POSITION_2_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(POSITION_2_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(POSITION_2_EXTI_IRQ, 2U, 0U);
+}
+
+void position3_exit_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(POSITION_3_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_3_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(POSITION_3_EXTI_SRC_PORT, POSITION_3_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(POSITION_3_EXTI_LINE, EXTI_INTERRUPT, POSITION_3_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(POSITION_3_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(POSITION_3_EXTI_IRQ, 2U, 0U);
 }
 
 /*!
@@ -76,22 +137,11 @@ void joggle_delay(uint16_t num)
 */
 void trige_count(void)
 {
-    if (pulse_count == 0xff) {
-
-        pulse_count = (0xff - pulse_count_pre) + 1;
-
-    } else {
-        pulse_count++;
-    }
+    cup_count++;
 }
 
 void calc_cadence()
 {
-    /* 传感器圈36个脉冲 */
-    cadence = ( ((float)pulse_count * 60.0f) / (36.0f * 0.5f) );
-    HZC_LP_FAST(cadence_f, cadence, 0.5f);
 
-    pulse_count_pre = pulse_count;
-    pulse_count = 0;
 }
 

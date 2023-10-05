@@ -105,31 +105,3 @@ void hall_timer_config(void)
     timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_CH3);
     timer_interrupt_enable(TIMER2, TIMER_INT_CH3);
 }
-
-/*!
-    \brief      hall control mode, rotor location initialization
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void hall_init(void)
-{
-    hall.pre_state = 0;
-    hall.speed = 0;
-}
-
-/*!
-    \brief      hall control mode, read hall state
-    \param[in]  none
-    \param[out] none
-    \retval     hall state, 1-6
-*/
-uint8_t hall_read_state(void)
-{
-    uint8_t state;
-    state  = (uint8_t)((GPIO_ISTAT(GPIOA) & 0x000000C0) >> 6);
-    state |= (uint8_t)((GPIO_ISTAT(GPIOB) & 0x00000001) << 2);
-    
-    return (state);
-}
-

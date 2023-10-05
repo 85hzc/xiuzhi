@@ -9,10 +9,10 @@
 void motor_sent_data(uint8_t pwm, uint8_t current);
 void motor_sent_control(uint8_t pwm, uint8_t current);
 
-float torque_ebike_f = 0.0, vbus_f = 0.0, g_velocity = 0.0, g_velocity_f = 0.0;
-uint16_t vbus, i_Sensor, i_Input;
+float g_velocity = 0.0;
 float g_torque_offset = 0.0;
 uint8_t g_velocity_count = 0;
+float temperature = 0.0;
 
 
 uint8_t calculateCRC8(const uint8_t *data, int  len)
@@ -54,23 +54,7 @@ void velocity_exti_init(void)
 */
 void torque_value_calibration(void)
 {
-    #if 0
-    uint32_t i, torque = 0;
-    /* use regular group to sample the offset */
-    delay_1ms(100);
-    /* the current offset of phase A */
-    adc_regular_channel_config(ADC0, 0, TORQUE_SENSOR_PIN, ADC_SAMPLETIME_239POINT5);
-    for(i=0; i<26; i++){
-        adc_software_trigger_enable(ADC0, ADC_REGULAR_CHANNEL);
-        while(RESET == adc_flag_get(ADC0, ADC_FLAG_EOC));
-        if(i >= 10){
-            torque += adc_regular_data_read(ADC0);
-        }
-    }
-    g_torque_offset = torque/16.0f;
-    /* restore to default configuration */
-    adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, DISABLE);
-    #else
+
     uint16_t torque = 0;
     float torqueSum = 0.0;
     uint8_t torque_offset_flag = 1, times=0;
@@ -93,7 +77,7 @@ void torque_value_calibration(void)
         }
         times++;
     }
-    #endif
+
     printf("g_torque_offset = %.2f\r\n", g_torque_offset);
 
     fmc_erase_pages(CONFIG_PAGE);
@@ -112,15 +96,6 @@ void ebike_process(void)
     uint8_t pwm;
     uint8_t I_ctrl;
 
-    I_ctrl = (uint8_t)((torque_ebike_f / 1400.0f) * 100) % 100;
-    pwm = (g_velocity_f >= 50.0f) ? 0 : 100;
-
-    g_generator_power = I_ctrl * 1.2f;
-    if (cadence_f >= 80) {
-        (I_ctrl <= 80) ? (I_ctrl+=20) : (I_ctrl=100) ;
-    } else {
-        I_ctrl += (cadence_f / 80.0f) * 20;
-    }
 
     motor_sent_control(pwm, I_ctrl);
 }
@@ -167,50 +142,16 @@ void motor_sent_control(uint8_t pwm, uint8_t current)
 // 50ms period
 void ebike_read_sample(void)
 {
-    uint16_t torque_ebike = 0.0;
+    uint16_t temp;
 
-    #if 0
-    static uint32_t torque = 0;
-    static uint8_t torque_offset_flag = 1, times=0;
-    if (torque_offset_flag && times++ < 26) {
-        if (times >= 10) {
-            torque += adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_1);
-        }
-        if (times == 25) {
-            g_torque_offset = (float)torque / 16.0f;
-            torque_offset_flag = 0;
-        }
-        goto TODO;
-    }
-    #endif
-
-    i_Sensor = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
-    i_Input = i_Sensor * 0.003223;
-    torque_ebike = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_1) - g_torque_offset;
-    HZC_LP_FAST(torque_ebike_f, torque_ebike, 0.1f);
-    vbus     = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_2) * 0.0129f;//3.3f * 16.0f / 4096.0f;//VBUS_CHANNEL
-    HZC_LP_FAST(vbus_f, vbus, 0.1f);
-    //printf("[AD]ibus:%d, vbus:%.1f, tor:%.2f(%.2f)\r\n", i_Sensor, vbus_f, torque_ebike_f, g_torque_offset);
+    temp = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
+    temperature = temp * 0.003223;
 
     //TODO:
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 }
 
-void hall_start(void)
-{
-    hall_init();
-
-    timer_enable(TIMER0);
-    timer_event_software_generate(TIMER0, TIMER_EVENT_SRC_UPG);
-
-    /* clear TIMER2 trigger interrupt flag */
-    timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_TRG);
-    timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_TRG|TIMER_INT_FLAG_CH3);
-
-    /* enable TIMER2 */
-    timer_enable(TIMER2);
-}
 
 void calc_velocity_1_second()//
 {
@@ -218,6 +159,32 @@ void calc_velocity_1_second()//
     g_velocity = g_velocity_count * 0.68 * 3.14 * 3.6;
     g_velocity_count = 0;
 
-    HZC_LP_FAST(g_velocity_f, g_velocity, 0.5f);
+}
+
+
+/*
+** 调节加热导通电流；
+*/
+void heat_running()
+{
+	  uint16_t pwm = 0;
+    printf("[AD]temperature:%.1f\r\n", temperature);
+
+    //need PID
+    if ((temperature > 42.0)){
+        //关闭加热
+        pwm = 0;
+    } else if ((temperature < 42.0)){
+        //打开发电环路
+				pwm = 500;
+    }
+
+    //0 ---- 500
+    /* configure TIMER channel output pulse value */
+    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) 500 /** g_generator_gears / 5.0f*/);
+
+    //g_generator_gears_pre = g_generator_gears;
+    //fmc_erase_pages(MODE_PAGE);
+    //fmc_data_program(MODE_PAGE);
 }
 

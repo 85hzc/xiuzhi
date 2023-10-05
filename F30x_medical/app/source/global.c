@@ -44,17 +44,10 @@ uint16_t adc_reference_filtered = 0;
 int16_t torque_reference = 0;
 
 /* global structure */
-Generator_e g_generator_gears = GENERATOR_0, g_generator_gears_pre = GENERATOR_0;   //踩踏阻力
-Gear_e g_drive_mode = GEAR_0;           //电机助力
 uint16_t g_generator_power = 0, g_error_code = 0;
-motor_state motor;
-mc_flags motor_flag = {0,0,0,1,0,0};
-
 flash_page_type page_type;
-
-/* hall variables */
-hall_structure hall;
-
+Loop_State_e loop_state;    //机器运行状态机
+uint8_t start_wort = 0;     //机器开启运行指令
 
 /* dma buffer */
 uint16_t timer_update_buffer[6] = {0};
@@ -73,3 +66,19 @@ int16_t uphase_sin,uphase_cos;
 /* debug variables */
 usart_debug debug_data;
 
+
+
+void work_loop( void )
+{
+    switch (loop_state) {
+        case LOOP_IDLE:
+            if (start_wort) {
+                loop_state = LOOP_LUOBEI;
+                start_wort = 0;
+            }
+            break;
+
+        default:
+            printf("invalid state.\r\n");
+    }
+}

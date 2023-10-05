@@ -42,7 +42,5 @@ OF SUCH DAMAGE.
 void hardware_config(void);
 /* TIMER7 configuration, generator resistant control PWM */
 void timer7_config(void);
-/* TIMER0 dma configuration, 1-shunt current sampling */
-//void timer0_dma_config(void);
 
 #endif /* HARDWARE_H */

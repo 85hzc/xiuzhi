@@ -95,11 +95,19 @@ void fmc_data_program(flash_page_type page_type)
         case MODE_PAGE:
             address = FMC_MODE_SHIFT_ADDR /*+ (FMC_PAGE_SIZE * (uint8_t)page_type)*/;
             
-            fmc_halfword_program(address, g_drive_mode);
+            fmc_halfword_program(address, cup_count);
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             
-            fmc_halfword_program(address, g_generator_gears);
+						fmc_halfword_program(address, temperature_set);
+            address += 2;
+            fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
+            
+						fmc_halfword_program(address, enyzme_set);
+            address += 2;
+            fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
+            
+            fmc_halfword_program(address, water_set);
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             break;

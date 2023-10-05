@@ -420,49 +420,6 @@ void oled_display(void)
         first_time = 0;
         printf("%d\r\n",__LINE__);
     }
-
-    if ((uint8_t)g_velocity_f != velocity_display_flag) {
-        oled_clear(3,4);
-        oled_showstring(0, 3, (uint8_t *)"velocit:", FONT_6_8);
-        oled_shownum(70,3,(uint16_t)g_velocity_f,3,FONT_6_8);
-        oled_showstring(88, 3, (uint8_t *)" Km/H", FONT_6_8);
-        velocity_display_flag = (uint8_t)g_velocity_f;
-        printf("%d\r\n",__LINE__);
-    }
-
-    if ((uint8_t)g_generator_gears != gears_display_flag) {
-        oled_clear(4,5);
-        oled_showstring(0, 4, (uint8_t *)"gears  :", FONT_6_8);
-        oled_shownum(70,4,(uint16_t)g_generator_gears,3,FONT_6_8);
-        gears_display_flag = (uint8_t)g_generator_gears;
-        printf("%d\r\n",__LINE__);
-    }
-
-    if ((uint8_t)g_drive_mode != mode_display_flag) {
-        oled_clear(5,6);
-        oled_showstring(0, 5, (uint8_t *)"mode   :", FONT_6_8);
-        oled_shownum(70,5,(uint16_t)g_drive_mode,3,FONT_6_8);
-        mode_display_flag = (uint8_t)g_drive_mode;
-        printf("%d\r\n",__LINE__);
-    }
-    
-    if (g_generator_power != power_display_flag) {
-        oled_clear(6,7);
-        oled_showstring(0, 6, (uint8_t *)"power  :", FONT_6_8);
-        oled_shownum(70,6,(uint16_t)g_generator_power,3,FONT_6_8);
-        oled_showstring(88, 6, (uint8_t *)" W", FONT_6_8);
-        power_display_flag = (uint8_t)g_generator_power;
-        printf("%d\r\n",__LINE__);
-    }
-
-    if ((uint8_t)cadence_f != cadence_flag) {
-        oled_clear(7,8);
-        oled_showstring(0, 7, (uint8_t *)"cadence:", FONT_6_8);
-        oled_shownum(70,7,(uint16_t)cadence_f,3,FONT_6_8);
-        oled_showstring(88, 7, (uint8_t *)" RPM", FONT_6_8);
-        cadence_flag = (uint8_t)cadence_f;
-        printf("%d\r\n",__LINE__);
-    }
 }
 
 /*!

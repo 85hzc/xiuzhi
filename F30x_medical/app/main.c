@@ -54,11 +54,18 @@ int main(void)
     hardware_config();
 
     /* hardware initialization */
-    torque_exti_init();
-    position_exit_init();
-    velocity_exti_init();
-    //bldc_init();
-    key_init();
+    luobei_exti_init();             //落杯器完成落杯动作，计数
+    protect_exit_init();            //安全限位开关
+    velocity_exti_init();           //流量传感器信号中断输入
+    position1_exit_init();
+    position2_exit_init();
+    position3_exit_init();
+
+    luobei_motor_init();
+    water_motor_init();
+    enzyme_motor_init();
+
+    key_init();                 //开关输入信号初始化
     led_init();
 
     delay_1ms(100);
@@ -69,11 +76,13 @@ int main(void)
     /* read the hall */
     fmc_data_read();
     extern uint8_t fmc_data[3][8];
-    g_generator_gears_pre = g_generator_gears = fmc_data[0][1];
-    g_drive_mode = fmc_data[0][0];
-    g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
+    water_set = fmc_data[0][3];
+    enyzme_set = fmc_data[0][2];
+    temperature_set = fmc_data[0][1];
+    cup_count = fmc_data[0][0];
+    //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
+
     printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
-    printf("[fmc] mode: %d, gear: %d\r\n", g_drive_mode, g_generator_gears);
 
     while(1){
 
@@ -102,6 +111,14 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
+            
+            /*
+            //状态诊断   状态进入 和 状态恢复
+            key_read_state(KEY_guangdian);
+            key_read_state(KEY_fuzi);
+            key_read_state(KEY_T1);
+            key_read_state(KEY_T2);
+            */
             ebike_read_sample();
 
             if (controller_ready_flag) {
@@ -132,6 +149,8 @@ int main(void)
 
             /* key process routine */
             key_process();
+
+            work_loop();
         }
 
         if (bTimeFlag_500ms)
@@ -149,12 +168,11 @@ int main(void)
             calc_cadence();
             calc_velocity_1_second();
 
-            Reluctance_motor_running();
+            heat_running();
 
             if (!controller_ready_flag) {
                 motor_sent_set(36, 10);//36V,10A
             }
-            printf("[AD]i_Input:%d, vbus:%.1f, tor:%.2f(%.2f)\r\n", i_Input, vbus_f, torque_ebike_f, g_torque_offset);
         }
 
         if (bTimeFlag_3s)

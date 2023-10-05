@@ -66,7 +66,7 @@ void ADC0_1_IRQHandler(void);
 /* this function handles DMA exception */
 void DMA0_Channel0_IRQHandler(void);
 /*this function handles EXTI4 interrupts handler*/
-void EXTI4_IRQHandler(void);
+void EXTI10_15_IRQHandler(void);
 /*this function handles EXTI5_9 interrupts handler*/
 void EXTI5_9_IRQHandler(void);
 

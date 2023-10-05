@@ -65,8 +65,6 @@ OF SUCH DAMAGE.
 
 
 /* motor parameter check */
-#define INPUT_VOLTAGE_MIN                   (16U)                               /* the minimum value of bus voltage in volt */
-#define INPUT_VOLTAGE_MAX                   (32U)                               /* the maximum value of bus voltage in volt */
 //#define TEMPERATURE_MIN                     (-5)                                /* the minimum value of mosfet temperature in centigrade */
 //#define TEMPERATURE_MAX                     (80U)                               /* the maximum value of mosfet temperature in centigrade */
 
@@ -77,14 +75,6 @@ OF SUCH DAMAGE.
 #define CURRENT_AMP_GAIN                    (1.0f)                              /* the gain of amplifier in the current conditioning circuit */
 #define CURRENT_AMP_SHIFT                   (1.65f)                             /* the bias voltage in the current sampling circuit */
 #define CURRENT_SHUNT_RES                   (0.1f)                              /* the sampling resistance in the current sampling circuit */
-
-
-/* acquire the modulation degree, according to the sampling time */
-#if (defined (CSVPWM) || defined(CBSVPWM))
-    #define MODULATION_DEGREE           (0.860f - ((float)TMIN_NS*2)/TS_NS)
-#elif defined DSVPWMMIN
-    #define MODULATION_DEGREE           (0.860f - ((float)TMIN_NS)/TS_NS)
-#endif /* CSVPWM & DSVPWMMIN */
 
 
 /* pid parameter configuration */
@@ -121,44 +111,52 @@ OF SUCH DAMAGE.
 #define M_PI                                (3.141592f)                         /* the value of pi */
 
 
-/* 发电开关 */
-#define GENERATE_SWITCH_PIN                 GPIO_PIN_7
-#define GENERATE_SWITCH_GPIO_CLK            RCU_GPIOC
-#define GENERATE_SWITCH_GPIO_PORT           GPIOC
+//////落杯模块//////
+/* 落杯位置纸杯检测开关信号 */
+#define SWITCH_LUOBEI_PIN                   GPIO_PIN_7
+#define SWITCH_LUOBEI_GPIO_CLK              RCU_GPIOC
+#define SWITCH_LUOBEI_GPIO_PORT             GPIOC
 
-/* CAN pin configuration */
-#define CAN_RX_PORT                         GPIOA
-#define CAN_RX_PIN                          GPIO_PIN_11
-#define CAN_TX_PORT                         GPIOA
-#define CAN_TX_PIN                          GPIO_PIN_12
+/* 落杯器电机驱动信号 */
+#define MOTOR_LUOBEI_PIN                    GPIO_PIN_8
+#define MOTOR_LUOBEI_GPIO_CLK               RCU_GPIOA
+#define MOTOR_LUOBEI_GPIO_PORT              GPIOA
 
 
-/* adc channel configuration */
-#define TORQUE_SENSOR_PIN                   GPIO_PIN_0
-#define TORQUE_SENSOR_PORT                  GPIOA
-#define TORQUE_SENSOR_CHANNEL               ADC_CHANNEL_0
 
-#define VBUS_PIN                            GPIO_PIN_1
-#define VBUS_PORT                           GPIOA
-#define VBUS_CHANNEL                        ADC_CHANNEL_1
+//////储水模块//////
+/* 温控开关1信号 */
+#define SWITCH_T1_PIN                       GPIO_PIN_8
+#define SWITCH_T1_GPIO_CLK                  RCU_GPIOC
+#define SWITCH_T1_GPIO_PORT                 GPIOC
+/* 温控开关2信号 */
+#define SWITCH_T2_PIN                       GPIO_PIN_9
+#define SWITCH_T2_GPIO_CLK                  RCU_GPIOC
+#define SWITCH_T2_GPIO_PORT                 GPIOC
+/* 液位开关信号 */
+#define SWITCH_WATER_PIN                    GPIO_PIN_10
+#define SWITCH_WATER_GPIO_CLK               RCU_GPIOC
+#define SWITCH_WATER_GPIO_PORT              GPIOC
 
-#define POSITION_PIN                        GPIO_PIN_0
-#define POSITION_PORT                       GPIOC
-#define POSITION_CHANNEL                    ADC_CHANNEL_10
 
-#define I_BUS_PIN                           GPIO_PIN_1
-#define I_BUS_PORT                          GPIOB
-#define I_BUS_CHANNEL                       ADC_CHANNEL_9
 
-/*
-#define I_V_PIN                             GPIO_PIN_1
-#define I_V_PORT                            GPIOC
-#define I_V_CHANNEL                         ADC_CHANNEL_11
 
-#define TEMPERATURE_PIN                     GPIO_PIN_5
+//////加注模块//////
+/* 纯水泵电机驱动信号 */
+#define MOTOR_WATER_PIN                     GPIO_PIN_13
+#define MOTOR_WATER_GPIO_CLK                RCU_GPIOB
+#define MOTOR_WATER_GPIO_PORT               GPIOB
+
+/* 酶液泵电机驱动信号 */
+#define MOTOR_ENZYME_PIN                    GPIO_PIN_12
+#define MOTOR_ENZYME_GPIO_CLK               RCU_GPIOB
+#define MOTOR_ENZYME_GPIO_PORT              GPIOB
+
+/* 温度传感器 */
+#define TEMPERATURE_PIN                     GPIO_PIN_0
 #define TEMPERATURE_PORT                    GPIOA
-#define TEMPERATURE_CHANNEL                 ADC_CHANNEL_5
-*/
+#define TEMPERATURE_CHANNEL                 ADC_CHANNEL_0
+
 
 /* conflicting configuration */
 
@@ -179,59 +177,35 @@ OF SUCH DAMAGE.
 #endif /* DSVPWMMIN & CBSVPWM */
 
 typedef enum {
-    GENERATOR_0 = 0,
-    GENERATOR_1,
-    GENERATOR_2,
-    GENERATOR_3,
-    GENERATOR_4,
-    GENERATOR_5
-} Generator_e;
+    LOOP_IDLE = 0,
+    LOOP_LUOBEI,//落杯过程
+    LOOP_ZHUYE, //注液过程
+    LOOP_CHUBEI,//出杯过程
+    LOOP_QIBEI, //弃杯过程
+    LOOP_ERROR = 0xff
+} Loop_State_e;
 
-typedef enum {
-    GEAR_0 = 0,
-    GEAR_1,
-    GEAR_2,
-    GEAR_3,
-    GEAR_4,
-    GEAR_5
-} Gear_e;
 
 
 /* global variable declaration */
 /* reference variable */
-//extern uint16_t adc_reference;
 extern uint16_t adc_reference_filtered;
-//extern uint16_t speed_reference;
 extern int16_t torque_reference;
 
 /* global structure */
-extern motor_state motor;
-extern mc_flags motor_flag;
 extern pid_parameter speed, torque, flux, flux_weaken;
 extern flash_page_type page_type;
 
-/* hall variables */
-extern hall_structure hall;
+extern uint16_t cup_count, water_set;
+extern uint8_t temperature_set, enyzme_set;
 
 /* dma buffer */
 extern uint16_t timer_update_buffer[6];
 extern uint16_t adc_buffer[2];
 
-/* phase current */
-extern int16_t current_a, current_b, current_c;
-/* the reload value of timer */
-extern uint16_t pwm_top;
-/* the frequency of PWM */
-extern uint16_t frequency_now;
-/* the angle of open-loop control */
-extern float phase_sin,phase_cos;
-extern int16_t uphase_sin,uphase_cos;
-
 /* debug varieble */
 extern usart_debug debug_data;
 
-extern Generator_e g_generator_gears,g_generator_gears_pre;
-extern Gear_e g_drive_mode;
 extern uint16_t g_generator_power, g_error_code;
 
 #endif /* GLOBAL_H */
