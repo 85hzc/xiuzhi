@@ -47,32 +47,22 @@ OF SUCH DAMAGE.
 */
 int main(void)
 {
-    /*
-    dbg_periph_enable(DBG_TIMER0_HOLD);
-    dbg_periph_enable(DBG_TIMER2_HOLD);
-    dbg_periph_enable(DBG_TIMER3_HOLD);
-    */
     /* systick initialization */
     systick_config();
-    /* hardware self test */
-    //startup_self_test();
+
     /* peripheral initialization */
     hardware_config();
 
     /* hardware initialization */
     torque_exti_init();
-    //position_exit_init();
+    position_exit_init();
     velocity_exti_init();
     //bldc_init();
     key_init();
     led_init();
-    //oled_init();
 
     delay_1ms(100);
     printf("\r\nsystem ready!\r\n");
-
-    /* GD logo display */
-    //oled_logo();
 
     /* tool function initialization */
     utils_sample_init();
@@ -85,10 +75,6 @@ int main(void)
     printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
     printf("[fmc] mode: %d, gear: %d\r\n", g_drive_mode, g_generator_gears);
 
-    /*
-    hall_timer_config();
-    hall_start();
-    */
     while(1){
 
         if (bTimeFlag_5ms)
@@ -174,7 +160,6 @@ int main(void)
         if (bTimeFlag_3s)
         {
             bTimeFlag_3s = 0;
-            //calc_velocity_3_second();
         }
     }
 }

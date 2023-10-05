@@ -139,20 +139,10 @@ void PendSV_Handler(void)
 */   
 void SysTick_Handler(void)
 {
-    //static int16_t speed_filtered;
-
     periodTask_1ms();
 
     /* systick dealy process */
     delay_decrement();
-
-    /* ADC sampling */
-    //if(motor_flag.adc_ready_flag == 1){
-    //    adc_software_trigger_enable(ADC0, ADC_REGULAR_CHANNEL);
-    //}
-
-    /* the filtered speed */
-    //UTILS_LP_FAST(speed_filtered, hall.speed, 0.05f);
 }
 
 
@@ -178,7 +168,7 @@ void TIMER2_IRQHandler(void)
         timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_TRG);
 
         /* calculate the speed of the rotor */
-        hall.speed = hall_speed_update(speed_timer_overflow);
+        //hall.speed = hall_speed_update(speed_timer_overflow);
         speed_timer_overflow = 0;
     }
 
@@ -188,80 +178,6 @@ void TIMER2_IRQHandler(void)
         timer_event_software_generate(TIMER2, TIMER_EVENT_SRC_UPG);
     }
 }
-
-#if 0
-/*!
-    \brief      this function handles ADC0 and ADC1 exception
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-//int16_t current_alpha, current_beta, current_q, current_d;
-//int16_t voltage_d, voltage_q, voltage_alpha, voltage_beta;
-//int16_t voltage_a, voltage_b, voltage_c;
-//int32_t voltage_q_filtered, voltage_d_filtered;
-//float voltage_q_amplitude;
-//static uint8_t svpwm_flag = 1;
-void ADC0_1_IRQHandler(void)
-{
-    /* clear the interrupt flag */
-    adc_interrupt_flag_clear(ADC0, ADC_INT_EOIC);
-
-    ebike_read_sample();
-
-    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, DISABLE);
-
-    /* power calculation */
-    //pmsm_power_calculation(voltage_q, voltage_d);
-
-#if 0//def USART_DEBUG_ENABLE
-    debug_data.data1 = position;
-    debug_data.data2 = vbus;
-    debug_data.data3 = torque_ebike_f;
-    debug_data.data4 = caden;
-    debug_usart_data_transfer(debug_data);
-#endif /* USART_DEBUG_ENABLE */
-
-    adc_external_trigger_config(ADC0, ADC_INSERTED_CHANNEL, ENABLE);
-}
-
-/*!
-    \brief      this function handles DMA interrupt
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void DMA0_Channel0_IRQHandler(void)
-{
-    dma_interrupt_flag_clear(DMA0, DMA_CH0, DMA_INT_FLAG_FTF);
-
-    motor.torque = get_input_torque(adc_buffer[0]);
-}
-
-/*!
-    \brief      this function handles EXTI4 interrupts handler
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void EXTI4_IRQHandler(void)
-{
-    led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
-
-    /* Port A: DATA */
-    if(exti_interrupt_flag_get(EXTI_6) != RESET){
-        exti_interrupt_flag_clear(EXTI_6);
-
-        led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
-
-        joggle_delay(10000);
-        if(RESET == gpio_input_bit_get(TOR_IN1_GPIO_PORT, TOR_IN1_GPIO_PIN)){
-            trige_count();
-        }else{
-        }
-    }
-}
-#endif
 
 /*!
     \brief      this function handles EXTI5_9 interrupts handler
@@ -283,17 +199,17 @@ void EXTI5_9_IRQHandler(void)
     }
 
     /* Port IN2 */ //限位控制
-    /*if(exti_interrupt_flag_get(EXTI_7) != RESET){
+    if(exti_interrupt_flag_get(EXTI_7) != RESET){
         exti_interrupt_flag_clear(EXTI_7);
         joggle_delay(10000);
         if(RESET == gpio_input_bit_get(PROTECT_IN2_GPIO_PORT, PROTECT_IN2_GPIO_PIN)){
 
-            bldc_brake();
+            //bldc_brake();
             g_generator_gears_pre = GENERATOR_5;
             g_generator_gears = GENERATOR_5;
         }else{
         }
-    }*/
+    }
 
     /* Port TP2 */ //轮速信号
     if(exti_interrupt_flag_get(EXTI_9) != RESET){

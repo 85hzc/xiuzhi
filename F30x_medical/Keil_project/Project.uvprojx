@@ -404,11 +404,6 @@
               <FilePath>..\app\source\global.c</FilePath>
             </File>
             <File>
-              <FileName>pmsm_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\source\pmsm_app.c</FilePath>
-            </File>
-            <File>
               <FileName>global.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\app\include\global.h</FilePath>
@@ -479,11 +474,6 @@
               <FilePath>..\app\source\oled.c</FilePath>
             </File>
             <File>
-              <FileName>torque_sensor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\app\source\torque_sensor.c</FilePath>
-            </File>
-            <File>
               <FileName>ebike.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\source\ebike.c</FilePath>
@@ -492,6 +482,11 @@
               <FileName>bldc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\source\bldc.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\source\app_exti.c</FilePath>
             </File>
           </Files>
         </Group>

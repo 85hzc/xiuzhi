@@ -1,6 +1,6 @@
 /*!
-    \file    torque_sensor.c
-    \brief   torque driver file
+    \file    app_exti.c
+    \brief   exti driver file
 */
 
 
@@ -34,6 +34,26 @@ void torque_exti_init(void)
 
     /* enable and set key EXTI interrupt to the lowest priority */
     nvic_irq_enable(TOR_IN1_EXTI_IRQ, 2U, 0U);
+}
+
+void position_exit_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(PROTECT_IN2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, PROTECT_IN2_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(PROTECT_IN2_EXTI_SRC_PORT, PROTECT_IN2_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(PROTECT_IN2_EXTI_LINE, EXTI_INTERRUPT, PROTECT_IN2_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(PROTECT_IN2_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(PROTECT_IN2_EXTI_IRQ, 2U, 0U);
 }
 
 /*!

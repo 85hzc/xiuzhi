@@ -49,21 +49,12 @@ OF SUCH DAMAGE.
 #include "led.h"
 #include "oled.h"
 #include "flash.h"
-#include "torque_sensor.h"
+#include "app_exti.h"
 #include "usart2.h"
-#include "ebike.h"
-
-#include "pmsm.h"
-#include "pmsm_app.h"
 
 #include "type.h"
 #include "timeflag.h"
 #include "utils.h"
-
-
-/* motor parameters */
-/* the pole-pair number of pmsm */
-#define NUMBER_OF_PAIRS                     (2U)                                /* PMSM number of pair poles */
 
 /* system parameters */
 #define SYSTEM_FREQUENCE                    (120000000U)                        /* system frequence */
@@ -86,9 +77,7 @@ OF SUCH DAMAGE.
 #define CURRENT_AMP_GAIN                    (1.0f)                              /* the gain of amplifier in the current conditioning circuit */
 #define CURRENT_AMP_SHIFT                   (1.65f)                             /* the bias voltage in the current sampling circuit */
 #define CURRENT_SHUNT_RES                   (0.1f)                              /* the sampling resistance in the current sampling circuit */
-/* sampling parameters */
-/* 3-shunt sample parameters */
-#define TMIN_NS                             (3800U)                             /* the minimum sampling time */
+
 
 /* acquire the modulation degree, according to the sampling time */
 #if (defined (CSVPWM) || defined(CBSVPWM))
@@ -102,8 +91,7 @@ OF SUCH DAMAGE.
 /* HALL SPEED MODE pid parameter */
 #define SPEED_LOOP_KP                       (400U)                              /* the proportional paramter of speed regulator in hall mode */
 #define SPEED_LOOP_KI                       (20U)                               /* the integral paramter of speed regulator in hall mode */
-#define CURRENT_LOOP_KP                     (100U)                              /* the proportional paramter of current regulator in hall mode */
-#define CURRENT_LOOP_KI                     (5U)                                /* the integral paramter of current regulator in hall mode */
+
 
 /* debug function */
 /* debug buffer size configuration, 12 bytes per frame */

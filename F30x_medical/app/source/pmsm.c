@@ -133,26 +133,3 @@ uint8_t hall_read_state(void)
     return (state);
 }
 
-
-/*!
-    \brief      hall control mode, update motor speed, which is expressed in revolutions per second
-    \param[in]  none
-    \param[out] none
-    \retval     motor mechanical speed, 0-4000
-*/
-uint16_t hall_speed_update(uint8_t overflow_count)
-{
-    uint32_t timer2_count, speed_temp;
-
-    timer2_count = (timer_channel_capture_value_register_read(TIMER2, TIMER_CH_0) + (overflow_count) * 50000);
-
-    speed_temp = 1000000.0f * 60 /timer2_count /(NUMBER_OF_PAIRS*6);
-    utils_add_sample(speed_samples, speed_temp, SPEED_LEN_BITS, &speed_index);
-    speed_temp = utils_average_sample(speed_samples, SPEED_LEN_BITS);
-    
-    //if(speed_temp>6000)
-    //    speed_temp = 0;
-    
-    return (speed_temp);
-}
-

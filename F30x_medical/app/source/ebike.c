@@ -221,12 +221,3 @@ void calc_velocity_1_second()//
     HZC_LP_FAST(g_velocity_f, g_velocity, 0.5f);
 }
 
-void calc_velocity_3_second()//
-{
-    /* 传感器1圈1个脉冲 */
-    g_velocity = g_velocity_count * 0.68 * 3.14 * 1.2;
-    g_velocity_count = 0;
-
-    HZC_LP_FAST(g_velocity_f, g_velocity, 0.5f);
-}
-

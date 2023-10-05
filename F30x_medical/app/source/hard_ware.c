@@ -45,8 +45,7 @@ static void rcu_config(void);
 static void nvic_config(void);
 /* ADC configuration */
 static void adc_config(void);
-/* ADC dma configuration */
-//static void adc_dma_config(void);
+
 
 /*!
     \brief      hardware configuration
@@ -61,7 +60,6 @@ void hardware_config()
     gpio_config();
 
     timer7_config();
-    //adc_dma_config();
     adc_config();
     i2c_init();
 
@@ -253,37 +251,3 @@ static void adc_config(void)
     //motor_flag.adc_ready_flag = 1;
 }
 
-#if 0
-/*!
-    \brief      ADC dma configuration
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-static void adc_dma_config(void)
-{
-    dma_parameter_struct dma_init_struct;
-    rcu_periph_clock_enable(RCU_DMA0);
-
-    /* TIMER0 update */
-    dma_deinit(DMA0, DMA_CH0);
-    dma_init_struct.direction    = DMA_PERIPHERAL_TO_MEMORY;
-    dma_init_struct.memory_addr  = (uint32_t)adc_buffer;
-    dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_16BIT;
-    dma_init_struct.number       = 2;
-    dma_init_struct.periph_addr  = (uint32_t)(&ADC_RDATA(ADC0));
-    dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_16BIT;
-    dma_init_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA0, DMA_CH0, &dma_init_struct);
-    dma_circulation_enable(DMA0, DMA_CH0);
-    dma_memory_to_memory_disable(DMA0, DMA_CH0);
-
-    /* enable the full transfer interrupt */
-    dma_interrupt_flag_clear(DMA0, DMA_CH0, DMA_INT_FLAG_FTF);
-    dma_interrupt_enable(DMA0, DMA_CH0, DMA_INT_FTF);
-
-    dma_channel_enable(DMA0, DMA_CH0);
-}
-#endif
