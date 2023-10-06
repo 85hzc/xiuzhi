@@ -9,9 +9,7 @@
 void motor_sent_data(uint8_t pwm, uint8_t current);
 void motor_sent_control(uint8_t pwm, uint8_t current);
 
-float g_velocity = 0.0;
-float g_torque_offset = 0.0;
-uint8_t g_velocity_count = 0;
+uint16_t g_water_count = 0;
 float temperature = 0.0;
 
 
@@ -26,25 +24,6 @@ uint8_t calculateCRC8(const uint8_t *data, int  len)
     return crc;
 }
 
-void velocity_exti_init(void)
-{
-    /* enable the clock of GPIO */
-    rcu_periph_clock_enable(RCU_GPIOA);
-    rcu_periph_clock_enable(RCU_AF);
-
-    /* configure button pin A as input */
-    gpio_init(VELOCITY_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, VELOCITY_GPIO_PIN);
-
-    /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(VELOCITY_EXTI_SRC_PORT, VELOCITY_EXTI_SRC_PIN);
-
-    /* configure key EXTI line */
-    exti_init(VELOCITY_EXTI_LINE, EXTI_INTERRUPT, VELOCITY_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(VELOCITY_EXTI_LINE);
-
-    /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(VELOCITY_EXTI_IRQ, 2U, 0U);
-}
 
 /*!
     \brief      current offset calibration
@@ -54,31 +33,7 @@ void velocity_exti_init(void)
 */
 void torque_value_calibration(void)
 {
-
-    uint16_t torque = 0;
-    float torqueSum = 0.0;
-    uint8_t torque_offset_flag = 1, times=0;
-
-    while (torque_offset_flag && times < 16) {
-
-        /* ADC software trigger enable */
-        adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
-        
-        //if (times >= 10) {
-            delay_1ms(100);
-            torque = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_1);
-            torqueSum += torque;
-            printf("torque = %d\r\n", torque);
-        //}
-
-        if (times == 15) {
-            g_torque_offset = (float)torqueSum / 16.0f;
-            torque_offset_flag = 0;
-        }
-        times++;
-    }
-
-    printf("g_torque_offset = %.2f\r\n", g_torque_offset);
+    printf("g_torque_offset\r\n");
 
     fmc_erase_pages(CONFIG_PAGE);
     fmc_data_program(CONFIG_PAGE);
@@ -153,15 +108,6 @@ void ebike_read_sample(void)
 }
 
 
-void calc_velocity_1_second()//
-{
-    /* 传感器1圈1个脉冲 */
-    g_velocity = g_velocity_count * 0.68 * 3.14 * 3.6;
-    g_velocity_count = 0;
-
-}
-
-
 /*
 ** 调节加热导通电流；
 */
@@ -176,7 +122,7 @@ void heat_running()
         pwm = 0;
     } else if ((temperature < 42.0)){
         //打开发电环路
-				pwm = 500;
+        pwm = 500;
     }
 
     //0 ---- 500
@@ -186,5 +132,26 @@ void heat_running()
     //g_generator_gears_pre = g_generator_gears;
     //fmc_erase_pages(MODE_PAGE);
     //fmc_data_program(MODE_PAGE);
+}
+
+//四个中断信号脚
+uint8_t read_qibei_position_switch()
+{
+    return (SET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)) ? 1 : 0;
+}
+
+uint8_t read_luobei_position_switch()
+{
+    return (SET == gpio_input_bit_get(N1S_LUOBEI_GPIO_PORT, N1S_LUOBEI_GPIO_PIN)) ? 1 : 0;
+}
+
+uint8_t read_zhushui_position_switch()
+{
+    return (SET == gpio_input_bit_get(N2S_ZHUSHUI_GPIO_PORT, N2S_ZHUSHUI_GPIO_PIN)) ? 1 : 0;
+}
+
+uint8_t read_chubei_position_switch()
+{
+    return (SET == gpio_input_bit_get(N3S_CHUBEI_GPIO_PORT, N3S_CHUBEI_GPIO_PIN)) ? 1 : 0;
 }
 

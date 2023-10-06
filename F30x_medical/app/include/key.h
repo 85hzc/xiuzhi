@@ -43,7 +43,7 @@ OF SUCH DAMAGE.
 
 /* the key enumeration */
 typedef enum {
-    KEY_guangdian,
+    KEY_youbei,
     KEY_fuzi,
     KEY_T1,
     KEY_T2,

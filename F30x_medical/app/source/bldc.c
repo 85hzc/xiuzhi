@@ -29,6 +29,20 @@ void luobei_motor_init(void)
     //gpio_bit_reset(MOTOR_LUOBEI_GPIO_PORT, MOTOR_LUOBEI_PIN);
 }
 
+void luobei_motor_start(void)
+{
+    /* bldc */
+    gpio_bit_set(MOTOR_LUOBEI_GPIO_PORT, MOTOR_LUOBEI_PIN);
+    //gpio_bit_set(MOTOR_LUOBEI_GPIO_PORT, MOTOR_LUOBEI_PIN);
+}
+
+void luobei_motor_stop(void)
+{
+    /* bldc */
+    gpio_bit_reset(MOTOR_LUOBEI_GPIO_PORT, MOTOR_LUOBEI_PIN);
+    //gpio_bit_reset(MOTOR_LUOBEI_GPIO_PORT, MOTOR_LUOBEI_PIN);
+}
+
 void water_motor_init(void)
 {
     /* enable the clock of GPIO */

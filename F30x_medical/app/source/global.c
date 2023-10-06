@@ -42,40 +42,59 @@ OF SUCH DAMAGE.
 uint16_t adc_reference_filtered = 0;
 //uint16_t speed_reference = 0;
 int16_t torque_reference = 0;
+uint8_t state_youbei, state_t1, state_t2, state_fuzi;
+uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
+uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
+
 
 /* global structure */
 uint16_t g_generator_power = 0, g_error_code = 0;
 flash_page_type page_type;
-Loop_State_e loop_state;    //机器运行状态机
+Loop_State_e loop_state = LOOP_IDLE;    //机器运行状态机
 uint8_t start_wort = 0;     //机器开启运行指令
-
-/* dma buffer */
-uint16_t timer_update_buffer[6] = {0};
-uint16_t adc_buffer[2] = {0};
-
-/* phase current */
-int16_t current_a = 0, current_b = 0 ,current_c = 0;
-/* the reload value of timer */
-uint16_t pwm_top;
-/* the frequency of PWM */
-uint16_t frequency_now;
-/* the sine and cosine of the spatial angle */
-float phase_sin,phase_cos;
-int16_t uphase_sin,uphase_cos;
 
 /* debug variables */
 usart_debug debug_data;
-
 
 
 void work_loop( void )
 {
     switch (loop_state) {
         case LOOP_IDLE:
+            //弃杯微动开关位置，且弃杯成功状态
             if (start_wort) {
+                if (!state_youbei && read_qibei_position_switch())
                 loop_state = LOOP_LUOBEI;
                 start_wort = 0;
             }
+            break;
+
+        case LOOP_LUOBEI://落杯过程
+            //到位检测
+            if (read_luobei_position_switch()) {
+                luobei_motor_start();
+                loop_state = LOOP_LUOBEI_DETECT;
+            }
+            break;
+
+        case LOOP_LUOBEI_DETECT://落杯监测
+            if (state_youbei) {
+                luobei_motor_stop();
+                step_motor_move_forward();
+                loop_state = LOOP_ZHUYE;
+            }
+            break;
+
+        case LOOP_ZHUYE: //注液过程
+            break;
+
+        case LOOP_CHUBEI://出杯过程
+            break;
+
+        case LOOP_QIBEI: //弃杯过程
+            break;
+
+        case LOOP_ERROR:
             break;
 
         default:

@@ -7,7 +7,7 @@
 #include "global.h"
 
 static uint16_t delay_joggle = 0;
-uint16_t cup_count, water_set;
+uint16_t cup_count, water_set, water_count;
 uint8_t temperature_set, enyzme_set;
 
 /*!
@@ -64,17 +64,17 @@ void position1_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(POSITION_1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_1_GPIO_PIN);
+    gpio_init(N1S_LUOBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N1S_LUOBEI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(POSITION_1_EXTI_SRC_PORT, POSITION_1_EXTI_SRC_PIN);
+    gpio_exti_source_select(N1S_LUOBEI_EXTI_SRC_PORT, N1S_LUOBEI_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(POSITION_1_EXTI_LINE, EXTI_INTERRUPT, POSITION_1_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(POSITION_1_EXTI_LINE);
+    exti_init(N1S_LUOBEI_EXTI_LINE, EXTI_INTERRUPT, N1S_LUOBEI_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(N1S_LUOBEI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(POSITION_1_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(N1S_LUOBEI_EXTI_IRQ, 2U, 0U);
 }
 
 void position2_exit_init(void)
@@ -84,17 +84,17 @@ void position2_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(POSITION_2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_2_GPIO_PIN);
+    gpio_init(N2S_ZHUSHUI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N2S_ZHUSHUI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(POSITION_2_EXTI_SRC_PORT, POSITION_2_EXTI_SRC_PIN);
+    gpio_exti_source_select(N2S_ZHUSHUI_EXTI_SRC_PORT, N2S_ZHUSHUI_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(POSITION_2_EXTI_LINE, EXTI_INTERRUPT, POSITION_2_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(POSITION_2_EXTI_LINE);
+    exti_init(N2S_ZHUSHUI_EXTI_LINE, EXTI_INTERRUPT, N2S_ZHUSHUI_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(N2S_ZHUSHUI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(POSITION_2_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(N2S_ZHUSHUI_EXTI_IRQ, 2U, 0U);
 }
 
 void position3_exit_init(void)
@@ -104,17 +104,38 @@ void position3_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(POSITION_3_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, POSITION_3_GPIO_PIN);
+    gpio_init(N3S_CHUBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N3S_CHUBEI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(POSITION_3_EXTI_SRC_PORT, POSITION_3_EXTI_SRC_PIN);
+    gpio_exti_source_select(N3S_CHUBEI_EXTI_SRC_PORT, N3S_CHUBEI_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(POSITION_3_EXTI_LINE, EXTI_INTERRUPT, POSITION_3_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(POSITION_3_EXTI_LINE);
+    exti_init(N3S_CHUBEI_EXTI_LINE, EXTI_INTERRUPT, N3S_CHUBEI_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(N3S_CHUBEI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(POSITION_3_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(N3S_CHUBEI_EXTI_IRQ, 2U, 0U);
+}
+
+
+void velocity_exti_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOA);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(VELOCITY_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, VELOCITY_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(VELOCITY_EXTI_SRC_PORT, VELOCITY_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(VELOCITY_EXTI_LINE, EXTI_INTERRUPT, VELOCITY_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(VELOCITY_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(VELOCITY_EXTI_IRQ, 2U, 0U);
 }
 
 /*!
@@ -140,8 +161,4 @@ void trige_count(void)
     cup_count++;
 }
 
-void calc_cadence()
-{
-
-}
 

@@ -165,8 +165,6 @@ int main(void)
         if (bTimeFlag_1s)
         {
             bTimeFlag_1s = 0;
-            calc_cadence();
-            calc_velocity_1_second();
 
             heat_running();
 

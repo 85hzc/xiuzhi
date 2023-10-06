@@ -478,6 +478,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\source\app_exti.c</FilePath>
             </File>
+            <File>
+              <FileName>step_motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\source\step_motor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

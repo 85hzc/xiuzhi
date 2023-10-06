@@ -65,10 +65,5 @@ void debug_dac_data_transfer(int16_t a, int16_t b);
 extern uint8_t debug_rx_buffer[],debug_rx_buffer_app[];
 extern  uint16_t debug_rx_counter, debug_rx_ok;
 
-extern float torque_ebike_f, vbus_f;
-extern uint16_t vbus, i_Sensor, i_Input;
-extern float g_torque_offset;
-extern uint8_t caden;
-
 #endif /* DEBUG_H */
 

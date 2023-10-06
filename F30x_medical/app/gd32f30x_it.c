@@ -169,7 +169,7 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_7);
         joggle_delay(10000);
         if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
-
+            g_exti_qibei_position_flag = 1;
         }
     }
 
@@ -179,10 +179,9 @@ void EXTI5_9_IRQHandler(void)
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(VELOCITY_GPIO_PORT, VELOCITY_GPIO_PIN)){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
-            g_velocity_count++;
-        }else{
+            g_water_count++;
         }
-    }
+		}
 }
 
 
@@ -199,8 +198,8 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_10) != RESET){
         exti_interrupt_flag_clear(EXTI_10);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(POSITION_1_GPIO_PORT, POSITION_1_GPIO_PIN)){
-            ;
+        if(SET == gpio_input_bit_get(N1S_LUOBEI_GPIO_PORT, N1S_LUOBEI_GPIO_PIN)){
+            g_exti_luobei_position_flag = 1;
         }
     }
 
@@ -208,8 +207,8 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_11) != RESET){
         exti_interrupt_flag_clear(EXTI_11);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(POSITION_2_GPIO_PORT, POSITION_2_GPIO_PIN)){
-            ;
+        if(SET == gpio_input_bit_get(N2S_ZHUSHUI_GPIO_PORT, N2S_ZHUSHUI_GPIO_PIN)){
+            g_exti_zhushui_position_flag = 1;
         }
     }
 
@@ -217,8 +216,8 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_12) != RESET){
         exti_interrupt_flag_clear(EXTI_12);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(POSITION_3_GPIO_PORT, POSITION_3_GPIO_PIN)){
-            ;
+        if(SET == gpio_input_bit_get(N3S_CHUBEI_GPIO_PORT, N3S_CHUBEI_GPIO_PIN)){
+            g_exti_chubei_position_flag = 1;
         }
     }
 }

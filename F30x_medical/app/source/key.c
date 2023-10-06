@@ -52,14 +52,14 @@ static FlagStatus key_read_debouncing(key_switch key_sw);
 void key_init(void)
 {
     /* enable the clock of GPIO and alternate function */
-    rcu_periph_clock_enable(SWITCH_LUOBEI_GPIO_CLK);
+    rcu_periph_clock_enable(SWITCH_YOUBEI_GPIO_CLK);
     rcu_periph_clock_enable(SWITCH_T1_GPIO_CLK);
     rcu_periph_clock_enable(SWITCH_T2_GPIO_CLK);
     rcu_periph_clock_enable(SWITCH_WATER_GPIO_CLK);
     rcu_periph_clock_enable(RCU_AF);
 
     /* key initialize */
-    gpio_init(SWITCH_LUOBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_LUOBEI_PIN);
+    gpio_init(SWITCH_YOUBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_YOUBEI_PIN);
     gpio_init(SWITCH_T1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T1_PIN);
     gpio_init(SWITCH_T2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T2_PIN);
     gpio_init(SWITCH_WATER_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_WATER_PIN);
@@ -76,8 +76,8 @@ static FlagStatus key_read(key_switch key)
     uint8_t data=0;
 
     switch(key){
-        case KEY_guangdian:
-            data = gpio_input_bit_get(SWITCH_LUOBEI_GPIO_PORT, SWITCH_LUOBEI_PIN);
+        case KEY_youbei:
+            data = gpio_input_bit_get(SWITCH_YOUBEI_GPIO_PORT, SWITCH_YOUBEI_PIN);
             break;
         case KEY_fuzi:
             data = gpio_input_bit_get(SWITCH_WATER_GPIO_PORT, SWITCH_WATER_PIN);
@@ -107,7 +107,7 @@ static FlagStatus key_read(key_switch key)
 static FlagStatus key_read_debouncing(key_switch key)
 {
     if(key_read(key)){
-        delay_1ms(10);
+        delay_1ms(5);
         if(key_read(key)){
             /* intermittent examination, press release to start */
             //while(SET == key_read(key));
@@ -144,8 +144,9 @@ static FlagStatus key_read_state(key_switch key)
 void key_process(void)
 {
     /* drive mode up key is pressed */
-    if(key_read_debouncing(KEY_guangdian)){
-        printf("guangdian\r\n");
+    if(key_read_debouncing(KEY_youbei)){
+        printf("youbei\r\n");
+        state_youbei = 1;
         //fmc_erase_pages(MODE_PAGE);
         //fmc_data_program(MODE_PAGE);
     }

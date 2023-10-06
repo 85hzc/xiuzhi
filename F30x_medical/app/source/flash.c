@@ -116,7 +116,7 @@ void fmc_data_program(flash_page_type page_type)
         case CONFIG_PAGE:
             address = FMC_CONFIG_ADDR /*+ (FMC_PAGE_SIZE * (uint8_t)page_type)*/;
             
-            fmc_halfword_program(address, (uint16_t)(g_torque_offset*100));
+            //fmc_halfword_program(address, (uint16_t)(g_torque_offset*100));
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             break;

@@ -112,11 +112,10 @@ OF SUCH DAMAGE.
 
 
 //////落杯模块//////
-/* 落杯位置纸杯检测开关信号 */
-#define SWITCH_LUOBEI_PIN                   GPIO_PIN_7
-#define SWITCH_LUOBEI_GPIO_CLK              RCU_GPIOC
-#define SWITCH_LUOBEI_GPIO_PORT             GPIOC
-
+/* 纸杯杯托位置检测开关信号 */
+#define SWITCH_YOUBEI_PIN                   GPIO_PIN_7
+#define SWITCH_YOUBEI_GPIO_CLK              RCU_GPIOC
+#define SWITCH_YOUBEI_GPIO_PORT             GPIOC
 /* 落杯器电机驱动信号 */
 #define MOTOR_LUOBEI_PIN                    GPIO_PIN_8
 #define MOTOR_LUOBEI_GPIO_CLK               RCU_GPIOA
@@ -139,23 +138,29 @@ OF SUCH DAMAGE.
 #define SWITCH_WATER_GPIO_PORT              GPIOC
 
 
-
-
 //////加注模块//////
 /* 纯水泵电机驱动信号 */
 #define MOTOR_WATER_PIN                     GPIO_PIN_13
 #define MOTOR_WATER_GPIO_CLK                RCU_GPIOB
 #define MOTOR_WATER_GPIO_PORT               GPIOB
-
 /* 酶液泵电机驱动信号 */
 #define MOTOR_ENZYME_PIN                    GPIO_PIN_12
 #define MOTOR_ENZYME_GPIO_CLK               RCU_GPIOB
 #define MOTOR_ENZYME_GPIO_PORT              GPIOB
-
 /* 温度传感器 */
 #define TEMPERATURE_PIN                     GPIO_PIN_0
 #define TEMPERATURE_PORT                    GPIOA
 #define TEMPERATURE_CHANNEL                 ADC_CHANNEL_0
+
+
+//////运杯模块//////
+/* 步进电机信号脚 */
+#define MOTOR_STEP_PIN_A_l                  GPIO_PIN_12
+#define MOTOR_STEP_PIN_A_h                  GPIO_PIN_12
+#define MOTOR_STEP_PIN_B_l                  GPIO_PIN_12
+#define MOTOR_STEP_PIN_B_h                  GPIO_PIN_12
+#define MOTOR_STEP_GPIO_CLK                 RCU_GPIOB
+#define MOTOR_STEP_GPIO_PORT                GPIOB
 
 
 /* conflicting configuration */
@@ -179,8 +184,11 @@ OF SUCH DAMAGE.
 typedef enum {
     LOOP_IDLE = 0,
     LOOP_LUOBEI,//落杯过程
+    LOOP_LUOBEI_DETECT,//落杯过程监测
     LOOP_ZHUYE, //注液过程
+    LOOP_ZHUYE_DETECT, //注液过程监测
     LOOP_CHUBEI,//出杯过程
+    LOOP_CHUBEI_DETECT,//出杯过程监测
     LOOP_QIBEI, //弃杯过程
     LOOP_ERROR = 0xff
 } Loop_State_e;
@@ -199,13 +207,12 @@ extern flash_page_type page_type;
 extern uint16_t cup_count, water_set;
 extern uint8_t temperature_set, enyzme_set;
 
-/* dma buffer */
-extern uint16_t timer_update_buffer[6];
-extern uint16_t adc_buffer[2];
-
 /* debug varieble */
 extern usart_debug debug_data;
 
 extern uint16_t g_generator_power, g_error_code;
+extern uint8_t state_youbei, state_t1, state_t2, state_fuzi;
+extern uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
+extern uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
 
 #endif /* GLOBAL_H */
