@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "global.h": "c",
+        "torque_sensor.h": "c",
+        "pmsm.h": "c",
+        "timeflag.h": "c"
+    }
+}

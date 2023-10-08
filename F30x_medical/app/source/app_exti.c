@@ -8,7 +8,6 @@
 
 static uint16_t delay_joggle = 0;
 uint16_t cup_count, water_set, water_count;
-uint8_t temperature_set, enyzme_set;
 
 /*!
     \brief      initialize the TOR port

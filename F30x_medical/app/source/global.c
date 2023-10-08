@@ -38,24 +38,29 @@ OF SUCH DAMAGE.
 #include "global.h"
 
 /* reference variable */
-//uint16_t adc_reference = 800;
-uint16_t adc_reference_filtered = 0;
-//uint16_t speed_reference = 0;
-int16_t torque_reference = 0;
-uint8_t state_youbei, state_t1, state_t2, state_fuzi;
+uint8_t state_youbei, state_t1, state_t2, state_fuzi, state_enzyme_count_running, state_qubei_count_running;
 uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
 uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
-
+uint8_t state_enzyme_ok = 0, state_water_ok = 0, state_qubei_timeout = 0;
+uint8_t temperature_set, enzyme_set;
 
 /* global structure */
 uint16_t g_generator_power = 0, g_error_code = 0;
 flash_page_type page_type;
-Loop_State_e loop_state = LOOP_IDLE;    //机器运行状态机
+Loop_State_e loop_state = LOOP_QIBEI;    //机器运行状态机
 uint8_t start_wort = 0;     //机器开启运行指令
 
 /* debug variables */
 usart_debug debug_data;
 
+void clear_position_flags( void )
+{
+    g_exti_qibei_position_flag = 0;
+    g_exti_luobei_position_flag = 0;
+    g_exti_chubei_position_flag = 0;
+    g_exti_zhushui_position_flag = 0;
+}
+            
 
 void work_loop( void )
 {
@@ -64,14 +69,14 @@ void work_loop( void )
             //弃杯微动开关位置，且弃杯成功状态
             if (start_wort) {
                 if (!state_youbei && read_qibei_position_switch())
+                step_motor_move_forward();
                 loop_state = LOOP_LUOBEI;
                 start_wort = 0;
             }
             break;
 
         case LOOP_LUOBEI://落杯过程
-            //到位检测
-            if (read_luobei_position_switch()) {
+            if (read_luobei_position_switch()) {    //到位检测
                 luobei_motor_start();
                 loop_state = LOOP_LUOBEI_DETECT;
             }
@@ -80,18 +85,54 @@ void work_loop( void )
         case LOOP_LUOBEI_DETECT://落杯监测
             if (state_youbei) {
                 luobei_motor_stop();
+                
+                delay_1ms(200);
                 step_motor_move_forward();
                 loop_state = LOOP_ZHUYE;
             }
             break;
 
         case LOOP_ZHUYE: //注液过程
+            if (read_zhushui_position_switch()) {    //到位检测
+                state_enzyme_count_running = 1;
+                enzyme_motor_start();
+                g_water_count = 0;
+                water_motor_start();
+                loop_state = LOOP_ZHUYE_DETECT;
+            }
+            break;
+
+        case LOOP_ZHUYE_DETECT:
+            if (state_water_ok && state_enzyme_ok) {
+                state_water_ok = 0;
+                state_enzyme_ok = 0;
+                loop_state = LOOP_CHUBEI;
+            }
             break;
 
         case LOOP_CHUBEI://出杯过程
+            step_motor_move_forward();
+            loop_state = LOOP_CHUBEI_DETECT;
+            state_qubei_count_running = 1;
+            break;
+
+        case LOOP_CHUBEI_DETECT://出杯位置检测
+            if (read_chubei_position_switch()) {    //到位检测
+                if (/*!state_youbei || */  //纸杯被取走
+                    start_wort || state_qubei_timeout) { //按下启动开关 or 取杯超时
+                    loop_state = LOOP_QIBEI;
+                    state_qubei_timeout = 0;
+                }
+            }
             break;
 
         case LOOP_QIBEI: //弃杯过程
+            if (!read_qibei_position_switch()) {//不在弃杯位置，需要返回初始位置
+                step_motor_move_reverse();
+                loop_state = LOOP_IDLE;
+            } else {    //在弃杯位置，可以正常启动工作
+                loop_state = LOOP_IDLE;
+            }
             break;
 
         case LOOP_ERROR:

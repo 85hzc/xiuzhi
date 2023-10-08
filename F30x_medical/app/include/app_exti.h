@@ -68,10 +68,6 @@
 #define N3S_CHUBEI_EXTI_IRQ             EXTI10_15_IRQn
 
 
-
-extern uint16_t g_water_count;
-
-
 /* delay stabilization */
 void joggle_delay(uint16_t num);
 

@@ -9,7 +9,7 @@
 void motor_sent_data(uint8_t pwm, uint8_t current);
 void motor_sent_control(uint8_t pwm, uint8_t current);
 
-uint16_t g_water_count = 0;
+uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 float temperature = 0.0;
 
 

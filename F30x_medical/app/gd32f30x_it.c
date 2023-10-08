@@ -143,6 +143,13 @@ void SysTick_Handler(void)
 
     /* systick dealy process */
     delay_decrement();
+
+    if (state_enzyme_count_running)
+        check_enzyme_timer();
+
+    if (state_qubei_count_running)
+        check_qubei_timer();
+    
 }
 
 
@@ -161,6 +168,7 @@ void EXTI5_9_IRQHandler(void)
         if(SET == gpio_input_bit_get(LUOBEI_IRQ_GPIO_PORT, LUOBEI_IRQ_GPIO_PIN)){
             //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             trige_count();
+            //luobei_motor_stop();
         }
     }
 
@@ -178,10 +186,16 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_9);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(VELOCITY_GPIO_PORT, VELOCITY_GPIO_PIN)){
-            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
+            //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_water_count++;
+
+            if (g_water_count > water_count_signals) {
+                water_motor_stop();
+                g_water_count = 0;
+                state_water_ok = 1;
+            }
         }
-		}
+    }
 }
 
 

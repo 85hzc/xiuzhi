@@ -103,7 +103,7 @@ void fmc_data_program(flash_page_type page_type)
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             
-						fmc_halfword_program(address, enyzme_set);
+						fmc_halfword_program(address, enzyme_set);
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             

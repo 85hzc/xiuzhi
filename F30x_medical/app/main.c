@@ -77,10 +77,13 @@ int main(void)
     fmc_data_read();
     extern uint8_t fmc_data[3][8];
     water_set = fmc_data[0][3];
-    enyzme_set = fmc_data[0][2];
+    enzyme_set = fmc_data[0][2];
     temperature_set = fmc_data[0][1];
     cup_count = fmc_data[0][0];
     //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
+
+    water_count_signals = water_set * 100;
+    enzyme_count_times = enzyme_set * 100;
 
     printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
 
@@ -127,17 +130,7 @@ int main(void)
             #if 0
             static FlagStatus breathe_flag = SET;
             static int16_t i = 0;
-            if (SET == breathe_flag){
-                i = i + 10;
-            }else{
-                i = i - 10;
-            }
-            if(i > 500){
-                breathe_flag = RESET;
-            }
-            if(i <= 0){
-                breathe_flag = SET;
-            }
+            if (SET == breathe_flag){ i = i + 10; }else{ i = i - 10; } if(i > 500){ breathe_flag = RESET; } if(i <= 0){ breathe_flag = SET; }
             /* configure TIMER channel output pulse value */
             timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0,i);
             #endif

@@ -8,6 +8,7 @@
 //==================================================================================================
 // Included header files
 //==================================================================================================
+#include "global.h"
 #include "timeflag.h"
 
 
@@ -21,6 +22,8 @@ static uint16_t g_rCounter_500ms = 0;
 static uint16_t g_rCounter_100ms = 0;
 static uint16_t g_rCounter_1s    = 0;
 static uint16_t g_rCounter_3s    = 0;
+static uint16_t g_rCounter_enzyme = 0;  //酶液注入量计时
+static uint32_t g_rCounter_qubei = 0;  //取杯操作超时计时  15分钟=15*60*1000
 
 /* 
     Public variable definitions
@@ -80,3 +83,28 @@ void periodTask_1ms(void)
 }
 
 
+void check_enzyme_timer( void )
+{
+    g_rCounter_enzyme++;
+    if (g_rCounter_enzyme == enzyme_count_times) {
+        
+        enzyme_motor_stop();
+        state_enzyme_count_running = 0;
+        state_enzyme_ok = 1;
+        g_rCounter_enzyme = 0;
+    }
+}
+
+
+void check_qubei_timer( void )
+{
+    g_rCounter_qubei++;
+    if (g_rCounter_qubei == 15*60*1000) {
+        
+        enzyme_motor_stop();
+        state_qubei_count_running = 0;
+        state_qubei_timeout = 1;
+        g_rCounter_qubei = 0;
+    }
+
+}

@@ -143,30 +143,91 @@ static FlagStatus key_read_state(key_switch key)
 */
 void key_process(void)
 {
+    static uint8_t yb=0,t1=0,t2=0,fz=0;
+
     /* drive mode up key is pressed */
     if(key_read_debouncing(KEY_youbei)){
-        printf("youbei\r\n");
-        state_youbei = 1;
+        if (!state_youbei) {
+            yb++;
+            if (yb>=SWITCH_LUOBEI_TIME) {
+                printf("you bei\r\n");
+                state_youbei = 1;
+                yb = 0;
+            }
+        }
         //fmc_erase_pages(MODE_PAGE);
         //fmc_data_program(MODE_PAGE);
+    } else {
+        if (state_youbei) {
+            yb++;
+            if (yb>=SWITCH_LUOBEI_TIME) {
+                printf("wu bei\r\n");
+                state_youbei = 0;
+                yb = 0;
+            }
+        }
     }
 
     if(key_read_debouncing(KEY_fuzi)){
-        printf("fuzi\r\n");
+        if (!state_fuzi) {
+            fz++;
+            if (fz>=SWITCH_DETECT_TIME) {
+                printf("fu zi 1\r\n");
+                state_fuzi = 1;
+                fz = 0;
+            }
+        }
         //fmc_erase_pages(MODE_PAGE);
         //fmc_data_program(MODE_PAGE);
+    } else {
+        if (state_fuzi) {
+            fz++;
+            if (fz>=SWITCH_DETECT_TIME) {
+                printf("fu zi 0\r\n");
+                state_fuzi = 0;
+                fz = 0;
+            }
+        }
     }
 
     if(key_read_debouncing(KEY_T1)){
-        printf("t1\r\n");
-        //fmc_erase_pages(MODE_PAGE);
-        //fmc_data_program(MODE_PAGE);
+        if (!state_t1) {
+            t1++;
+            if (t1>=SWITCH_DETECT_TIME) {
+                printf("t1 1\r\n");
+                state_t1 = 1;
+                t1 = 0;
+            }
+        }
+    } else {
+        if (state_t1) {
+            t1++;
+            if (t1>=SWITCH_DETECT_TIME) {
+                printf("t1 0\r\n");
+                state_t1 = 0;
+                t1 = 0;
+            }
+        }
     }
 
     if(key_read_debouncing(KEY_T2)){
-        printf("t2\r\n");
-        //fmc_erase_pages(MODE_PAGE);
-        //fmc_data_program(MODE_PAGE);
+        if (!state_t2) {
+            t2++;
+            if (t2>=SWITCH_DETECT_TIME) {
+                printf("t2 1\r\n");
+                state_t2 = 1;
+                t2 = 0;
+            }
+        }
+    } else {
+        if (state_t2) {
+            t2++;
+            if (t2>=SWITCH_DETECT_TIME) {
+                printf("t2 0\r\n");
+                state_t2 = 0;
+                t2 = 0;
+            }
+        }
     }
 }
 

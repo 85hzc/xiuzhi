@@ -81,12 +81,12 @@ void step_motor_move_forward(uint16_t steps)
 
     for (i=0,step=0; i<steps; i++)
     {
-        if (g_exti_qibei_position_flag || 
-            g_exti_luobei_position_flag ||
+        if (g_exti_luobei_position_flag ||
             g_exti_chubei_position_flag ||
             g_exti_zhushui_position_flag) {
-            
+            clear_position_flags();
             drv_motor_move_execute(MOVE_STEP_S);
+            return;
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + 1) % MOVE_CYCLE;
@@ -101,12 +101,10 @@ void step_motor_move_reverse(uint16_t steps)
 
     for (i=0,step=0; i<steps; i++)
     {
-        if (g_exti_qibei_position_flag || 
-            g_exti_luobei_position_flag ||
-            g_exti_chubei_position_flag ||
-            g_exti_zhushui_position_flag) {
-            
+        if (g_exti_qibei_position_flag) {
+            clear_position_flags();
             drv_motor_move_execute(MOVE_STEP_S);
+            return;
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;

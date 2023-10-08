@@ -53,6 +53,18 @@ void water_motor_init(void)
     gpio_bit_reset(MOTOR_WATER_GPIO_PORT, MOTOR_WATER_PIN);
 }
 
+void water_motor_start(void)
+{
+    /* bldc */
+    gpio_bit_set(MOTOR_WATER_GPIO_PORT, MOTOR_WATER_PIN);
+}
+
+void water_motor_stop(void)
+{
+    /* bldc */
+    gpio_bit_reset(MOTOR_WATER_GPIO_PORT, MOTOR_WATER_PIN);
+}
+
 void enzyme_motor_init(void)
 {
     /* enable the clock of GPIO */
@@ -60,5 +72,17 @@ void enzyme_motor_init(void)
     
     /* bldc */
     gpio_init(MOTOR_ENZYME_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, MOTOR_ENZYME_PIN);
+    gpio_bit_reset(MOTOR_ENZYME_GPIO_PORT, MOTOR_ENZYME_PIN);
+}
+
+void enzyme_motor_start(void)
+{
+    /* bldc */
+    gpio_bit_set(MOTOR_ENZYME_GPIO_PORT, MOTOR_ENZYME_PIN);
+}
+
+void enzyme_motor_stop(void)
+{
+    /* bldc */
     gpio_bit_reset(MOTOR_ENZYME_GPIO_PORT, MOTOR_ENZYME_PIN);
 }
