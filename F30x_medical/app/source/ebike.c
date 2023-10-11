@@ -11,7 +11,33 @@ void motor_sent_control(uint8_t pwm, uint8_t current);
 
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 float temperature = 0.0;
+PID_Parm pidParm;
 
+void config_init( void )
+{
+    fmc_data_read();
+    extern uint8_t fmc_data[3][8];
+    water_set = fmc_data[0][3];
+    enzyme_set = fmc_data[0][2];
+    temperature_set = fmc_data[0][1];
+    cup_count = fmc_data[0][0];
+    
+    water_count_signals = water_set * 100;
+    enzyme_count_times = enzyme_set * 100;
+
+    printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
+
+    //温控pid参数初始化
+    pidParm.qInRef = 40;//fmc_data[0][3];
+    pidParm.qKp = 0.5;
+    pidParm.qKi = 0.1;
+    pidParm.qOutMax = 400;   //PWM占空比0-500范围，限制功率80%，设置最大400
+    pidParm.qOutMin = 0;
+    //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
+
+
+
+}
 
 uint8_t calculateCRC8(const uint8_t *data, int  len)
 {
@@ -24,6 +50,33 @@ uint8_t calculateCRC8(const uint8_t *data, int  len)
     return crc;
 }
 
+void EBI_calcPI( PID_Parm *pParm)
+{
+    float Err;
+    float U;
+    float Exc;
+
+    Err  = pParm->qInRef - pParm->qInMeas;
+    pParm->qErr =  Err; 
+    U  = pParm->qdSum + pParm->qKp * Err;
+
+    if( U > pParm->qOutMax )
+    {
+        pParm->qOut = pParm->qOutMax;
+    }    
+    else if( U < pParm->qOutMin )
+    {
+        pParm->qOut = pParm->qOutMin;
+    }
+    else
+    {
+        pParm->qOut = U;  
+    }
+
+    Exc = U - pParm->qOut;
+
+    pParm->qdSum = pParm->qdSum + pParm->qKi * Err - pParm->qKc * Exc;
+}
 
 /*!
     \brief      current offset calibration
@@ -95,12 +148,13 @@ void motor_sent_control(uint8_t pwm, uint8_t current)
 }
 
 // 50ms period
-void ebike_read_sample(void)
+void ebike_read_temperature(void)
 {
     uint16_t temp;
 
     temp = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
     temperature = temp * 0.003223;
+    pidParm.qInMeas = temperature;
 
     //TODO:
     /* ADC software trigger enable */
@@ -113,10 +167,13 @@ void ebike_read_sample(void)
 */
 void heat_running()
 {
-	  uint16_t pwm = 0;
+    uint16_t pwm = 0;
     printf("[AD]temperature:%.1f\r\n", temperature);
 
     //need PID
+    #if 1
+    EBI_calcPI(&pidParm);
+    #else
     if ((temperature > 42.0)){
         //关闭加热
         pwm = 0;
@@ -124,12 +181,12 @@ void heat_running()
         //打开发电环路
         pwm = 500;
     }
+    #endif
 
     //0 ---- 500
     /* configure TIMER channel output pulse value */
-    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) 500 /** g_generator_gears / 5.0f*/);
+    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
 
-    //g_generator_gears_pre = g_generator_gears;
     //fmc_erase_pages(MODE_PAGE);
     //fmc_data_program(MODE_PAGE);
 }

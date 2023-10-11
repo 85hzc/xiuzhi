@@ -73,19 +73,7 @@ int main(void)
 
     /* tool function initialization */
     utils_sample_init();
-    /* read the hall */
-    fmc_data_read();
-    extern uint8_t fmc_data[3][8];
-    water_set = fmc_data[0][3];
-    enzyme_set = fmc_data[0][2];
-    temperature_set = fmc_data[0][1];
-    cup_count = fmc_data[0][0];
-    //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
-
-    water_count_signals = water_set * 100;
-    enzyme_count_times = enzyme_set * 100;
-
-    printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
+    config_init();
 
     while(1){
 
@@ -122,11 +110,6 @@ int main(void)
             key_read_state(KEY_T1);
             key_read_state(KEY_T2);
             */
-            ebike_read_sample();
-
-            if (controller_ready_flag) {
-                ebike_process();
-            }
             #if 0
             static FlagStatus breathe_flag = SET;
             static int16_t i = 0;
@@ -144,6 +127,14 @@ int main(void)
             key_process();
 
             work_loop();
+
+
+            if (controller_ready_flag) {
+                ebike_process();
+            }
+
+            ebike_read_temperature();
+            heat_running();
         }
 
         if (bTimeFlag_500ms)
@@ -158,8 +149,6 @@ int main(void)
         if (bTimeFlag_1s)
         {
             bTimeFlag_1s = 0;
-
-            heat_running();
 
             if (!controller_ready_flag) {
                 motor_sent_set(36, 10);//36V,10A

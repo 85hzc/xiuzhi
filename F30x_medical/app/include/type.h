@@ -108,6 +108,20 @@ typedef struct{
     uint8_t direction_flag;                                                     /* the sign of the output variable */
 }pid_parameter;
 
+typedef struct 
+{
+    float   qdSum;          
+    float   qKp;
+    float   qKi;
+    float   qKc;
+    float   qOutMax;
+    float   qOutMin;
+    float   qInRef;
+    float   qInMeas;
+    float   qOut;
+    float   qErr;
+} PID_Parm;
+
 /* the structure of motor parameter */
 typedef struct{
     SECTOR sector;                                                             /* the sector of applying voltage */
