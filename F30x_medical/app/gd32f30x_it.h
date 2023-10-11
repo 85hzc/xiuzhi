@@ -69,5 +69,7 @@ void DMA0_Channel0_IRQHandler(void);
 void EXTI10_15_IRQHandler(void);
 /*this function handles EXTI5_9 interrupts handler*/
 void EXTI5_9_IRQHandler(void);
+/* this function handles RTC global interrupt request */
+void RTC_IRQHandler(void);
 
 #endif /* GD32F30X_IT_H */

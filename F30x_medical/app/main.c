@@ -52,6 +52,9 @@ int main(void)
 
     /* peripheral initialization */
     hardware_config();
+    rtc_init();
+    /* clear reset flags */
+    rcu_all_reset_flag_clear();
 
     /* hardware initialization */
     luobei_exti_init();             //落杯器完成落杯动作，计数
@@ -153,6 +156,9 @@ int main(void)
             if (!controller_ready_flag) {
                 motor_sent_set(36, 10);//36V,10A
             }
+
+            /* display time in infinite loop */
+            time_show();
         }
 
         if (bTimeFlag_3s)

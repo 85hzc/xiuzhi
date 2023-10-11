@@ -117,6 +117,7 @@ void debug_msg_process(uint8_t *msg)
 
         case 7:
             printf("info\r\n");
+            time_adjust(msg[1],msg[2],msg[3]);
             break;
 
         case 8:

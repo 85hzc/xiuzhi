@@ -125,6 +125,7 @@ static void nvic_config(void)
     /* USART interrupt configuration */
     nvic_irq_enable(USART1_IRQn, 0, 0);
     nvic_irq_enable(USART2_IRQn, 0, 0);
+    nvic_irq_enable(RTC_IRQn,1,0);
 }
 
 /*!

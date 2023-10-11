@@ -1,15 +1,16 @@
 /*!
-    \file    debug.h
-    \brief   the header file of debug module
+    \file  rtc.h
+    \brief headfile of RTC check and config,time_show and time_adjust function
 
-    \version 2019-07-15, V1.0.0, FOC demo
-    \version 2021-02-01, V1.2.0, FOC demo
-    \version 2021-02-01, V1.2.0, FOC demo
-    \version 2021-08-16, V1.3.0, FOC demo
+	\version 2017-02-10, V1.0.0, firmware for GD32F30x
+    \version 2018-10-10, V1.1.0, firmware for GD32F30x
+    \version 2018-12-25, V2.0.0, firmware for GD32F30x
 */
 
 /*
-    Copyright (c) 2021, GigaDevice Semiconductor Inc.
+    Copyright (c) 2018, GigaDevice Semiconductor Inc.
+
+    All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -35,35 +36,20 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 OF SUCH DAMAGE.
 */
 
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef __RTC_H
+#define __RTC_H
 
 #include "gd32f30x.h"
+#include <stdio.h>
 
-#define USART1_BUFFER_SIZE (4)
+void nvic_configuration(void);
+void rtc_configuration(void);
+uint32_t time_regulate(void);
+void time_adjust(uint32_t hh, uint32_t mm, uint32_t ss);
+void time_display(uint32_t timevar);
+void time_show(void);
+uint8_t usart_scanf(uint32_t value);
+void rtc_init(void);
 
-/* the structure of debug */
-typedef struct
-{
-    int16_t data1;
-    int16_t data2;
-    int16_t data3;
-    int16_t data4;
-    int16_t data5;
-    int16_t data6;
-    int16_t data7;
-    int16_t data8;
-} usart_debug;
-
-/* initialize the hardware of debug function */
-void debug_init(void);
-/* data transmission with USART */
-void debug_usart_data_transfer(usart_debug data);
-/* data transmission with DAC */
-void debug_dac_data_transfer(int16_t a, int16_t b);
-
-extern uint8_t debug_rx_buffer[],debug_rx_buffer_app[];
-extern  uint16_t debug_rx_counter, debug_rx_ok;
-
-#endif /* DEBUG_H */
+#endif /* __RTC_H */
 
