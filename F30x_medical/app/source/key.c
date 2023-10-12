@@ -53,15 +53,11 @@ void key_init(void)
 {
     /* enable the clock of GPIO and alternate function */
     rcu_periph_clock_enable(SWITCH_YOUBEI_GPIO_CLK);
-    rcu_periph_clock_enable(SWITCH_T1_GPIO_CLK);
-    rcu_periph_clock_enable(SWITCH_T2_GPIO_CLK);
     rcu_periph_clock_enable(SWITCH_WATER_GPIO_CLK);
     rcu_periph_clock_enable(RCU_AF);
 
     /* key initialize */
     gpio_init(SWITCH_YOUBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_YOUBEI_PIN);
-    gpio_init(SWITCH_T1_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T1_PIN);
-    gpio_init(SWITCH_T2_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_T2_PIN);
     gpio_init(SWITCH_WATER_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, SWITCH_WATER_PIN);
 }
 
@@ -81,12 +77,6 @@ static FlagStatus key_read(key_switch key)
             break;
         case KEY_fuzi:
             data = gpio_input_bit_get(SWITCH_WATER_GPIO_PORT, SWITCH_WATER_PIN);
-            break;
-        case KEY_T1:
-            data = gpio_input_bit_get(SWITCH_T1_GPIO_PORT, SWITCH_T1_PIN);
-            break;
-        case KEY_T2:
-            data = gpio_input_bit_get(SWITCH_T2_GPIO_PORT, SWITCH_T2_PIN);
             break;
         default: data = 0;
     }

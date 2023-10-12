@@ -98,6 +98,8 @@ static void gpio_config(void)
     //加热丝  导通电流PWM控制
     /*Configure PC6(TIMER7_CH0) as alternate function*/
     gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+    /*Configure PC7(TIMER7_CH1) as alternate function*/
+    gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
 
 
     /* configure ADC pin, temperature sampling -- ADC_IN0(PA0) */
@@ -157,11 +159,16 @@ void timer7_config(void)
     timer_ocintpara.ocnpolarity  = TIMER_OCN_POLARITY_HIGH;
     timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
     timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
+    //CH0
     timer_channel_output_config(TIMER7, TIMER_CH_0, &timer_ocintpara);
-
     timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_0, 250);
     timer_channel_output_mode_config(TIMER7, TIMER_CH_0, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER7, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
+    //CH1
+    timer_channel_output_config(TIMER7, TIMER_CH_1, &timer_ocintpara);
+    timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_1, 250);
+    timer_channel_output_mode_config(TIMER7, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER7, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
     timer_primary_output_config(TIMER7, ENABLE);
     /* auto-reload preload enable */

@@ -31,12 +31,10 @@ void config_init( void )
     pidParm.qInRef = 40;//fmc_data[0][3];
     pidParm.qKp = 0.5;
     pidParm.qKi = 0.1;
+    pidParm.qKc = 0.1;
     pidParm.qOutMax = 400;   //PWM占空比0-500范围，限制功率80%，设置最大400
     pidParm.qOutMin = 0;
     //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
-
-
-
 }
 
 uint8_t calculateCRC8(const uint8_t *data, int  len)
@@ -163,9 +161,25 @@ void ebike_read_temperature(void)
 
 
 /*
+** 蜂鸣器
+*/
+void beep_on( void )
+{
+    /* configure TIMER channel output pulse value */
+    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_1, 250);
+}
+
+void beep_off( void )
+{
+    /* configure TIMER channel output pulse value */
+    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_1, 0);
+}
+
+
+/*
 ** 调节加热导通电流；
 */
-void heat_running()
+void heat_running( void )
 {
     uint16_t pwm = 0;
     printf("[AD]temperature:%.1f\r\n", temperature);
@@ -186,9 +200,6 @@ void heat_running()
     //0 ---- 500
     /* configure TIMER channel output pulse value */
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
-
-    //fmc_erase_pages(MODE_PAGE);
-    //fmc_data_program(MODE_PAGE);
 }
 
 //四个中断信号脚

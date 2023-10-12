@@ -110,57 +110,57 @@ OF SUCH DAMAGE.
 #define SQRT3_BY_2                          (0.866025f)                         /* the value of sqrt(3)/2 */
 #define M_PI                                (3.141592f)                         /* the value of pi */
 
+/* 蜂鸣器驱动信号 */
+#define BEEP_PIN                            GPIO_PIN_6
+#define BEEP_GPIO_CLK                       RCU_GPIOB
+#define BEEP_GPIO_PORT                      GPIOB
+
 
 //////落杯模块//////
 /* 纸杯杯托位置检测开关信号 */
 #define SWITCH_YOUBEI_PIN                   GPIO_PIN_7
-#define SWITCH_YOUBEI_GPIO_CLK              RCU_GPIOC
-#define SWITCH_YOUBEI_GPIO_PORT             GPIOC
+#define SWITCH_YOUBEI_GPIO_CLK              RCU_GPIOB
+#define SWITCH_YOUBEI_GPIO_PORT             GPIOB
 /* 落杯器电机驱动信号 */
-#define MOTOR_LUOBEI_PIN                    GPIO_PIN_8
+#define MOTOR_LUOBEI_PIN                    GPIO_PIN_12
 #define MOTOR_LUOBEI_GPIO_CLK               RCU_GPIOA
 #define MOTOR_LUOBEI_GPIO_PORT              GPIOA
 
 
 
 //////储水模块//////
-/* 温控开关1信号 */
-#define SWITCH_T1_PIN                       GPIO_PIN_8
-#define SWITCH_T1_GPIO_CLK                  RCU_GPIOC
-#define SWITCH_T1_GPIO_PORT                 GPIOC
-/* 温控开关2信号 */
-#define SWITCH_T2_PIN                       GPIO_PIN_9
-#define SWITCH_T2_GPIO_CLK                  RCU_GPIOC
-#define SWITCH_T2_GPIO_PORT                 GPIOC
 /* 液位开关信号 */
-#define SWITCH_WATER_PIN                    GPIO_PIN_10
-#define SWITCH_WATER_GPIO_CLK               RCU_GPIOC
-#define SWITCH_WATER_GPIO_PORT              GPIOC
-
-
-//////加注模块//////
-/* 纯水泵电机驱动信号 */
-#define MOTOR_WATER_PIN                     GPIO_PIN_13
-#define MOTOR_WATER_GPIO_CLK                RCU_GPIOB
-#define MOTOR_WATER_GPIO_PORT               GPIOB
-/* 酶液泵电机驱动信号 */
-#define MOTOR_ENZYME_PIN                    GPIO_PIN_12
-#define MOTOR_ENZYME_GPIO_CLK               RCU_GPIOB
-#define MOTOR_ENZYME_GPIO_PORT              GPIOB
+#define SWITCH_WATER_PIN                    GPIO_PIN_5
+#define SWITCH_WATER_GPIO_CLK               RCU_GPIOB
+#define SWITCH_WATER_GPIO_PORT              GPIOB
 /* 温度传感器 */
 #define TEMPERATURE_PIN                     GPIO_PIN_0
 #define TEMPERATURE_PORT                    GPIOA
 #define TEMPERATURE_CHANNEL                 ADC_CHANNEL_0
 
 
+//////加注模块//////
+/* 纯水泵电机驱动信号 */
+#define MOTOR_WATER_PIN                     GPIO_PIN_10
+#define MOTOR_WATER_GPIO_CLK                RCU_GPIOA
+#define MOTOR_WATER_GPIO_PORT               GPIOA
+/* 酶液泵电机驱动信号 */
+#define MOTOR_ENZYME_PIN                    GPIO_PIN_11
+#define MOTOR_ENZYME_GPIO_CLK               RCU_GPIOA
+#define MOTOR_ENZYME_GPIO_PORT              GPIOA
+
+
 //////运杯模块//////
 /* 步进电机信号脚 */
-#define MOTOR_STEP_PIN_A_l                  GPIO_PIN_12
-#define MOTOR_STEP_PIN_A_h                  GPIO_PIN_12
-#define MOTOR_STEP_PIN_B_l                  GPIO_PIN_12
-#define MOTOR_STEP_PIN_B_h                  GPIO_PIN_12
-#define MOTOR_STEP_GPIO_CLK                 RCU_GPIOB
-#define MOTOR_STEP_GPIO_PORT                GPIOB
+#define MOTOR_STEP_PIN_A_l                  GPIO_PIN_13
+#define MOTOR_STEP_PIN_B_l                  GPIO_PIN_14
+#define MOTOR_STEP_l_GPIO_CLK               RCU_GPIOB
+#define MOTOR_STEP_l_GPIO_PORT              GPIOB
+
+#define MOTOR_STEP_PIN_A_h                  GPIO_PIN_8
+#define MOTOR_STEP_PIN_B_h                  GPIO_PIN_9
+#define MOTOR_STEP_h_GPIO_CLK               RCU_GPIOA
+#define MOTOR_STEP_h_GPIO_PORT              GPIOA
 
 
 /* conflicting configuration */

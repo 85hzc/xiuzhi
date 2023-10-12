@@ -56,7 +56,7 @@ void usart2_init(void)
 
     /* USART2 configure */
     usart_deinit(USART2);
-    usart_baudrate_set(USART2, 9600);
+    usart_baudrate_set(USART2, 115200);
     usart_stop_bit_set(USART2, USART_STB_1BIT);
     usart_word_length_set(USART2, USART_WL_8BIT);
     usart_parity_config(USART2, USART_PM_NONE);
