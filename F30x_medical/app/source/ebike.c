@@ -6,6 +6,7 @@
 
 #include "global.h"
 
+uint16_t error_bits_flag = 0;
 float temperature = 0.0;
 PID_Parm pidParm;
 
@@ -149,10 +150,22 @@ void motor_sent_control(uint8_t pwm, uint8_t current)
 // 50ms period
 void ebike_read_temperature(void)
 {
+    float Rt=0.0;
+    //Rp上拉电阻值
+    float Rp=10000;
+    //T2为25摄氏度，折算为开尔文温度
+    float T2=273.15+25;
+    float Bx=3950;
+    float Ka=273.15;
+    float vol=0;
+/*
     uint16_t temp;
-
     temp = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
     temperature = temp * 0.003223;
+*/
+    vol=(float)(adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0) * 3.3 / 4096.0f);
+    Rt=(3.3-vol)*10000/vol;
+    temperature=1/(1/T2+log(Rt/Rp)/Bx)-Ka+0.5;
     pidParm.qInMeas = temperature;
 
     //TODO:
@@ -208,10 +221,13 @@ void ebike_check_warning()
     if (state_position_error_timeout) {
         state_position_error_timeout = 0;
         //输出“走位错误”
+        error_bits_flag |= 1<<POSITION_ERROR;
     } else if (state_fuzi) {
         //输出“水位不足”
+        error_bits_flag |= 1<<SHUIWEI_ERROR;
     } else if (state_jiazhu_error_timeout){
         //输出“加注失败”
+        error_bits_flag |= 1<<ZHUSHUI_ERROR;
     }
 
     if ((uint8_t)temperature > temperature_set+3) {
@@ -219,16 +235,19 @@ void ebike_check_warning()
         temperature_error_timer_start(15*60);
         if (state_temperature_error_timeout) {
             //输出“温度过高”
+            error_bits_flag |= 1<<WENDU_ERROR;
         }
     } else if ((uint8_t)temperature < temperature_set-3) {
 
         temperature_error_timer_start(5*60);
         if (state_temperature_error_timeout) {
             //输出“温度过低”
+            error_bits_flag |= 1<<WENDU_ERROR;
         }
     } else {
         //温度正常，恢复告警
         temperature_error_timer_clear();
+        error_bits_flag &= ~(1<<WENDU_ERROR);
     }
     
 }

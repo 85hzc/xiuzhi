@@ -193,6 +193,19 @@ typedef enum {
     LOOP_ERROR = 0xff
 } Loop_State_e;
 
+typedef enum {
+    POSITION_ERROR = 0,
+    WUBEI_ERROR,
+    QIBEI_ERROR,
+    ZHUSHUI_ERROR,
+    WENDU_ERROR,
+    SHUIWEI_ERROR,
+
+    RESET_,
+    READY_,
+    CHUBEI_,
+    HUISHOU_,
+};
 
 
 /* global variable declaration */
