@@ -106,13 +106,6 @@ int main(void)
         {
             bTimeFlag_50ms = 0;
             
-            /*
-            //状态诊断   状态进入 和 状态恢复
-            key_read_state(KEY_guangdian);
-            key_read_state(KEY_fuzi);
-            key_read_state(KEY_T1);
-            key_read_state(KEY_T2);
-            */
             #if 0
             static FlagStatus breathe_flag = SET;
             static int16_t i = 0;
@@ -128,21 +121,19 @@ int main(void)
 
             /* key process routine */
             key_process();
-
             work_loop();
-
+            heat_running();
 
             if (controller_ready_flag) {
                 ebike_process();
             }
-
-            ebike_read_temperature();
-            heat_running();
         }
 
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;
+            ebike_read_temperature();
+            ebike_check_warning();
 
             /* oled update */
             //oled_display();
@@ -157,7 +148,7 @@ int main(void)
                 motor_sent_set(36, 10);//36V,10A
             }
 
-            /* display time in infinite loop */
+            /* display time in loop */
             time_show();
         }
 

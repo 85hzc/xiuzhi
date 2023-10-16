@@ -208,15 +208,18 @@ extern flash_page_type page_type;
 /* debug varieble */
 extern usart_debug debug_data;
 
-extern uint16_t g_generator_power, g_error_code;
-extern uint8_t state_youbei, state_t1, state_t2, state_fuzi;
+extern uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose;
+extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
+    state_position_error_count_running, state_temperature_error_count_running;
 extern uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
 extern uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
-extern uint8_t state_enzyme_ok, state_water_ok, state_qubei_timeout;
-extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
-extern float temperature;
-extern uint8_t state_enzyme_count_running, state_qubei_count_running;
+extern uint8_t state_enzyme_ok, state_water_ok;
+extern uint8_t state_qubei_timeout, state_position_error_timeout, \
+    state_temperature_error_timeout, state_jiazhu_error_timeout;
 extern uint8_t temperature_set, enzyme_set;
 extern uint16_t cup_count, water_set;
+extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
+extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
+extern float temperature;
 
 #endif /* GLOBAL_H */

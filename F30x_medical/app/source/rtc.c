@@ -182,15 +182,12 @@ void time_show(void)
 {
     printf("\n\r");
 
-    /* infinite loop */
-    //while (1){
-        /* if 1s has paased */
-        if (timedisplay == 1){
-            /* display current time */
-            time_display(rtc_counter_get());
-            timedisplay = 0;
-        }
-    //}
+    /* if 1s has paased */
+    if (timedisplay == 1){
+        /* display current time */
+        time_display(rtc_counter_get());
+        timedisplay = 0;
+    }
 }
 
 /*!

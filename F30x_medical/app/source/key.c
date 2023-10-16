@@ -145,8 +145,6 @@ void key_process(void)
                 yb = 0;
             }
         }
-        //fmc_erase_pages(MODE_PAGE);
-        //fmc_data_program(MODE_PAGE);
     } else {
         if (state_youbei) {
             yb++;
@@ -167,8 +165,6 @@ void key_process(void)
                 fz = 0;
             }
         }
-        //fmc_erase_pages(MODE_PAGE);
-        //fmc_data_program(MODE_PAGE);
     } else {
         if (state_fuzi) {
             fz++;
@@ -179,7 +175,7 @@ void key_process(void)
             }
         }
     }
-
+    /*
     if(key_read_debouncing(KEY_T1)){
         if (!state_t1) {
             t1++;
@@ -218,6 +214,6 @@ void key_process(void)
                 t2 = 0;
             }
         }
-    }
+    }*/
 }
 

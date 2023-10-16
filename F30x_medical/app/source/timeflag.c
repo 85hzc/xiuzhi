@@ -24,7 +24,9 @@ static uint16_t g_rCounter_1s    = 0;
 static uint16_t g_rCounter_3s    = 0;
 static uint16_t g_rCounter_enzyme = 0;  //酶液注入量计时
 static uint32_t g_rCounter_qubei = 0;  //取杯操作超时计时  15分钟=15*60*1000
-
+static uint32_t g_rCounter_position_error = 0;  //取杯操作超时计时  10秒=10*1000
+static uint32_t g_rCounter_temperature_error = 0;  //温控超时计时
+static uint32_t g_rCounter_jiazhu_error = 0; //注水超时计时
 /* 
     Public variable definitions
 */
@@ -82,6 +84,47 @@ void periodTask_1ms(void)
     }
 }
 
+void temperature_error_timer_start(uint8_t secs)
+{
+    temperature_error_count_times = secs*1000;
+
+    if (!state_temperature_error_count_running)
+        g_rCounter_temperature_error = 0;
+    
+    state_temperature_error_count_running = 1;
+}
+
+void temperature_error_timer_clear( void )
+{
+    state_temperature_error_count_running = 0;
+    g_rCounter_temperature_error = 0;
+}
+
+void position_error_timer_start(uint8_t secs)
+{
+    position_error_count_times = secs*1000;
+    g_rCounter_position_error = 0;
+    state_position_error_count_running = 1;
+}
+
+void position_error_timer_clear( void )
+{
+    g_rCounter_position_error = 0;
+    state_position_error_count_running = 0;
+}
+
+void jiazhu_error_timer_start(uint8_t secs)
+{
+    jiazhu_error_count_times = secs*1000;
+    g_rCounter_jiazhu_error = 0;
+    state_jiazhu_error_count_running = 1;
+}
+
+void jiazhu_error_timer_clear( void )
+{
+    g_rCounter_jiazhu_error = 0;
+    state_jiazhu_error_count_running = 0;
+}
 
 void check_enzyme_timer( void )
 {
@@ -95,16 +138,47 @@ void check_enzyme_timer( void )
     }
 }
 
-
 void check_qubei_timer( void )
 {
     g_rCounter_qubei++;
-    if (g_rCounter_qubei == 15*60*1000) {
+    if (g_rCounter_qubei == 15*60*1000) {   //15min
         
-        enzyme_motor_stop();
         state_qubei_count_running = 0;
         state_qubei_timeout = 1;
         g_rCounter_qubei = 0;
     }
+}
 
+void check_position_error_timer( void )
+{
+    g_rCounter_position_error++;
+    if (g_rCounter_position_error == position_error_count_times) {
+        
+        state_position_error_count_running = 0;
+        state_position_error_timeout = 1;
+        g_rCounter_position_error = 0;
+    }
+}
+
+
+void check_jiazhu_error_timer( void )
+{
+    g_rCounter_jiazhu_error++;
+    if (g_rCounter_jiazhu_error == jiazhu_error_count_times) {
+        
+        state_jiazhu_error_count_running = 0;
+        state_jiazhu_error_timeout = 1;
+        g_rCounter_jiazhu_error = 0;
+    }
+}
+
+void check_temperature_error_timer( void )
+{
+    g_rCounter_temperature_error++;
+    if (g_rCounter_temperature_error == temperature_error_count_times) {
+        
+        state_temperature_error_count_running = 0;
+        state_temperature_error_timeout = 1;
+        g_rCounter_temperature_error = 0;
+    }
 }

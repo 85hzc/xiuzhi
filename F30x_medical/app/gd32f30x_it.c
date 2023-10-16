@@ -151,6 +151,15 @@ void SysTick_Handler(void)
     if (state_qubei_count_running)
         check_qubei_timer();
     
+    if (state_position_error_count_running)
+        check_position_error_timer();
+
+    if (state_temperature_error_count_running)
+        check_temperature_error_timer();
+
+    if (state_jiazhu_error_count_running)
+        check_jiazhu_error_timer();
+
 }
 
 

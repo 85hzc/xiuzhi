@@ -6,12 +6,13 @@
 
 #include "global.h"
 
+float temperature = 0.0;
+PID_Parm pidParm;
+
+
 void motor_sent_data(uint8_t pwm, uint8_t current);
 void motor_sent_control(uint8_t pwm, uint8_t current);
 
-uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
-float temperature = 0.0;
-PID_Parm pidParm;
 
 void config_init( void )
 {
@@ -200,6 +201,36 @@ void heat_running( void )
     //0 ---- 500
     /* configure TIMER channel output pulse value */
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
+}
+
+void ebike_check_warning()
+{
+    if (state_position_error_timeout) {
+        state_position_error_timeout = 0;
+        //输出“走位错误”
+    } else if (state_fuzi) {
+        //输出“水位不足”
+    } else if (state_jiazhu_error_timeout){
+        //输出“加注失败”
+    }
+
+    if ((uint8_t)temperature > temperature_set+3) {
+
+        temperature_error_timer_start(15*60);
+        if (state_temperature_error_timeout) {
+            //输出“温度过高”
+        }
+    } else if ((uint8_t)temperature < temperature_set-3) {
+
+        temperature_error_timer_start(5*60);
+        if (state_temperature_error_timeout) {
+            //输出“温度过低”
+        }
+    } else {
+        //温度正常，恢复告警
+        temperature_error_timer_clear();
+    }
+    
 }
 
 //四个中断信号脚
