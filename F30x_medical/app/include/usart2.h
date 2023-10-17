@@ -48,6 +48,5 @@ void usart2_config(void);
 
 extern uint8_t rx_buffer[],rx_buffer_app[],tx_buffer[];
 extern uint16_t tx_counter, rx_counter, rx_ok;
-extern uint8_t controller_ready_flag;
 
 #endif /* USART2_H */

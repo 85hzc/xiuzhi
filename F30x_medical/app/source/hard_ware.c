@@ -211,8 +211,5 @@ static void adc_config(void)
     adc_inserted_channel_config(ADC0, 0, TEMPERATURE_CHANNEL, ADC_SAMPLE_TIME);           //CH9
     //adc_inserted_channel_config(ADC0, 1, TORQUE_SENSOR_CHANNEL, ADC_SAMPLE_TIME);   //CH0
     //adc_inserted_channel_config(ADC0, 2, VBUS_CHANNEL, ADC_SAMPLE_TIME);            //CH1
-
-    //adc_dma_mode_enable(ADC0);
-    //motor_flag.adc_ready_flag = 1;
 }
 

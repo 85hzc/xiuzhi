@@ -47,6 +47,7 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include "key.h"
 #include "led.h"
+#include "lcd.h"
 #include "oled.h"
 #include "flash.h"
 #include "app_exti.h"
@@ -205,6 +206,8 @@ typedef enum {
     READY_,
     CHUBEI_,
     HUISHOU_,
+
+    ERROR_max
 };
 
 
@@ -234,5 +237,6 @@ extern uint16_t cup_count, water_set;
 extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
 extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
 extern float temperature;
+extern uint16_t error_bits_flag;
 
 #endif /* GLOBAL_H */

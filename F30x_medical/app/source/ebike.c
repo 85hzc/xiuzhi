@@ -11,10 +11,6 @@ float temperature = 0.0;
 PID_Parm pidParm;
 
 
-void motor_sent_data(uint8_t pwm, uint8_t current);
-void motor_sent_control(uint8_t pwm, uint8_t current);
-
-
 void config_init( void )
 {
     fmc_data_read();
@@ -39,6 +35,7 @@ void config_init( void )
     //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
 }
 
+//校验和计算
 uint8_t calculateCRC8(const uint8_t *data, int  len)
 {
     uint8_t crc = 0;
@@ -99,36 +96,7 @@ void torque_value_calibration(void)
     \param[out] none
     \retval     none
 */
-void ebike_process(void)
-{
-    uint8_t pwm;
-    uint8_t I_ctrl;
-
-
-    motor_sent_control(pwm, I_ctrl);
-}
-
-
-void motor_sent_set(uint8_t vbus, uint8_t vbus_I)
-{
-    /*
-    ** 设置指令：（空闲时间≥20ms）+ 0xAA + PAR1 + PAR2 + CheckSum
-    **    PAR1：当前控制器工作电压等级 24V/36V/48V/60V/72V
-    **    PAR2：当前控制器最大母线控制电流  单位：A
-    */
-    uint8_t usart_data[COM_BUFFER_SIZE];
-
-    memset(usart_data, 0, COM_BUFFER_SIZE);
-    usart_data[0] = 0xAA;
-    usart_data[1] = vbus;
-    usart_data[2] = vbus_I;
-    usart_data[3] = calculateCRC8(usart_data, 3);
-
-    //printf("motor_sent_set:0x%x 0x%x 0x%x 0x%x\r\n", usart_data[0],usart_data[1],usart_data[2],usart_data[3]);
-    usart2_data_transfer(usart_data, COM_BUFFER_SIZE);
-}
-
-void motor_sent_control(uint8_t pwm, uint8_t current)
+void display_process(void)
 {
     /*
     ** 控制指令：（空闲时间≥20ms）+ 0x55 + PAR1 + PAR2 + CheckSum
@@ -139,13 +107,13 @@ void motor_sent_control(uint8_t pwm, uint8_t current)
 
     memset(usart_data, 0, COM_BUFFER_SIZE);
     usart_data[0] = 0x55;
-    usart_data[1] = pwm;
-    usart_data[2] = current;
+    usart_data[1] = 0;
+    usart_data[2] = 0;
     usart_data[3] = calculateCRC8(usart_data, 3);
 
-    //printf("motor_sent_control:0x%x 0x%x 0x%x 0x%x\r\n", usart_data[0],usart_data[1],usart_data[2],usart_data[3]);
     usart2_data_transfer(usart_data, COM_BUFFER_SIZE);
 }
+
 
 // 50ms period
 void ebike_read_temperature(void)
@@ -222,9 +190,6 @@ void ebike_check_warning()
         state_position_error_timeout = 0;
         //输出“走位错误”
         error_bits_flag |= 1<<POSITION_ERROR;
-    } else if (state_fuzi) {
-        //输出“水位不足”
-        error_bits_flag |= 1<<SHUIWEI_ERROR;
     } else if (state_jiazhu_error_timeout){
         //输出“加注失败”
         error_bits_flag |= 1<<ZHUSHUI_ERROR;

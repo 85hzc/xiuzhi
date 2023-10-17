@@ -163,6 +163,8 @@ void key_process(void)
                 printf("fu zi 1\r\n");
                 state_fuzi = 1;
                 fz = 0;
+                //输出“水位不足”
+                error_bits_flag |= 1<<SHUIWEI_ERROR;
             }
         }
     } else {
@@ -172,6 +174,8 @@ void key_process(void)
                 printf("fu zi 0\r\n");
                 state_fuzi = 0;
                 fz = 0;
+                //清除“水位不足”
+                error_bits_flag &= ~(1<<SHUIWEI_ERROR);
             }
         }
     }

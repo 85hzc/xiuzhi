@@ -37,6 +37,9 @@ OF SUCH DAMAGE.
 
 #include "global.h"
 
+void controller_msg_process(uint8_t *msg);
+void debug_msg_process(uint8_t *msg);
+
 /* reference variable */
 uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose = 1;
 uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \

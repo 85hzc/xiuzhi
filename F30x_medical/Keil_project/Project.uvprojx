@@ -488,6 +488,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\source\rtc.c</FilePath>
             </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\source\lcd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

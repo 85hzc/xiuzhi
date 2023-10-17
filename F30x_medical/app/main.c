@@ -123,10 +123,6 @@ int main(void)
             key_process();
             work_loop();
             heat_running();
-
-            if (controller_ready_flag) {
-                ebike_process();
-            }
         }
 
         if (bTimeFlag_500ms)
@@ -134,9 +130,7 @@ int main(void)
             bTimeFlag_500ms = 0;
             ebike_read_temperature();
             ebike_check_warning();
-
-            /* oled update */
-            //oled_display();
+            display_process();
             //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
         }
 
@@ -144,12 +138,11 @@ int main(void)
         {
             bTimeFlag_1s = 0;
 
-            if (!controller_ready_flag) {
-                motor_sent_set(36, 10);//36V,10A
-            }
-
             /* display time in loop */
             time_show();
+
+            /* lcd status update */
+            lcd_status_display();
         }
 
         if (bTimeFlag_3s)
