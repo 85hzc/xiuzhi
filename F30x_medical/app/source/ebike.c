@@ -10,29 +10,35 @@ uint16_t error_bits_flag = 0;
 float temperature = 0.0;
 PID_Parm pidParm;
 
+void beep_on( void );
+void beep_off( void );
 
 void config_init( void )
 {
     fmc_data_read();
     extern uint8_t fmc_data[3][8];
     water_set = fmc_data[0][3];
-    enzyme_set = fmc_data[0][2];
+    enzyme_rate = fmc_data[0][2];
     temperature_set = fmc_data[0][1];
     cup_count = fmc_data[0][0];
     
-    water_count_signals = water_set * 100;
-    enzyme_count_times = enzyme_set * 100;
+    water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
+    enzyme_count_times = ( (water_set * enzyme_rate) / (float)(100.0 - enzyme_rate) ) * 1000; //流速：1 ml/s
 
-    printf("[fmc][1]: %x %x\r\n", fmc_data[1][0], fmc_data[1][1]);
+    printf("water: %dml, enzyme rate: %d\%, temp_set: %d, cup_count: %d\r\n", water_set, enzyme_rate
+            , temperature_set, cup_count);
 
+    memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
-    pidParm.qInRef = 40;//fmc_data[0][3];
+    pidParm.qInRef = temperature_set;
     pidParm.qKp = 0.5;
     pidParm.qKi = 0.1;
     pidParm.qKc = 0.1;
-    pidParm.qOutMax = 400;   //PWM占空比0-500范围，限制功率80%，设置最大400
-    pidParm.qOutMin = 0;
+    pidParm.qOutMax = TEMPERATURE_PWM_MAX;   //PWM占空比0-500范围，限制功率80%，设置最大400
+    pidParm.qOutMin = TEMPERATURE_PWM_MIN;
     //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
+
+    beep_off();
 }
 
 //校验和计算
@@ -81,12 +87,11 @@ void EBI_calcPI( PID_Parm *pParm)
     \param[out] none
     \retval     none
 */
-void torque_value_calibration(void)
+void flash_value_flash(void)
 {
-    printf("g_torque_offset\r\n");
-
-    fmc_erase_pages(CONFIG_PAGE);
-    fmc_data_program(CONFIG_PAGE);
+    printf("flash update.\r\n");
+    fmc_erase_pages(MODE_PAGE);
+    fmc_data_program(MODE_PAGE);
 }
 
 
@@ -163,13 +168,11 @@ void beep_off( void )
 */
 void heat_running( void )
 {
-    uint16_t pwm = 0;
-    printf("[AD]temperature:%.1f\r\n", temperature);
-
     //need PID
     #if 1
     EBI_calcPI(&pidParm);
     #else
+    uint16_t pwm = 0;
     if ((temperature > 42.0)){
         //关闭加热
         pwm = 0;
@@ -181,6 +184,7 @@ void heat_running( void )
 
     //0 ---- 500
     /* configure TIMER channel output pulse value */
+    //printf("qout=%f\r\n", pidParm.qOut);
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
 }
 

@@ -49,7 +49,8 @@ uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
 uint8_t state_enzyme_ok = 0, state_water_ok = 0;
 uint8_t state_qubei_timeout = 0, state_position_error_timeout = 0, \
     state_temperature_error_timeout = 0, state_jiazhu_error_timeout = 0;
-uint8_t temperature_set, enzyme_set;
+uint8_t temperature_set;
+uint8_t enzyme_rate;   //稀释比例，如： 1%=1，15%=15（整型数0--100）
 uint8_t start_work = 0;     //机器开启运行指令（触摸屏控件启动），初始化为0
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 uint32_t position_error_count_times = 0, temperature_error_count_times = 0, jiazhu_error_count_times = 0;
@@ -79,7 +80,7 @@ void work_loop( void )
             if (!state_youbei && read_qibei_position_switch()) {
 
                 //弃杯成功，启动前进至落杯位置
-                step_motor_move_forward();
+                step_motor_move_forward(STEP_MOTOR_STEPS);
                 loop_state = LOOP_LUOBEI;
                 position_error_timer_start(5);
             } else if (read_qibei_position_switch()) {  //显示返回到位，重置超时预警定时器
@@ -105,7 +106,7 @@ void work_loop( void )
                 luobei_motor_stop();
                 
                 delay_1ms(200);
-                step_motor_move_forward();
+                step_motor_move_forward(STEP_MOTOR_STEPS);
                 loop_state = LOOP_ZHUYE;
                 position_error_timer_start(5);
             }  else if (!self_diagnose && !state_youbei) {         //二次尝试取杯操作
@@ -144,7 +145,7 @@ void work_loop( void )
             break;
 
         case LOOP_CHUBEI://出杯过程
-            step_motor_move_forward();      //驱动到取杯位置
+            step_motor_move_forward(STEP_MOTOR_STEPS);      //驱动到取杯位置
             loop_state = LOOP_CHUBEI_DETECT;
             position_error_timer_start(5);
             if (!self_diagnose) {
@@ -157,7 +158,7 @@ void work_loop( void )
                 position_error_timer_clear();
                 if (self_diagnose) {
                     //自检流程回退到落杯位置
-                    step_motor_move_reverse();
+                    step_motor_move_reverse(STEP_MOTOR_STEPS);
                     position_error_timer_start(5);
                     loop_state = LOOP_LUOBEI;
                     self_diagnose = 0;          //自己流程结束
@@ -170,7 +171,7 @@ void work_loop( void )
 
         case LOOP_QIBEI: //弃杯过程
             if (!read_qibei_position_switch()) {//不在弃杯位置，需要返回初始位置
-                step_motor_move_reverse();
+                step_motor_move_reverse(STEP_MOTOR_STEPS);
                 loop_state = LOOP_IDLE;
                 position_error_timer_start(10);
             } else {    //在弃杯位置，可以正常启动工作

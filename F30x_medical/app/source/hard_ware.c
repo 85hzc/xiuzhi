@@ -198,7 +198,6 @@ static void adc_config(void)
 
     /* ADC calibration and reset calibration */
     adc_calibration_enable(ADC0);
-    //torque_value_calibration();
 
     /* configure ADC inserted channel trigger */
     adc_external_trigger_source_config(ADC0, ADC_INSERTED_CHANNEL, ADC0_1_2_EXTTRIG_INSERTED_NONE);

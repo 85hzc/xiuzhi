@@ -7,7 +7,8 @@
 #include "global.h"
 
 static uint16_t delay_joggle = 0;
-uint16_t cup_count, water_set, water_count;
+uint16_t cup_count, cup_flag; //统计数量 （杯）
+uint16_t water_set;         //注水纯水容量 （ml）
 
 /*!
     \brief      initialize the TOR port
@@ -150,7 +151,7 @@ void joggle_delay(uint16_t num)
 
 
 /*!
-    \brief      count at one effective edge
+    \brief      落杯数量统计
     \param[in]  num
     \param[out] none
     \retval     none
@@ -158,6 +159,7 @@ void joggle_delay(uint16_t num)
 void trige_count(void)
 {
     cup_count++;
+    cup_flag = 1;
 }
 
 

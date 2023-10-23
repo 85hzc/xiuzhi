@@ -52,7 +52,8 @@ int main(void)
 
     /* peripheral initialization */
     hardware_config();
-    rtc_init();
+
+    //rtc_init();
     /* clear reset flags */
     rcu_all_reset_flag_clear();
 
@@ -128,7 +129,9 @@ int main(void)
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;
+            #ifndef DEBUG
             ebike_read_temperature();
+            #endif
             ebike_check_warning();
             display_process();
             //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
@@ -143,6 +146,12 @@ int main(void)
 
             /* lcd status update */
             lcd_status_display();
+
+            if (cup_flag) {
+                cup_flag = 0;
+                flash_value_flash();
+            }
+            printf("[AD]temperature:%.1f\r\n", temperature);
         }
 
         if (bTimeFlag_3s)

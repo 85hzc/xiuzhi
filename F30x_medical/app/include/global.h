@@ -61,21 +61,17 @@ OF SUCH DAMAGE.
 #define SYSTEM_FREQUENCE                    (120000000U)                        /* system frequence */
 #define PWM_FREQUENCE                       (16000U)
 #define PWM_COUNT                           (SYSTEM_FREQUENCE/PWM_FREQUENCE/2)  /* PWM frequence */
-#define TS_NS                               (1000000000/PWM_FREQUENCE)          /* sampling time in nanoseconds */
-#define TS_S                                (1.0f/PWM_FREQUENCE)                /* sampling time in seconds */
 
 
 /* motor parameter check */
-//#define TEMPERATURE_MIN                     (-5)                                /* the minimum value of mosfet temperature in centigrade */
-//#define TEMPERATURE_MAX                     (80U)                               /* the maximum value of mosfet temperature in centigrade */
+#define TEMPERATURE_PWM_MIN                 (0)                                /* the minimum value of mosfet temperature in centigrade */
+#define TEMPERATURE_PWM_MAX                 (400U)                               /* the maximum value of mosfet temperature in centigrade */
+
+#define STEP_MOTOR_STEPS                    (0xFF)
 
 
 /* ADC sample time */
 #define ADC_SAMPLE_TIME                     (ADC_SAMPLETIME_41POINT5)            /* ADC sampling time configuration */
-/* conditioning circuit parameter */
-#define CURRENT_AMP_GAIN                    (1.0f)                              /* the gain of amplifier in the current conditioning circuit */
-#define CURRENT_AMP_SHIFT                   (1.65f)                             /* the bias voltage in the current sampling circuit */
-#define CURRENT_SHUNT_RES                   (0.1f)                              /* the sampling resistance in the current sampling circuit */
 
 
 /* pid parameter configuration */
@@ -223,6 +219,7 @@ extern flash_page_type page_type;
 
 /* debug varieble */
 extern usart_debug debug_data;
+extern PID_Parm pidParm;
 
 extern uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose;
 extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
@@ -232,8 +229,8 @@ extern uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
 extern uint8_t state_enzyme_ok, state_water_ok;
 extern uint8_t state_qubei_timeout, state_position_error_timeout, \
     state_temperature_error_timeout, state_jiazhu_error_timeout;
-extern uint8_t temperature_set, enzyme_set;
-extern uint16_t cup_count, water_set;
+extern uint8_t temperature_set, enzyme_rate;
+extern uint16_t cup_count, cup_flag, water_set;
 extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
 extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
 extern float temperature;

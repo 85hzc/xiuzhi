@@ -91,38 +91,52 @@ void debug_msg_process(uint8_t *msg)
     cmd = msg[0];
     switch(cmd)
     {
-        case 1://start
-            printf("start\r\n");
+        case 1://set real time temperature for pid working
+            temperature = msg[1];
+            printf("temperature = %f\r\n", temperature);
+            pidParm.qInMeas = temperature;  //for test
             break;
 
-        case 2://brake
-            printf("brake\r\n");
+        case 2://加热温度设定值
+            temperature_set = msg[1];
+            printf("temperature_set = %d\r\n", temperature_set);
+            flash_value_flash();
             break;
 
-        case 3://mode switch
-            printf("mode\r\n");
+        case 3://落杯电机启停
+            if (msg[1])
+                luobei_motor_start();
+            else
+                luobei_motor_stop();
+
+            printf("luo bei.\r\n");
             break;
 
-        case 4:// cw/"ccw" translates to "counterclockwise" in English.
-            printf("direction\r\n");
+        case 4://注水量设置
+            water_set = msg[1] | msg[2];
+            printf("water_set = %d\r\n", water_set);
+            flash_value_flash();
             break;
 
-        case 5://+ speed
-            printf("adc_reference\r\n");
+        case 5://稀释比例
+            enzyme_rate = msg[1];
+            printf("enzyme_rate = %d\r\n", enzyme_rate);
+            flash_value_flash();
             break;
 
-        case 6://- speed
-            printf("adc_reference\r\n");
+        case 6://
+            if (msg[1]) {
+                printf("step motor f\r\n");
+                step_motor_move_forward(STEP_MOTOR_STEPS);
+            } else {
+                printf("step motor r\r\n");
+                step_motor_move_reverse(STEP_MOTOR_STEPS);
+            }
             break;
 
         case 7:
-            printf("info\r\n");
+            printf("time:%2d:%2d:%2d\r\n",msg[1],msg[2],msg[3]);
             time_adjust(msg[1],msg[2],msg[3]);
-            break;
-
-        case 8:
-            printf("calibration torque offset\r\n");
-            torque_value_calibration();
             break;
 
         default:

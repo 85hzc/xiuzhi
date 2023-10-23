@@ -40,7 +40,8 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 
-#define USART1_BUFFER_SIZE (4)
+#define DEBUG
+#define USART1_BUFFER_SIZE (6)
 
 /* the structure of debug */
 typedef struct
