@@ -52,6 +52,7 @@ uint8_t state_qubei_timeout = 0, state_position_error_timeout = 0, \
 uint8_t temperature_set;
 uint8_t enzyme_rate;   //稀释比例，如： 1%=1，15%=15（整型数0--100）
 uint8_t start_work = 0;     //机器开启运行指令（触摸屏控件启动），初始化为0
+uint8_t luobei_retry = 0, luobei_delay = 0;   //二次尝试取杯操作
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 uint32_t position_error_count_times = 0, temperature_error_count_times = 0, jiazhu_error_count_times = 0;
 
@@ -95,6 +96,8 @@ void work_loop( void )
                     luobei_motor_start();
                     loop_state = LOOP_LUOBEI_DETECT;
                     start_work = 0;
+                    luobei_delay = 0;
+                    luobei_retry = 0;
                 } else if (self_diagnose){          //自检流程
                     loop_state = LOOP_LUOBEI_DETECT;
                 }
@@ -105,12 +108,26 @@ void work_loop( void )
             if (state_youbei) {
                 luobei_motor_stop();
                 
-                delay_1ms(200);
+                delay_1ms(500);
                 step_motor_move_forward(STEP_MOTOR_STEPS);
                 loop_state = LOOP_ZHUYE;
+                luobei_delay = 0;
+                luobei_retry = 0;
                 position_error_timer_start(5);
             }  else if (!self_diagnose && !state_youbei) {         //二次尝试取杯操作
 
+                if (luobei_retry) { // 1：执行一次落杯操作，尝试二次落杯过程
+                    if (luobei_retry>=2) {  //二次落杯失败，提示无杯错误
+                        luobei_motor_stop();
+                        luobei_delay++;
+                        //延时判断落杯状态，因为落杯动作需要时间（落杯状态key判断需要SWITCH_LUOBEI_TIME=2（200ms））
+                        if (luobei_delay>=SWITCH_LUOBEI_TIME+8) { //延时1000ms
+                            error_bits_flag |= 1<<WUBEI_ERROR;
+                            luobei_delay = 0;
+                            luobei_retry = 0;
+                        }
+                    }
+                }
             } else if (self_diagnose){          //自检流程
                 loop_state = LOOP_ZHUYE;
                 position_error_timer_start(5);

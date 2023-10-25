@@ -232,12 +232,12 @@ void rtc_init( void )
         or RTC clock source is not configured (when the first time the program 
         is executed or data in RCU_BDCTL is lost due to Vbat feeding) */
         printf("\r\nThis is a RTC demo!\r\n");
-        printf("\r\n\n RTC not yet configured....");
+        printf("RTC not yet configured....\r\n");
 
         /* RTC configuration */
         rtc_configuration();
 
-        printf("\r\n RTC configured....");
+        printf("RTC configured....");
         /* adjust time by values entred by the user on the hyperterminal */
         time_adjust(0x11, 0x11, 0x13);
 

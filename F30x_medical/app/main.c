@@ -153,11 +153,6 @@ int main(void)
             }
             printf("[AD]temperature:%.1f\r\n", temperature);
         }
-
-        if (bTimeFlag_3s)
-        {
-            bTimeFlag_3s = 0;
-        }
     }
 }
 

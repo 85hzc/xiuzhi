@@ -218,6 +218,10 @@ void ebike_check_warning()
         temperature_error_timer_clear();
         error_bits_flag &= ~(1<<WENDU_ERROR);
     }
+
+    if (state_youbei) {
+        error_bits_flag &= ~(1<<WUBEI_ERROR);
+    }
     
 }
 

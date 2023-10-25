@@ -231,6 +231,7 @@ extern uint8_t state_qubei_timeout, state_position_error_timeout, \
     state_temperature_error_timeout, state_jiazhu_error_timeout;
 extern uint8_t temperature_set, enzyme_rate;
 extern uint16_t cup_count, cup_flag, water_set;
+extern uint8_t luobei_retry, luobei_delay;
 extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
 extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
 extern float temperature;

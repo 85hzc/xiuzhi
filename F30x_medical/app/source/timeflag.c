@@ -21,7 +21,6 @@ static uint16_t g_rCounter_50ms  = 0;
 static uint16_t g_rCounter_500ms = 0;
 static uint16_t g_rCounter_100ms = 0;
 static uint16_t g_rCounter_1s    = 0;
-static uint16_t g_rCounter_3s    = 0;
 static uint16_t g_rCounter_enzyme = 0;  //酶液注入量计时
 static uint32_t g_rCounter_qubei = 0;  //取杯操作超时计时  15分钟=15*60*1000
 static uint32_t g_rCounter_position_error = 0;  //取杯操作超时计时  10秒=10*1000
@@ -35,7 +34,6 @@ uint8_t bTimeFlag_500ms;
 uint8_t bTimeFlag_50ms;
 uint8_t bTimeFlag_20ms;
 uint8_t bTimeFlag_5ms;
-uint8_t bTimeFlag_3s;
 uint8_t bTimeFlag_1s;
 
 void periodTask_1ms(void)
@@ -53,13 +51,6 @@ void periodTask_1ms(void)
     {
         g_rCounter_1s = 0;
         bTimeFlag_1s = 1;
-    }
-
-    g_rCounter_3s++;
-    if (g_rCounter_3s >= drCnt3s)
-    {
-        g_rCounter_3s = 0;
-        bTimeFlag_3s = 1;
     }
 
     g_rCounter_500ms++;

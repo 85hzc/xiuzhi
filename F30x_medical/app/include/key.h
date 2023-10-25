@@ -40,7 +40,7 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 
-#define SWITCH_LUOBEI_TIME 10
+#define SWITCH_LUOBEI_TIME 2
 #define SWITCH_DETECT_TIME 3
 
 /* the key enumeration */

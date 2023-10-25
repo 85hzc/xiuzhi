@@ -178,6 +178,7 @@ void EXTI5_9_IRQHandler(void)
         if(SET == gpio_input_bit_get(LUOBEI_IRQ_GPIO_PORT, LUOBEI_IRQ_GPIO_PIN)){
             //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             trige_count();
+            luobei_retry += 1;   //完成一次落杯操作，作为二次尝试落杯判断依据（如果空杯情况）
             //luobei_motor_stop();
         }
     }
