@@ -125,12 +125,14 @@ void debug_msg_process(uint8_t *msg)
             break;
 
         case 6://
-            if (msg[1]) {
+            if (msg[1]==1) {
                 printf("step motor f\r\n");
                 step_motor_move_forward(STEP_MOTOR_STEPS);
-            } else {
+            } else if (msg[1]==2) {
                 printf("step motor r\r\n");
                 step_motor_move_reverse(STEP_MOTOR_STEPS);
+            } else {
+                step_motor_move_stop();
             }
             break;
 
@@ -138,6 +140,17 @@ void debug_msg_process(uint8_t *msg)
             printf("time:%2d:%2d:%2d\r\n",msg[1],msg[2],msg[3]);
             time_adjust(msg[1],msg[2],msg[3]);
             break;
+
+        case 8://纯水泵调试
+            if (msg[1]) {
+                printf("water motor start\r\n");
+                water_motor_start();
+            } else {
+                printf("water motor stop\r\n");
+                water_motor_stop();
+            }
+            break;
+            
 
         default:
             break;

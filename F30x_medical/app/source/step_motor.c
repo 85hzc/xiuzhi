@@ -64,11 +64,11 @@ void step_motor_init(void)
     rcu_periph_clock_enable(MOTOR_STEP_h_GPIO_CLK);
     rcu_periph_clock_enable(MOTOR_STEP_l_GPIO_CLK);
 
-    /* bldc */
-    gpio_init(MOTOR_STEP_l_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, MOTOR_STEP_PIN_A_l);
-    gpio_init(MOTOR_STEP_h_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, MOTOR_STEP_PIN_A_h);
-    gpio_init(MOTOR_STEP_l_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, MOTOR_STEP_PIN_B_l);
-    gpio_init(MOTOR_STEP_h_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_2MHZ, MOTOR_STEP_PIN_B_h);
+    /* step motor IOs */
+    gpio_init(MOTOR_STEP_l_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_10MHZ, MOTOR_STEP_PIN_A_l);
+    gpio_init(MOTOR_STEP_h_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_10MHZ, MOTOR_STEP_PIN_A_h);
+    gpio_init(MOTOR_STEP_l_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_10MHZ, MOTOR_STEP_PIN_B_l);
+    gpio_init(MOTOR_STEP_h_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_10MHZ, MOTOR_STEP_PIN_B_h);
     gpio_bit_reset(MOTOR_STEP_l_GPIO_PORT, MOTOR_STEP_PIN_A_l);
     gpio_bit_reset(MOTOR_STEP_h_GPIO_PORT, MOTOR_STEP_PIN_A_h);
     gpio_bit_reset(MOTOR_STEP_l_GPIO_PORT, MOTOR_STEP_PIN_B_l);
@@ -92,9 +92,9 @@ void step_motor_move_forward(uint16_t steps)
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + 1) % MOVE_CYCLE;
-        delay_1ms(5);
+        delay_1ms(1);
     }
-    //drv_motor_move_execute(MOVE_STEP_S);
+    drv_motor_move_execute(MOVE_STEP_S);
 }
 
 void step_motor_move_reverse(uint16_t steps)
@@ -112,9 +112,14 @@ void step_motor_move_reverse(uint16_t steps)
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
-        delay_1ms(5);
+        delay_1ms(1);
     }
-    //drv_motor_move_execute(MOVE_STEP_S);
+    drv_motor_move_execute(MOVE_STEP_S);
+}
+
+void step_motor_move_stop()
+{  
+    drv_motor_move_execute(MOVE_STEP_S);
 }
 
 static void drv_motor_move_execute(uint8_t step)

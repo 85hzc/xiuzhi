@@ -128,6 +128,12 @@ void check_enzyme_timer( void )
         g_rCounter_enzyme = 0;
     }
 }
+void qubei_timer_init( void )
+{
+    state_qubei_timeout = 0;
+    state_qubei_count_running = 0;
+    g_rCounter_qubei = 0;
+}
 
 void check_qubei_timer( void )
 {

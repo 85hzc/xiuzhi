@@ -67,7 +67,7 @@ OF SUCH DAMAGE.
 #define TEMPERATURE_PWM_MIN                 (0)                                /* the minimum value of mosfet temperature in centigrade */
 #define TEMPERATURE_PWM_MAX                 (400U)                               /* the maximum value of mosfet temperature in centigrade */
 
-#define STEP_MOTOR_STEPS                    (0xFF)
+#define STEP_MOTOR_STEPS                    (0x5FF)
 
 
 /* ADC sample time */

@@ -65,6 +65,7 @@ int main(void)
     position2_exit_init();
     position3_exit_init();
 
+    step_motor_init();
     luobei_motor_init();
     water_motor_init();
     enzyme_motor_init();
@@ -151,7 +152,7 @@ int main(void)
                 cup_flag = 0;
                 flash_value_flash();
             }
-            printf("[AD]temperature:%.1f\r\n", temperature);
+            //printf("[AD]temperature:%.1f\r\n", temperature);
         }
     }
 }
