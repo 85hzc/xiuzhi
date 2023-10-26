@@ -40,13 +40,13 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 
-#define COM_BUFFER_SIZE              (4U)
+#define COM_BUFFER_SIZE              (128)
 
 /* initialize the hardware of debug function */
 void usart2_config(void);
 
 
 extern uint8_t rx_buffer[],rx_buffer_app[],tx_buffer[];
-extern uint16_t tx_counter, rx_counter, rx_ok;
+extern uint16_t tx_counter, rx_counter, rx_counter_app, rx_ok;
 
 #endif /* USART2_H */

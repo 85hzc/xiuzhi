@@ -204,7 +204,7 @@ typedef enum {
     HUISHOU_,
 
     ERROR_max
-};
+}error_type_e;
 
 
 /* global variable declaration */

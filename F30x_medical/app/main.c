@@ -80,6 +80,8 @@ int main(void)
     /* tool function initialization */
     utils_sample_init();
     config_init();
+    // init knob screen display
+    lcd_init_display();
 
     while(1){
 
@@ -93,7 +95,10 @@ int main(void)
                 //printf("rx from controller:%x %x %x %x\r\n", \
                         rx_buffer_app[0], rx_buffer_app[1],\
                         rx_buffer_app[2], rx_buffer_app[3]);
-                controller_msg_process(rx_buffer_app);
+                controller_msg_process(rx_buffer_app, rx_counter_app);
+                // Clear the rx_buffer_app after process
+                memset(rx_buffer_app, 0, COM_BUFFER_SIZE);
+                rx_counter_app = 0;
             }
 
             if (debug_rx_ok)
@@ -135,7 +140,7 @@ int main(void)
             ebike_read_temperature();
             #endif
             ebike_check_warning();
-            display_process();
+            // display_process();
             //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
         }
 
@@ -145,6 +150,7 @@ int main(void)
 
             /* display time in loop */
             time_show();
+            lcd_time_display(rtc_counter_get());
 
             /* lcd status update */
             lcd_status_display();

@@ -37,7 +37,6 @@ OF SUCH DAMAGE.
 
 #include "global.h"
 
-void controller_msg_process(uint8_t *msg);
 void debug_msg_process(uint8_t *msg);
 
 /* reference variable */
@@ -62,6 +61,12 @@ Loop_State_e loop_state = LOOP_QIBEI;    //机器运行状态机
 
 /* debug variables */
 usart_debug debug_data;
+
+// extern uint8_t read_qibei_position_switch();
+// extern uint8_t read_luobei_position_switch();
+// extern uint8_t read_zhushui_position_switch();
+// extern uint8_t read_chubei_position_switch();
+// extern void position_error_timer_clear( void );
 
 void clear_position_flags( void )
 {

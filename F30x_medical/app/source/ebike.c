@@ -10,6 +10,7 @@ uint16_t error_bits_flag = 0;
 float temperature = 0.0;
 PID_Parm pidParm;
 
+extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
 void beep_on( void );
 void beep_off( void );
 

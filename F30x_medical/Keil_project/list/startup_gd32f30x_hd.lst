@@ -572,14 +572,13 @@ ARM Macro Assembler    Page 9
   366 0000001C                 END
               00000000 
               00000000 
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
-interwork --depend=.\output\startup_gd32f30x_hd.d -o.\output\startup_gd32f30x_h
-d.o -I.\RTE\_POWER_machine -IC:\Users\lenovo\AppData\Local\Arm\Packs\GigaDevice
-\GD32F30x_DFP\2.2.1\Device\Include -IC:\Keil_v5\ARM\CMSIS\Include --predefine="
-__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 530" --predefine="_RTE_ 
-SETA 1" --predefine="GD32F30X_HD SETA 1" --predefine="_RTE_ SETA 1" --list=.\li
-st\startup_gd32f30x_hd.lst ..\Firmware\CMSIS\GD\GD32F30x\Source\ARM\startup_gd3
-2f30x_hd.s
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\output\startup_gd32f30x_hd.d -o.\output\startup_gd32f30x_hd.o
+ -I.\RTE\_POWER_machine -IE:\Keil_v5\ARM\PACK\GigaDevice\GD32F30x_DFP\2.2.3\Dev
+ice\Include -IE:\Keil_v5\ARM\CMSIS\Include --predefine="__EVAL SETA 1" --predef
+ine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 523" --predefine="_
+RTE_ SETA 1" --predefine="GD32F30X_HD SETA 1" --list=.\list\startup_gd32f30x_hd
+.lst ..\Firmware\CMSIS\GD\GD32F30x\Source\ARM\startup_gd32f30x_hd.s
 
 
 
@@ -1715,4 +1714,4 @@ f30x_hd.s
 f30x_hd.s
 Comment: __main used once
 2 symbols
-424 symbols in table
+425 symbols in table

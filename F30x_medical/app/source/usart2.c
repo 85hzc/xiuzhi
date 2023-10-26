@@ -10,9 +10,10 @@
 static void usart2_config(void);
 
 /* public variables */
-uint8_t rx_buffer[COM_BUFFER_SIZE],tx_buffer[COM_BUFFER_SIZE];
+// uint8_t rx_buffer[COM_BUFFER_SIZE],tx_buffer[COM_BUFFER_SIZE];
+uint8_t rx_buffer[COM_BUFFER_SIZE];
 uint8_t rx_buffer_app[COM_BUFFER_SIZE];
-uint16_t tx_counter = 0, rx_counter = 0, rx_ok = 0;
+uint16_t tx_counter = 0, rx_counter = 0, rx_counter_app = 0, rx_ok = 0;
 
 /*!
     \brief      data transmission with USART
@@ -71,25 +72,4 @@ void usart2_init(void)
     usart_interrupt_enable(USART2, USART_INT_RBNE);
     /* enable USART2 transmit interrupt */
     //usart_interrupt_enable(USART2, USART_INT_TBE);
-}
-
-void controller_msg_process(uint8_t *msg)
-{
-    /*
-    控制：（空闲时间≥20ms）+0x55 +PAR1+PAR2 +CheckSum
-        说明：
-        PAR1：错误码
-            无错误：0x00。
-            MOSFET故障：0x10。
-        PAR2：电流值百分比
-            0% – 100%
-    */
-    if (msg[0]==0x55) {
-        
-        printf("error code:%x, current:%d\r\n", msg[1], msg[2]);
-    } else if (msg[0]==0xAA) {
-        
-        printf("vbus:%d, I_max:%d\r\n", msg[1], msg[2]);
-    }
-
 }

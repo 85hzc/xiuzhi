@@ -86,7 +86,7 @@ void fmc_erase_pages(flash_page_type page_type)
 */
 void fmc_data_program(flash_page_type page_type)
 {
-    uint8_t i;
+    // uint8_t i;
     /* unlock the flash program/erase controller */
     fmc_unlock();
     
