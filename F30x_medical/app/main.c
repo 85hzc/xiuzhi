@@ -52,8 +52,9 @@ int main(void)
 
     /* peripheral initialization */
     hardware_config();
+    beep_off();
 
-    //rtc_init();
+    rtc_init();
     /* clear reset flags */
     rcu_all_reset_flag_clear();
 

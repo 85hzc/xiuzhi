@@ -127,7 +127,7 @@ static void nvic_config(void)
     /* USART interrupt configuration */
     nvic_irq_enable(USART1_IRQn, 0, 0);
     nvic_irq_enable(USART2_IRQn, 0, 0);
-    nvic_irq_enable(RTC_IRQn,1,0);
+    nvic_irq_enable(RTC_IRQn, 1, 0);
 }
 
 /*!
@@ -143,8 +143,8 @@ void timer7_config(void)
     timer_parameter_struct       timer_initpara;
     timer_oc_parameter_struct    timer_ocintpara;
     timer_deinit(TIMER7);
-
-    timer_initpara.prescaler         = 119;
+    //120 000 000
+    timer_initpara.prescaler         = 239;//1KHz
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 500;

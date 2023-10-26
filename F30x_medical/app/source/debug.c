@@ -137,8 +137,14 @@ void debug_msg_process(uint8_t *msg)
             break;
 
         case 7:
-            printf("time:%2d:%2d:%2d\r\n",msg[1],msg[2],msg[3]);
+            /* RTC configuration */
+            printf("RTC reconfigured....\r\n");
+            /* RTC configuration */
+            rtc_configuration();
+            /* adjust time by values entred by the user on the hyperterminal */
             time_adjust(msg[1],msg[2],msg[3]);
+            printf("time:%2d:%2d:%2d\r\n",msg[1],msg[2],msg[3]);
+            bkp_write_data(BKP_DATA_0, 0xA5A5);
             break;
 
         case 8://纯水泵调试
@@ -150,7 +156,10 @@ void debug_msg_process(uint8_t *msg)
                 water_motor_stop();
             }
             break;
-            
+        
+        case 9://重启reset
+            NVIC_SystemReset();
+            break;
 
         default:
             break;

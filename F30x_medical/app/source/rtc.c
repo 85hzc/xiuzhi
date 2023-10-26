@@ -75,12 +75,12 @@ void rtc_configuration(void)
     bkp_deinit();
 
     /* enable LXTAL */
-    rcu_osci_on(RCU_LXTAL);
+    rcu_osci_on(RCU_HXTAL);
     /* wait till LXTAL is ready */
-    rcu_osci_stab_wait(RCU_LXTAL);
+    rcu_osci_stab_wait(RCU_HXTAL);
     
     /* select RCU_LXTAL as RTC clock source */
-    rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
+    rcu_rtc_clock_config(RCU_RTCSRC_HXTAL_DIV_128);
 
     /* enable RTC Clock */
     rcu_periph_clock_enable(RCU_RTC);
@@ -98,7 +98,8 @@ void rtc_configuration(void)
     rtc_lwoff_wait();
 
     /* set RTC prescaler: set RTC period to 1s */
-    rtc_prescaler_set(32767);
+    //rtc_prescaler_set(32767);
+    rtc_prescaler_set(62500);
 
     /* wait until last write operation on RTC registers has finished */
     rtc_lwoff_wait();
@@ -180,7 +181,6 @@ void time_display(uint32_t timevar)
 */
 void time_show(void)
 {
-    printf("\n\r");
 
     /* if 1s has paased */
     if (timedisplay == 1){
@@ -190,6 +190,7 @@ void time_show(void)
     }
 }
 
+#if 0
 /*!
     \brief      get numeric values from the hyperterminal
     \param[in]  value: input value from the hyperterminal
@@ -220,7 +221,7 @@ uint8_t usart_scanf(uint32_t value)
     }
     return index;
 }
-
+#endif
 
 void rtc_init( void )
 {
@@ -231,7 +232,7 @@ void rtc_init( void )
         /* backup data register value is not correct or not yet programmed
         or RTC clock source is not configured (when the first time the program 
         is executed or data in RCU_BDCTL is lost due to Vbat feeding) */
-        printf("\r\nThis is a RTC demo!\r\n");
+        printf("\r\nThis is a RTC demo!");
         printf("RTC not yet configured....\r\n");
 
         /* RTC configuration */
@@ -239,12 +240,11 @@ void rtc_init( void )
 
         printf("RTC configured....");
         /* adjust time by values entred by the user on the hyperterminal */
-        time_adjust(0x11, 0x11, 0x13);
-
+        time_adjust(0x0, 0x0, 0x0);
         bkp_write_data(BKP_DATA_0, 0xA5A5);
     }else{
-        /* check if the power on reset flag is set */
         if (rcu_flag_get(RCU_FLAG_PORRST) != RESET){
+            /* check if the power on reset flag is set */
             printf("\r\n\n Power On Reset occurred....");
         }else if (rcu_flag_get(RCU_FLAG_SWRST) != RESET){
             /* check if the pin reset flag is set */
