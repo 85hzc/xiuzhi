@@ -90,28 +90,29 @@ uint8_t lcd_conn_opt(uint8_t conn)
     // }
     // printf("\n");
 
-    size_t i = 0;
-    for (i = 0; i < COMM_MAX_RESEND_TIMES; i++)
+    usart2_data_transfer((uint8_t *)pMsg, msg_len);
+    int32_t time_send = 0;
+    int32_t delay_t = COMM_MAX_DELAY_TIME;
+    while (delay_t > 0)
     {
-        usart2_data_transfer((uint8_t *)pMsg, msg_len);
-        delay_1ms(50);
+        if (time_send >= COMM_SEND_TIME_INTERVAL)
+        {
+            time_send = 0;
+            usart2_data_transfer((uint8_t *)pMsg, msg_len);
+        }
+
+        delay_1ms(COMM_DELAY_TIME_INTERVAL);
         if (sg_lcd_status == COMM_ACK_NORMAL)
         {
-            if (conn == COMM_CONN)
-            {
-                sg_lcd_stage = COMM_CONN_STAGE;
-            }
-            else
-            {
-                sg_lcd_stage = COMM_DIS_CONN_STAGE;
-            }
             break;
         }
+        delay_t -= COMM_DELAY_TIME_INTERVAL;
+        time_send += COMM_DELAY_TIME_INTERVAL;
     }
 
-    // printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
     free(pMsg);
-    if (i >= COMM_MAX_RESEND_TIMES)
+
+    if (delay_t <= 0)
     {
         printf("fun:%s line:%d conn:%d knob screen operation fail", __FUNCTION__, __LINE__, conn);
         return 0;
@@ -155,8 +156,32 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
-    // printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+    int32_t time_send = 0;
+    int32_t delay_t = COMM_MAX_DELAY_TIME;
+    while (delay_t > 0)
+    {
+        if (time_send >= COMM_SEND_TIME_INTERVAL)
+        {
+            time_send = 0;
+            usart2_data_transfer((uint8_t *)pMsg, msg_len);
+        }
+
+        delay_1ms(COMM_DELAY_TIME_INTERVAL);
+        if (sg_lcd_status == COMM_ACK_NORMAL)
+        {
+            break;
+        }
+        delay_t -= COMM_DELAY_TIME_INTERVAL;
+        time_send += COMM_DELAY_TIME_INTERVAL;
+    }
+
     free(pMsg);
+
+    if (delay_t <= 0)
+    {
+        printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+        return 0;
+    }
 
     return 1;
 }
@@ -192,8 +217,32 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
-    // printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+    int32_t time_send = 0;
+    int32_t delay_t = COMM_MAX_DELAY_TIME;
+    while (delay_t > 0)
+    {
+        if (time_send >= COMM_SEND_TIME_INTERVAL)
+        {
+            time_send = 0;
+            usart2_data_transfer((uint8_t *)pMsg, msg_len);
+        }
+
+        delay_1ms(COMM_DELAY_TIME_INTERVAL);
+        if (sg_lcd_status == COMM_ACK_NORMAL)
+        {
+            break;
+        }
+        delay_t -= COMM_DELAY_TIME_INTERVAL;
+        time_send += COMM_DELAY_TIME_INTERVAL;
+    }
+
     free(pMsg);
+
+    if (delay_t <= 0)
+    {
+        printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+        return 0;
+    }
 
     return 1;
 }
@@ -229,8 +278,32 @@ uint8_t lcd_screen_display_ctrl(uint8_t on_off)
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
-    // printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+    int32_t time_send = 0;
+    int32_t delay_t = COMM_MAX_DELAY_TIME;
+    while (delay_t > 0)
+    {
+        if (time_send >= COMM_SEND_TIME_INTERVAL)
+        {
+            time_send = 0;
+            usart2_data_transfer((uint8_t *)pMsg, msg_len);
+        }
+
+        delay_1ms(COMM_DELAY_TIME_INTERVAL);
+        if (sg_lcd_status == COMM_ACK_NORMAL)
+        {
+            break;
+        }
+        delay_t -= COMM_DELAY_TIME_INTERVAL;
+        time_send += COMM_DELAY_TIME_INTERVAL;
+    }
+
     free(pMsg);
+
+    if (delay_t <= 0)
+    {
+        printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+        return 0;
+    }
 
     return 1;
 }
@@ -267,8 +340,32 @@ uint8_t lcd_get_screen_info_cmd()
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
-    // printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+    int32_t time_send = 0;
+    int32_t delay_t = COMM_MAX_DELAY_TIME;
+    while (delay_t > 0)
+    {
+        if (time_send >= COMM_SEND_TIME_INTERVAL)
+        {
+            time_send = 0;
+            usart2_data_transfer((uint8_t *)pMsg, msg_len);
+        }
+
+        delay_1ms(COMM_DELAY_TIME_INTERVAL);
+        if (sg_lcd_status == COMM_ACK_NORMAL)
+        {
+            break;
+        }
+        delay_t -= COMM_DELAY_TIME_INTERVAL;
+        time_send += COMM_DELAY_TIME_INTERVAL;
+    }
+
     free(pMsg);
+
+    if (delay_t <= 0)
+    {
+        printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+        return 0;
+    }
 
     return 1;
 }
@@ -324,6 +421,8 @@ void controller_msg_process(uint8_t *msg, uint16_t len)
             break;
         case COMM_FILL_BG_AND_ICON_COMPLETE_CMD:
             printf("fill the graph ok\n");
+            // refresh screen content when recv complete cmd
+            lcd_screen_display_ctrl(COMM_CTRL_DISPLAY_ON);
             break;
 
         default:
@@ -814,15 +913,7 @@ void lcd_time_display(uint32_t timestamp)
         _u16_2_byte2_big_endian(sn, imgs[4].figure_no);
     }
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 5);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 5);
 }
 
 void lcd_total_volume_display(uint16_t volume)
@@ -863,15 +954,7 @@ void lcd_total_volume_display(uint16_t volume)
     _u16_2_byte2_big_endian(81, imgs[4].x_coordinate);
     _u16_2_byte2_big_endian(148, imgs[4].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 5);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 5);
 }
 
 void lcd_dilute_ratio_display(uint16_t ratio)
@@ -900,15 +983,7 @@ void lcd_dilute_ratio_display(uint16_t ratio)
     _u16_2_byte2_big_endian(275, imgs[2].x_coordinate);
     _u16_2_byte2_big_endian(148, imgs[2].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 5);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 3);
 }
 
 void lcd_running_status_display(uint16_t status_sn)
@@ -951,15 +1026,7 @@ void lcd_running_status_display(uint16_t status_sn)
     _u16_2_byte2_big_endian(x, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(y, imgs[0].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_temperature_display(uint16_t temp)
@@ -1006,15 +1073,7 @@ void lcd_temperature_display(uint16_t temp)
         _u16_2_byte2_big_endian(204, imgs[3].y_coordinate);
     }
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, figure_num);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, figure_num);
 }
 
 void lcd_cup_num_display(uint16_t cups)
@@ -1055,15 +1114,7 @@ void lcd_cup_num_display(uint16_t cups)
     _u16_2_byte2_big_endian(149, imgs[4].x_coordinate);
     _u16_2_byte2_big_endian(271, imgs[4].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(&imgs[1], 4);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(&imgs[1], 5);
 }
 
 void lcd_setting_display(uint16_t set_sn)
@@ -1114,15 +1165,7 @@ void lcd_setting_display(uint16_t set_sn)
     _u16_2_byte2_big_endian(x, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(y, imgs[0].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_main_bg_display()
@@ -1139,15 +1182,7 @@ void lcd_main_bg_display()
     _u16_2_byte2_big_endian(0, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(0, imgs[0].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_main_circle_bg_display()
@@ -1165,15 +1200,7 @@ void lcd_main_circle_bg_display()
     _u16_2_byte2_big_endian(8, imgs[0].y_coordinate);
 
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_main_menu_bg_display()
@@ -1190,15 +1217,7 @@ void lcd_main_menu_bg_display()
     _u16_2_byte2_big_endian(25, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(197, imgs[0].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_main_middle_bg_display()
@@ -1243,15 +1262,7 @@ void lcd_main_middle_bg_display()
     _u16_2_byte2_big_endian(220, imgs[7].x_coordinate);
     _u16_2_byte2_big_endian(201, imgs[7].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 8);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 8);
 }
 
 void lcd_main_cup_bg_display()
@@ -1271,15 +1282,7 @@ void lcd_main_cup_bg_display()
     // _u16_2_byte2_big_endian(209, imgs[1].x_coordinate);
     // _u16_2_byte2_big_endian(271, imgs[1].y_coordinate);
 
-    for (size_t i = 0; i < COMM_MAX_RESEND_TIMES; i++)
-    {
-        lcd_fill_bg_and_icon_cmd(imgs, 1);
-        delay_1ms(50);
-        if (sg_lcd_status == COMM_ACK_NORMAL)
-        {
-            break;
-        }
-    }
+    lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_init_display()
