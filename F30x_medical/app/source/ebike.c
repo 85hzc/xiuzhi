@@ -18,26 +18,25 @@ void config_init( void )
 {
     fmc_data_read();
     extern uint8_t fmc_data[3][8];
-    water_set = fmc_data[0][3];
-    enzyme_rate = fmc_data[0][2];
-    temperature_set = fmc_data[0][1];
-    cup_count = fmc_data[0][0];
+    water_set = fmc_data[0][4]<<8 | fmc_data[0][5];
+    enzyme_rate = fmc_data[0][3];
+    temperature_set = fmc_data[0][2];
+    cup_count = fmc_data[0][0]<<8 | fmc_data[0][1];
     
     water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
     enzyme_count_times = ( (water_set * enzyme_rate) / (float)(100.0 - enzyme_rate) ) * 1000; //流速：1 ml/s
 
-    printf("water: %dml, enzyme rate: %d\%, temp_set: %d, cup_count: %d\r\n", water_set, enzyme_rate
+    printf("water: %d ml, enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, enzyme_rate
             , temperature_set, cup_count);
 
     memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
     pidParm.qInRef = temperature_set;
-    pidParm.qKp = 0.5;
+    pidParm.qKp = 1;
     pidParm.qKi = 0.1;
     pidParm.qKc = 0.1;
     pidParm.qOutMax = TEMPERATURE_PWM_MAX;   //PWM占空比0-500范围，限制功率80%，设置最大400
     pidParm.qOutMin = TEMPERATURE_PWM_MIN;
-    //g_torque_offset = (float)(fmc_data[1][0] + fmc_data[1][1]) / 100.0f;
 
     beep_off();
 }
@@ -121,24 +120,24 @@ void display_process(void)
 }
 
 
-// 50ms period
+// 500ms period
 void ebike_read_temperature(void)
 {
     float Rt=0.0;
     //Rp上拉电阻值
-    float Rp=10000;
+    float Rp=10;//000;
     //T2为25摄氏度，折算为开尔文温度
     float T2=273.15+25;
-    float Bx=3950;
+    float Bx=3950.0;
     float Ka=273.15;
-    float vol=0;
-/*
-    uint16_t temp;
-    temp = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
-    temperature = temp * 0.003223;
-*/
-    vol=(float)(adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0) * 3.3 / 4096.0f);
-    Rt=(3.3-vol)*10000/vol;
+    float vol=0.0;
+    uint32_t adValue = 0;
+
+    adValue = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
+    vol = adValue * 3.3 / 4096.0f;
+    //Rt=(3.3-vol)*10000/vol;
+    //Rt=(3.3-vol)*10/vol;
+    Rt = vol * 10.0 / (3.3-vol);
     temperature=1/(1/T2+log(Rt/Rp)/Bx)-Ka+0.5;
     pidParm.qInMeas = temperature;
 
@@ -163,29 +162,27 @@ void beep_off( void )
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_1, 0);
 }
 
+void set_error(uint8_t err_bit)
+{
+    error_bits_flag |= 1<<err_bit;
+}
+
+void clear_error(uint8_t err_bit)
+{
+    error_bits_flag &= ~(1<<err_bit);
+}
 
 /*
 ** 调节加热导通电流；
 */
 void heat_running( void )
 {
-    //need PID
-    #if 1
+
     EBI_calcPI(&pidParm);
-    #else
-    uint16_t pwm = 0;
-    if ((temperature > 42.0)){
-        //关闭加热
-        pwm = 0;
-    } else if ((temperature < 42.0)){
-        //打开发电环路
-        pwm = 500;
-    }
-    #endif
 
     //0 ---- 500
     /* configure TIMER channel output pulse value */
-    //printf("qout=%f\r\n", pidParm.qOut);
+    //printf("qout=%.1f\r\n", pidParm.qOut);
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
 }
 
@@ -194,10 +191,10 @@ void ebike_check_warning()
     if (state_position_error_timeout) {
         state_position_error_timeout = 0;
         //输出“走位错误”
-        error_bits_flag |= 1<<POSITION_ERROR;
+        set_error(POSITION_ERROR);
     } else if (state_jiazhu_error_timeout){
         //输出“加注失败”
-        error_bits_flag |= 1<<ZHUSHUI_ERROR;
+        set_error(ZHUSHUI_ERROR);
     }
 
     if ((uint8_t)temperature > temperature_set+3) {
@@ -205,23 +202,23 @@ void ebike_check_warning()
         temperature_error_timer_start(15*60);
         if (state_temperature_error_timeout) {
             //输出“温度过高”
-            error_bits_flag |= 1<<WENDU_ERROR;
+            set_error(WENDU_ERROR);
         }
     } else if ((uint8_t)temperature < temperature_set-3) {
 
         temperature_error_timer_start(5*60);
         if (state_temperature_error_timeout) {
             //输出“温度过低”
-            error_bits_flag |= 1<<WENDU_ERROR;
+            set_error(WENDU_ERROR);
         }
     } else {
         //温度正常，恢复告警
         temperature_error_timer_clear();
-        error_bits_flag &= ~(1<<WENDU_ERROR);
+        clear_error(WENDU_ERROR);
     }
 
     if (state_youbei) {
-        error_bits_flag &= ~(1<<WUBEI_ERROR);
+        clear_error(WUBEI_ERROR);
     }
     
 }

@@ -92,13 +92,14 @@ void debug_msg_process(uint8_t *msg)
     switch(cmd)
     {
         case 1://set real time temperature for pid working
-            temperature = msg[1];
-            printf("temperature = %f\r\n", temperature);
-            pidParm.qInMeas = temperature;  //for test
+            cup_count = msg[1]<<8 | msg[2];
+            printf("cup_count = %d\r\n", cup_count);
+            flash_value_flash();
             break;
 
         case 2://加热温度设定值
             temperature_set = msg[1];
+            pidParm.qInRef = temperature_set;
             printf("temperature_set = %d\r\n", temperature_set);
             flash_value_flash();
             break;
@@ -113,7 +114,7 @@ void debug_msg_process(uint8_t *msg)
             break;
 
         case 4://注水量设置
-            water_set = msg[1] | msg[2];
+            water_set = msg[1]<<8 | msg[2];
             printf("water_set = %d\r\n", water_set);
             flash_value_flash();
             break;

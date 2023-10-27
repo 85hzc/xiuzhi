@@ -128,7 +128,7 @@ void work_loop( void )
                         luobei_delay++;
                         //延时判断落杯状态，因为落杯动作需要时间（落杯状态key判断需要SWITCH_LUOBEI_TIME=2（200ms））
                         if (luobei_delay>=SWITCH_LUOBEI_TIME+8) { //延时1000ms
-                            error_bits_flag |= 1<<WUBEI_ERROR;
+                            set_error(WUBEI_ERROR);
                             luobei_delay = 0;
                             luobei_retry = 0;
                         }

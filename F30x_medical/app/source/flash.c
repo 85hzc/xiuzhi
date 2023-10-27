@@ -86,7 +86,6 @@ void fmc_erase_pages(flash_page_type page_type)
 */
 void fmc_data_program(flash_page_type page_type)
 {
-    // uint8_t i;
     /* unlock the flash program/erase controller */
     fmc_unlock();
     
@@ -95,7 +94,11 @@ void fmc_data_program(flash_page_type page_type)
         case MODE_PAGE:
             address = FMC_MODE_SHIFT_ADDR /*+ (FMC_PAGE_SIZE * (uint8_t)page_type)*/;
             
-            fmc_halfword_program(address, cup_count);
+            fmc_halfword_program(address, cup_count>>8 & 0xff);
+            address += 2;
+            fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
+
+            fmc_halfword_program(address, cup_count & 0xff);
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
 
@@ -107,7 +110,10 @@ void fmc_data_program(flash_page_type page_type)
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
 
-            fmc_halfword_program(address, water_set);
+            fmc_halfword_program(address, water_set>>8 & 0xff);
+            address += 2;
+            fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
+            fmc_halfword_program(address, water_set & 0xff);
             address += 2;
             fmc_flag_clear(FMC_FLAG_BANK0_END | FMC_FLAG_BANK0_WPERR | FMC_FLAG_BANK0_PGERR);
             break;

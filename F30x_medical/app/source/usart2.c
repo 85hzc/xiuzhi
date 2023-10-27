@@ -6,11 +6,7 @@
 
 #include "global.h"
 
-/* static function declaration */
-static void usart2_config(void);
-
 /* public variables */
-// uint8_t rx_buffer[COM_BUFFER_SIZE],tx_buffer[COM_BUFFER_SIZE];
 uint8_t rx_buffer[COM_BUFFER_SIZE];
 uint8_t rx_buffer_app[COM_BUFFER_SIZE];
 uint16_t tx_counter = 0, rx_counter = 0, rx_counter_app = 0, rx_ok = 0;

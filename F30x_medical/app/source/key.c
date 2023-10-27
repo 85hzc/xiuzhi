@@ -136,7 +136,7 @@ void key_process(void)
     static uint8_t yb=0,t1=0,t2=0,fz=0;
 
     /* drive mode up key is pressed */
-    if(key_read_debouncing(KEY_youbei)){
+    if(!key_read_debouncing(KEY_youbei)){
         if (!state_youbei) {
             yb++;
             if (yb>=SWITCH_LUOBEI_TIME) {
@@ -160,22 +160,22 @@ void key_process(void)
         if (!state_fuzi) {
             fz++;
             if (fz>=SWITCH_DETECT_TIME) {
-                printf("fu zi 1\r\n");
+                printf("Lack Water\r\n");
                 state_fuzi = 1;
                 fz = 0;
                 //输出“水位不足”
-                error_bits_flag |= 1<<SHUIWEI_ERROR;
+                set_error(SHUIWEI_ERROR);
             }
         }
     } else {
         if (state_fuzi) {
             fz++;
             if (fz>=SWITCH_DETECT_TIME) {
-                printf("fu zi 0\r\n");
+                printf("full water\r\n");
                 state_fuzi = 0;
                 fz = 0;
                 //清除“水位不足”
-                error_bits_flag &= ~(1<<SHUIWEI_ERROR);
+                clear_error(SHUIWEI_ERROR);
             }
         }
     }

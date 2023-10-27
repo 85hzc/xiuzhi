@@ -42,9 +42,6 @@ OF SUCH DAMAGE.
 
 #define COM_BUFFER_SIZE              (128)
 
-/* initialize the hardware of debug function */
-void usart2_config(void);
-
 
 extern uint8_t rx_buffer[],rx_buffer_app[],tx_buffer[];
 extern uint16_t tx_counter, rx_counter, rx_counter_app, rx_ok;

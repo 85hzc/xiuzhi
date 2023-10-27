@@ -176,7 +176,7 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_6);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(LUOBEI_IRQ_GPIO_PORT, LUOBEI_IRQ_GPIO_PIN)){
-            //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+            led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             trige_count();
             luobei_retry += 1;   //完成一次落杯操作，作为二次尝试落杯判断依据（如果空杯情况）
             //luobei_motor_stop();
@@ -188,6 +188,7 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_7);
         joggle_delay(10000);
         if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_qibei_position_flag = 1;
         }
     }
@@ -197,7 +198,7 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_9);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(VELOCITY_GPIO_PORT, VELOCITY_GPIO_PIN)){
-            //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_water_count++;
 
             if (g_water_count > water_count_signals) {
@@ -224,6 +225,7 @@ void EXTI10_15_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_10);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(N1S_LUOBEI_GPIO_PORT, N1S_LUOBEI_GPIO_PIN)){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_luobei_position_flag = 1;
         }
     }
@@ -233,6 +235,7 @@ void EXTI10_15_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_11);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(N2S_ZHUSHUI_GPIO_PORT, N2S_ZHUSHUI_GPIO_PIN)){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_zhushui_position_flag = 1;
         }
     }
@@ -242,6 +245,7 @@ void EXTI10_15_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_12);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(N3S_CHUBEI_GPIO_PORT, N3S_CHUBEI_GPIO_PIN)){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_chubei_position_flag = 1;
         }
     }
