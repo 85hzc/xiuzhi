@@ -171,25 +171,25 @@ void SysTick_Handler(void)
 */
 void EXTI5_9_IRQHandler(void)
 {
-    //落杯信号中断
+    //限位控制开关中断
     if(exti_interrupt_flag_get(EXTI_6) != RESET){
         exti_interrupt_flag_clear(EXTI_6);
+        joggle_delay(10000);
+        if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
+            g_exti_qibei_position_flag = 1;
+        }
+    }
+
+    //落杯信号中断
+    if(exti_interrupt_flag_get(EXTI_7) != RESET){
+        exti_interrupt_flag_clear(EXTI_7);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(LUOBEI_IRQ_GPIO_PORT, LUOBEI_IRQ_GPIO_PIN)){
             led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             trige_count();
             luobei_retry += 1;   //完成一次落杯操作，作为二次尝试落杯判断依据（如果空杯情况）
             //luobei_motor_stop();
-        }
-    }
-
-    //限位控制
-    if(exti_interrupt_flag_get(EXTI_7) != RESET){
-        exti_interrupt_flag_clear(EXTI_7);
-        joggle_delay(10000);
-        if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
-            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
-            g_exti_qibei_position_flag = 1;
         }
     }
 

@@ -133,7 +133,7 @@ static FlagStatus key_read_state(key_switch key)
 */
 void key_process(void)
 {
-    static uint8_t yb=0,t1=0,t2=0,fz=0;
+    static uint8_t yb=0,fz=0;
 
     /* drive mode up key is pressed */
     if(!key_read_debouncing(KEY_youbei)){
@@ -179,45 +179,5 @@ void key_process(void)
             }
         }
     }
-    /*
-    if(key_read_debouncing(KEY_T1)){
-        if (!state_t1) {
-            t1++;
-            if (t1>=SWITCH_DETECT_TIME) {
-                printf("t1 1\r\n");
-                state_t1 = 1;
-                t1 = 0;
-            }
-        }
-    } else {
-        if (state_t1) {
-            t1++;
-            if (t1>=SWITCH_DETECT_TIME) {
-                printf("t1 0\r\n");
-                state_t1 = 0;
-                t1 = 0;
-            }
-        }
-    }
-
-    if(key_read_debouncing(KEY_T2)){
-        if (!state_t2) {
-            t2++;
-            if (t2>=SWITCH_DETECT_TIME) {
-                printf("t2 1\r\n");
-                state_t2 = 1;
-                t2 = 0;
-            }
-        }
-    } else {
-        if (state_t2) {
-            t2++;
-            if (t2>=SWITCH_DETECT_TIME) {
-                printf("t2 0\r\n");
-                state_t2 = 0;
-                t2 = 0;
-            }
-        }
-    }*/
 }
 

@@ -125,7 +125,7 @@ void debug_msg_process(uint8_t *msg)
             flash_value_flash();
             break;
 
-        case 6://
+        case 6://步进电机测试
             if (msg[1]==1) {
                 printf("step motor f\r\n");
                 step_motor_move_forward(STEP_MOTOR_STEPS);
@@ -160,6 +160,17 @@ void debug_msg_process(uint8_t *msg)
         
         case 9://重启reset
             NVIC_SystemReset();
+            break;
+
+        case 10://酶液泵调试
+            if (msg[1]) {
+                printf("enzyme motor start\r\n");
+                state_enzyme_count_running = 1;
+                enzyme_motor_start();
+            } else {
+                printf("enzyme motor stop\r\n");
+                enzyme_motor_stop();
+            }
             break;
 
         default:

@@ -52,7 +52,6 @@ int main(void)
 
     /* peripheral initialization */
     hardware_config();
-    beep_off();
 
     rtc_init();
     /* clear reset flags */
@@ -113,35 +112,30 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
-            
-            #if 0
-            static FlagStatus breathe_flag = SET;
-            static int16_t i = 0;
-            if (SET == breathe_flag){ i = i + 10; }else{ i = i - 10; } if(i > 500){ breathe_flag = RESET; } if(i <= 0){ breathe_flag = SET; }
-            /* configure TIMER channel output pulse value */
-            timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0,i);
-            #endif
+
+            EBI_calcPI(&pidParm);
         }
 
         if (bTimeFlag_100ms)
         {
             bTimeFlag_100ms = 0;
 
+            #ifndef DEBUG
+            ebike_read_temperature();
+            #endif
             /* key process routine */
             key_process();
             work_loop();
-            heat_running();
         }
 
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;
-            #ifndef DEBUG
-            ebike_read_temperature();
-            #endif
+
             ebike_check_warning();
-            // display_process();
+            display_process();
             //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
+            heat_running();
         }
 
         if (bTimeFlag_1s)
@@ -159,7 +153,7 @@ int main(void)
                 cup_flag = 0;
                 flash_value_flash();
             }
-            //printf("[AD]temperature:%.1f\r\n", temperature);
+            //printf("[AD]temperature:%.1f %.1f\r\n", temperature_f, temperature_cb);
         }
     }
 }

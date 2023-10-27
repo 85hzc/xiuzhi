@@ -7,7 +7,7 @@
 #include "global.h"
 
 uint16_t error_bits_flag = 0;
-float temperature = 0.0;
+float temperature = 0.0, temperature_f = 0.0, temperature_cb = 0.0;;
 PID_Parm pidParm;
 
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
@@ -24,7 +24,7 @@ void config_init( void )
     cup_count = fmc_data[0][0]<<8 | fmc_data[0][1];
     
     water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
-    enzyme_count_times = ( (water_set * enzyme_rate) / (float)(100.0 - enzyme_rate) ) * 1000; //流速：1 ml/s
+    enzyme_count_times = ( (water_set * enzyme_rate/100.0f) / (float)(100.0 - enzyme_rate) ) * 1000; //流速：1 ml/s
 
     printf("water: %d ml, enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, enzyme_rate
             , temperature_set, cup_count);
@@ -32,13 +32,11 @@ void config_init( void )
     memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
     pidParm.qInRef = temperature_set;
-    pidParm.qKp = 1;
-    pidParm.qKi = 0.1;
+    pidParm.qKp = 10.0;
+    pidParm.qKi = 1.0;
     pidParm.qKc = 0.1;
     pidParm.qOutMax = TEMPERATURE_PWM_MAX;   //PWM占空比0-500范围，限制功率80%，设置最大400
     pidParm.qOutMin = TEMPERATURE_PWM_MIN;
-
-    beep_off();
 }
 
 //校验和计算
@@ -94,54 +92,39 @@ void flash_value_flash(void)
     fmc_data_program(MODE_PAGE);
 }
 
-
-/*!
-    \brief      read the sampling
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void display_process(void)
-{
-    /*
-    ** 控制指令：（空闲时间≥20ms）+ 0x55 + PAR1 + PAR2 + CheckSum
-    **    PAR1：PWM占空比,PWM宽度0-100,100表示100%,0表示0%。
-    **    PAR2：母线电流限流值百分比,100表示100%,0表示0%。
-    */
-    uint8_t usart_data[COM_BUFFER_SIZE];
-
-    memset(usart_data, 0, COM_BUFFER_SIZE);
-    usart_data[0] = 0x55;
-    usart_data[1] = 0;
-    usart_data[2] = 0;
-    usart_data[3] = calculateCRC8(usart_data, 3);
-
-    usart2_data_transfer(usart_data, COM_BUFFER_SIZE);
-}
-
-
-// 500ms period
+//Rp上拉电阻值
+float Rp=10;//000;
+//T2为25摄氏度，折算为开尔文温度
+float T2=273.15+25;
+float Ka=273.15;
+// 100ms period
 void ebike_read_temperature(void)
 {
-    float Rt=0.0;
-    //Rp上拉电阻值
-    float Rp=10;//000;
-    //T2为25摄氏度，折算为开尔文温度
-    float T2=273.15+25;
-    float Bx=3950.0;
-    float Ka=273.15;
-    float vol=0.0;
-    uint32_t adValue = 0;
+    static uint8_t read_times = 0;
+    float Rt=0.0, vol=0.0;
 
-    adValue = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0);
-    vol = adValue * 3.3 / 4096.0f;
+    vol = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0) * 3.3 / 4096.0f;
     //Rt=(3.3-vol)*10000/vol;
-    //Rt=(3.3-vol)*10/vol;
-    Rt = vol * 10.0 / (3.3-vol);
-    temperature=1/(1/T2+log(Rt/Rp)/Bx)-Ka+0.5;
-    pidParm.qInMeas = temperature;
+    Rt = vol * 10.0 / (3.3 - vol);
+    //查表法判断Rt有效性
+    extern const float ntc_B3950_10k[];
+    //小于0度 or 大于100度，无效数据过滤
+    if ((Rt > ntc_B3950_10k[0]) || ( Rt < ntc_B3950_10k[100])) {
+        printf("res:%f over flow!\r\n", Rt);
+        goto TODO;
+    }
 
-    //TODO:
+    temperature = 1 / (float)(1.0/T2+log(Rt/Rp) / 3950.0) - Ka + 0.5;
+    HZC_LP_FAST(temperature_f, temperature, 0.1);
+    pidParm.qInMeas = temperature_f;
+
+    for ( uint8_t i=0; i<=100; i++ ) {
+        if ((Rt<ntc_B3950_10k[i]) && (Rt>ntc_B3950_10k[i+1])) {
+            temperature_cb = i;
+        }
+    }
+
+    TODO:
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
 }
@@ -177,13 +160,10 @@ void clear_error(uint8_t err_bit)
 */
 void heat_running( void )
 {
-
-    EBI_calcPI(&pidParm);
-
     //0 ---- 500
     /* configure TIMER channel output pulse value */
-    //printf("qout=%.1f\r\n", pidParm.qOut);
-    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
+		//printf("qout=%.1f\r\n", pidParm.qOut);
+		timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
 }
 
 void ebike_check_warning()
@@ -197,14 +177,14 @@ void ebike_check_warning()
         set_error(ZHUSHUI_ERROR);
     }
 
-    if ((uint8_t)temperature > temperature_set+3) {
+    if ((uint8_t)temperature_f > temperature_set+3) {
 
         temperature_error_timer_start(15*60);
         if (state_temperature_error_timeout) {
             //输出“温度过高”
             set_error(WENDU_ERROR);
         }
-    } else if ((uint8_t)temperature < temperature_set-3) {
+    } else if ((uint8_t)temperature_f < temperature_set-3) {
 
         temperature_error_timer_start(5*60);
         if (state_temperature_error_timeout) {

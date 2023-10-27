@@ -64,8 +64,8 @@ OF SUCH DAMAGE.
 
 
 /* motor parameter check */
-#define TEMPERATURE_PWM_MIN                 (0)                                /* the minimum value of mosfet temperature in centigrade */
-#define TEMPERATURE_PWM_MAX                 (400U)                               /* the maximum value of mosfet temperature in centigrade */
+#define TEMPERATURE_PWM_MIN                 (0)                                 /* the minimum value of mosfet temperature in centigrade */
+#define TEMPERATURE_PWM_MAX                 (200U)                              /* the maximum value of mosfet temperature in centigrade */
 
 #define STEP_MOTOR_STEPS                    (0x5FF)
 
@@ -234,7 +234,7 @@ extern uint16_t cup_count, cup_flag, water_set;
 extern uint8_t luobei_retry, luobei_delay;
 extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
 extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
-extern float temperature;
+extern float temperature, temperature_f, temperature_cb;
 extern uint16_t error_bits_flag;
 
 #endif /* GLOBAL_H */

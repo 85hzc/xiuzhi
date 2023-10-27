@@ -161,12 +161,12 @@ void timer7_config(void)
     timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
     //CH0
     timer_channel_output_config(TIMER7, TIMER_CH_0, &timer_ocintpara);
-    timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_0, 250);
+    timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_0, 0);
     timer_channel_output_mode_config(TIMER7, TIMER_CH_0, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER7, TIMER_CH_0, TIMER_OC_SHADOW_DISABLE);
     //CH1
     timer_channel_output_config(TIMER7, TIMER_CH_1, &timer_ocintpara);
-    timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_1, 250);
+    timer_channel_output_pulse_value_config(TIMER7, TIMER_CH_1, 0);
     timer_channel_output_mode_config(TIMER7, TIMER_CH_1, TIMER_OC_MODE_PWM0);
     timer_channel_output_shadow_config(TIMER7, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
 
