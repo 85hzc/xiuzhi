@@ -47,6 +47,7 @@ OF SUCH DAMAGE.
 */
 int main(void)
 {
+    uint8_t seconds = 0;
     /* systick initialization */
     systick_config();
 
@@ -80,7 +81,7 @@ int main(void)
     utils_sample_init();
     config_init();
     // init knob screen display
-    lcd_init_display();
+    // lcd_init_display();
 
     while(1){
 
@@ -102,6 +103,7 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
+
             controller_msg_process();
 
             EBI_calcPI(&pidParm);
@@ -111,7 +113,6 @@ int main(void)
         {
             bTimeFlag_100ms = 0;
 
-            // controller_msg_process();
             #ifndef DEBUG
             ebike_read_temperature();
             #endif
@@ -136,10 +137,18 @@ int main(void)
 
             /* display time in loop */
             time_show();
-            lcd_time_display(rtc_counter_get());
+
+            // lcd_time_display(rtc_counter_get());
+            // if (seconds++ >= 60)
+            // {
+            //     seconds = 0;
+            //     lcd_time_display(rtc_counter_get());
+            // }
 
             /* lcd status update */
             lcd_status_display();
+
+            lcd_display_update();
 
             if (cup_flag) {
                 cup_flag = 0;

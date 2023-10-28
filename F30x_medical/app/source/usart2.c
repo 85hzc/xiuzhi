@@ -105,6 +105,6 @@ uint8_t buffer_reads(uint8_t *data, uint8_t len)
         pdata++;
     }
 
-    printf("fun:%s line:%d cnt:%d\r\n",__FUNCTION__,__LINE__,cnt);
+    // printf("fun:%s line:%d cnt:%d\r\n",__FUNCTION__,__LINE__,cnt);
     return cnt;
 }

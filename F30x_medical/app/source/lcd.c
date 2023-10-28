@@ -83,15 +83,18 @@ uint8_t lcd_conn_opt(uint8_t conn)
     pbuf = pbuf + pMsg->payload_len+2;
     *pbuf = crc;
 
-    pbuf = (uint8_t *)pMsg;
-    printf("send data:\n");
-    for (size_t i = 0; i < msg_len; i++)
-    {
-        printf("%02x ", pbuf[i]);
-    }
-    printf("\n");
+    // pbuf = (uint8_t *)pMsg;
+    // printf("send data:\n");
+    // for (size_t i = 0; i < msg_len; i++)
+    // {
+    //     printf("%02x ", pbuf[i]);
+    // }
+    // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+#if 0
+
     int32_t time_send = 0;
     int32_t delay_t = COMM_MAX_DELAY_TIME;
     while (delay_t > 0)
@@ -118,6 +121,9 @@ uint8_t lcd_conn_opt(uint8_t conn)
         printf("fun:%s line:%d conn:%d knob screen operation fail\n", __FUNCTION__, __LINE__, conn);
         return 0;
     }
+#endif // 0
+
+    free(pMsg);
 
     return 1;
 }
@@ -149,15 +155,17 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
     pbuf = pbuf + pMsg->payload_len+2;
     *pbuf = crc;
 
-    pbuf = (uint8_t *)pMsg;
-    printf("send data:\n");
-    for (size_t i = 0; i < msg_len; i++)
-    {
-        printf("%02x ", pbuf[i]);
-    }
-    printf("\n");
+    // pbuf = (uint8_t *)pMsg;
+    // printf("send data:\n");
+    // for (size_t i = 0; i < msg_len; i++)
+    // {
+    //     printf("%02x ", pbuf[i]);
+    // }
+    // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+#if 0
     int32_t time_send = 0;
     int32_t delay_t = COMM_MAX_DELAY_TIME;
     while (delay_t > 0)
@@ -184,6 +192,9 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
         printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
         return 0;
     }
+#endif // 0
+
+    free(pMsg);
 
     return 1;
 }
@@ -220,6 +231,8 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+#if 0
     int32_t time_send = 0;
     int32_t delay_t = COMM_MAX_DELAY_TIME;
     while (delay_t > 0)
@@ -246,6 +259,9 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
         printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
         return 0;
     }
+#endif // 0
+
+    free(pMsg);
 
     return 1;
 }
@@ -282,6 +298,8 @@ uint8_t lcd_screen_display_ctrl(uint8_t on_off)
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+#if 0
     int32_t time_send = 0;
     int32_t delay_t = COMM_MAX_DELAY_TIME;
     while (delay_t > 0)
@@ -308,6 +326,9 @@ uint8_t lcd_screen_display_ctrl(uint8_t on_off)
         printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
         return 0;
     }
+#endif // 0
+
+    free(pMsg);
 
     return 1;
 }
@@ -345,6 +366,8 @@ uint8_t lcd_get_screen_info_cmd()
     // printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+#if 0
     int32_t time_send = 0;
     int32_t delay_t = COMM_MAX_DELAY_TIME;
     while (delay_t > 0)
@@ -371,6 +394,9 @@ uint8_t lcd_get_screen_info_cmd()
         printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
         return 0;
     }
+#endif // 0
+
+    free(pMsg);
 
     return 1;
 }
@@ -398,6 +424,13 @@ void controller_msg_process(void)
     }
     *pbuf = cmd;
     pbuf++;
+    // 经多次验证cmd为COMM_FILL_BG_AND_ICON_COMPLETE_CMD时,数据不按照协议实现 故需做特殊处理
+    if (COMM_FILL_BG_AND_ICON_COMPLETE_CMD == cmd)
+    {
+        lcd_screen_display_ctrl(COMM_CTRL_DISPLAY_ON);
+        return;
+    }
+
     if (!buffer_read(&payload_len))
     {
         printf("fun:%s line:%d invalid payload len\r\n",__FUNCTION__,__LINE__);
@@ -406,18 +439,20 @@ void controller_msg_process(void)
     *pbuf = payload_len;
     pbuf++;
     // get payload info and one byte crc
-    if (buffer_reads(pbuf, payload_len+1) < (payload_len+1))
+    uint8_t cnt = buffer_reads(pbuf, payload_len+1);
+
+    // printf("\n recv [%d] data:\n", cnt+3);
+    // for (size_t i = 0; i < cnt+3; i++)
+    // {
+    //     printf("%02x ", msg[i]);
+    // }
+    // printf("\n");
+
+    if (cnt < (payload_len+1))
     {
         printf("fun:%s line:%d recv invalid payload_len:%d data\r\n",__FUNCTION__,__LINE__,payload_len);
         return;
     }
-
-    printf("\n recv [%d] data:\n", payload_len+4);
-    for (size_t i = 0; i < payload_len+4; i++)
-    {
-        printf("%02x ", msg[i]);
-    }
-    printf("\n");
 
     comm_msg_t *pdata = (comm_msg_t *)msg;
     // crc not include head and crc len
@@ -437,14 +472,19 @@ void controller_msg_process(void)
         {
         case COMM_RESPONSE_CMD:
             sg_lcd_status = pdata->payload[0];
-            printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
-            if (sg_lcd_stage == COMM_UNCONN_STAGE || sg_lcd_stage == COMM_DIS_CONN_STAGE)
+            // printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
+            if (sg_lcd_status == COMM_ACK_NORMAL)
             {
-                if (sg_lcd_status == COMM_ACK_NORMAL)
+                if (sg_lcd_stage == COMM_UNCONN_STAGE)
+                {
+                    sg_lcd_stage = COMM_INIT_CONN_STAGE;
+                }
+                else if (sg_lcd_stage == COMM_DIS_CONN_STAGE)
                 {
                     sg_lcd_stage = COMM_CONN_STAGE;
                 }
             }
+
             // response_status_handle(status);
             break;
         case COMM_SOFTWARE_VER_REPORT_CMD:
@@ -469,6 +509,7 @@ void controller_msg_process(void)
 
 void notice_flash(uint8_t idx)
 {
+    printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
     if (idx == POSITION_ERROR) {
         //显示“走位错误”
         lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER);
@@ -882,16 +923,23 @@ uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type)
 
 void lcd_time_display(uint32_t timestamp)
 {
+    printf("fun:%s line:%d timestamp:%ld\n", __FUNCTION__, __LINE__,timestamp);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[5];
-    uint16_t seconds = timestamp / 1000;
-    uint16_t minutes = seconds / 60;
-    uint16_t hours = minutes / 60;
+    // uint16_t seconds = timestamp / 1000;
+    // uint16_t minutes = seconds / 60;
+    // uint16_t hours = minutes / 60;
+    uint16_t seconds = (timestamp % 3600) % 60;
+    uint16_t minutes = (timestamp % 3600) / 60;
+    uint16_t hours = timestamp / 3600;
     uint16_t sn = 0;
+
+    printf("fun:%s line:%d hours:%02x minutes:%02x seconds:%02x\n", __FUNCTION__, __LINE__,hours,minutes,seconds);
 
     _u16_2_byte2_big_endian(237, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(59, imgs[0].y_coordinate);
@@ -954,9 +1002,11 @@ void lcd_time_display(uint32_t timestamp)
 
 void lcd_total_volume_display(uint16_t volume)
 {
+    printf("fun:%s line:%d volume:%d\n", __FUNCTION__, __LINE__,volume);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[5];
@@ -995,9 +1045,11 @@ void lcd_total_volume_display(uint16_t volume)
 
 void lcd_dilute_ratio_display(uint16_t ratio)
 {
+    printf("fun:%s line:%d ratio:%d\n", __FUNCTION__, __LINE__,ratio);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[3];
@@ -1024,9 +1076,11 @@ void lcd_dilute_ratio_display(uint16_t ratio)
 
 void lcd_running_status_display(uint16_t status_sn)
 {
+    printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1067,9 +1121,11 @@ void lcd_running_status_display(uint16_t status_sn)
 
 void lcd_temperature_display(uint16_t temp)
 {
+    printf("fun:%s line:%d temp:%d\n", __FUNCTION__, __LINE__,temp);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[4];
@@ -1114,9 +1170,11 @@ void lcd_temperature_display(uint16_t temp)
 
 void lcd_cup_num_display(uint16_t cups)
 {
+    printf("fun:%s line:%d cups:%d\n", __FUNCTION__, __LINE__,cups);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[5];
@@ -1155,9 +1213,11 @@ void lcd_cup_num_display(uint16_t cups)
 
 void lcd_setting_display(uint16_t set_sn)
 {
+    printf("fun:%s line:%d set_sn:%x\n", __FUNCTION__, __LINE__,set_sn);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1209,6 +1269,7 @@ void lcd_main_bg_display()
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1226,6 +1287,7 @@ void lcd_main_circle_bg_display()
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1244,6 +1306,7 @@ void lcd_main_menu_bg_display()
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1261,6 +1324,7 @@ void lcd_main_middle_bg_display()
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[8];
@@ -1306,6 +1370,7 @@ void lcd_main_cup_bg_display()
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
+        return;
     }
 
     figure_msg_t imgs[2];
@@ -1323,11 +1388,12 @@ void lcd_main_cup_bg_display()
 
 void lcd_init_display()
 {
-    // 建立连接
-    if (lcd_check_conn_status() == COMM_DISCONN)
-    {
-        lcd_conn_opt(COMM_CONN);
-    }
+    // // 建立连接
+    // if (lcd_check_conn_status() == COMM_DISCONN)
+    // {
+    //     lcd_conn_opt(COMM_CONN);
+    //     return;
+    // }
 
     // 显示主屏背景
     lcd_main_bg_display();
@@ -1340,6 +1406,24 @@ void lcd_init_display()
     // 显示中间杯背景图标
     lcd_main_cup_bg_display();
 
+    // 显示时间
+    lcd_time_display(rtc_counter_get());
+    // 显示总容量
+    lcd_total_volume_display(water_set);
+    // 显示稀释比例
+    lcd_dilute_ratio_display(enzyme_rate);
+    // 显示运行状态
+    lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER);
+    // 显示温度
+    lcd_temperature_display(temperature_set);
+    // 显示出杯数量
+    lcd_cup_num_display(cup_count);
+    // 显示默认设置
+    lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+}
+
+void lcd_display_update(void)
+{
     // 显示时间
     lcd_time_display(rtc_counter_get());
     // 显示总容量

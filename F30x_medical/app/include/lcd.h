@@ -194,11 +194,11 @@ typedef enum
 typedef enum
 {
     COMM_UNCONN_STAGE,//未连接初始状态阶段
-    // COMM_INIT_CONN_STAGE,//发起连接状态阶段
-    // COMM_FILL_BG_AND_IMAGE_STAGE,//填图状态阶段
-    // COMM_FILL_AREA_COLOR_STAGE,//填充颜色状态阶段
-    // COMM_CRTL_SCREEN_DISPLAY_STAGE,//控制屏显状态阶段
-    // COMM_GET_SLAVE_SOFTWARE_VER_STAGE,//获取屏显信息状态阶段
+    COMM_INIT_CONN_STAGE,//发起连接状态阶段
+    COMM_FILL_BG_AND_IMAGE_STAGE,//填图状态阶段
+    COMM_FILL_AREA_COLOR_STAGE,//填充颜色状态阶段
+    COMM_CRTL_SCREEN_DISPLAY_STAGE,//控制屏显状态阶段
+    COMM_GET_SLAVE_SOFTWARE_VER_STAGE,//获取屏显信息状态阶段
     COMM_CONN_STAGE,//已连接状态阶段
     COMM_DIS_CONN_STAGE,//断开连接状态阶段
 } comm_status_stage_e;
@@ -258,5 +258,6 @@ void lcd_main_menu_bg_display(void);
 void lcd_main_middle_bg_display(void);
 void lcd_main_cup_bg_display(void);
 void lcd_init_display(void);
+void lcd_display_update(void);
 
 #endif /* LCD_H */
