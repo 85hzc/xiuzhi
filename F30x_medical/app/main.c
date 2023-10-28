@@ -88,17 +88,7 @@ int main(void)
         {
             bTimeFlag_5ms = 0;
 
-            if (rx_ok)
-            {
-                rx_ok = 0;
-                //printf("rx from controller:%x %x %x %x\r\n", \
-                        rx_buffer_app[0], rx_buffer_app[1],\
-                        rx_buffer_app[2], rx_buffer_app[3]);
-                controller_msg_process(rx_buffer_app, rx_counter_app);
-                // Clear the rx_buffer_app after process
-                memset(rx_buffer_app, 0, COM_BUFFER_SIZE);
-                rx_counter_app = 0;
-            }
+            // controller_msg_process();
 
             if (debug_rx_ok)
             {
@@ -112,6 +102,7 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
+            controller_msg_process();
 
             EBI_calcPI(&pidParm);
         }
@@ -120,6 +111,7 @@ int main(void)
         {
             bTimeFlag_100ms = 0;
 
+            // controller_msg_process();
             #ifndef DEBUG
             ebike_read_temperature();
             #endif

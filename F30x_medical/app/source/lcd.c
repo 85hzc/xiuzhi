@@ -8,8 +8,8 @@
 #include "stdlib.h"
 #include "string.h"
 
-static int8_t sg_lcd_stage = COMM_UNCONN_STAGE;
-static int8_t sg_lcd_status = COMM_ACK_NORMAL;
+static uint8_t sg_lcd_stage = COMM_UNCONN_STAGE;
+static uint8_t sg_lcd_status = COMM_ACK_NORMAL;
 
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
 
@@ -45,7 +45,7 @@ static uint8_t _calc_CRC(const uint8_t* data, size_t length) {
     }
 
     crc = ((uint8_t)sum) ^ 0xFF;
-    // ESP_LOGI(TAG, "length:%02x sum:%04x crc:%02x", length, sum, crc);
+    // printf("_calc_CRC length:%02x sum:%04x crc:%02x\n", length, sum, crc);
     return crc;
 }
 
@@ -62,12 +62,13 @@ static uint8_t lcd_check_conn_status()
 
 uint8_t lcd_conn_opt(uint8_t conn)
 {
+    printf("fun:%s line:%d conn:%d\n", __FUNCTION__, __LINE__,conn);
     // comm_msg_t's len + conn/disconn data's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
     if (!pMsg)
     {
-        printf("fun:%s line:%d calloc comm_msg_t fail", __FUNCTION__, __LINE__);
+        printf("fun:%s line:%d calloc comm_msg_t fail\n", __FUNCTION__, __LINE__);
         return 0;
     }
 
@@ -76,19 +77,19 @@ uint8_t lcd_conn_opt(uint8_t conn)
     pMsg->payload_len = sizeof(uint8_t);
     pMsg->cmd = COMM_CONN_DISCONNECT_CMD;
     memcpy(pMsg->payload, &conn, sizeof(uint8_t));
-    uint8_t *pbuf = (uint8_t *)(pMsg->cmd);
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
     // crc not include head and crc len
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
     *pbuf = crc;
 
-    // pbuf = (uint8_t *)pMsg;
-    // printf("send data:\n");
-    // for (size_t i = 0; i < msg_len; i++)
-    // {
-    //     printf("%02x ", pbuf[i]);
-    // }
-    // printf("\n");
+    pbuf = (uint8_t *)pMsg;
+    printf("send data:\n");
+    for (size_t i = 0; i < msg_len; i++)
+    {
+        printf("%02x ", pbuf[i]);
+    }
+    printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
     int32_t time_send = 0;
@@ -114,7 +115,7 @@ uint8_t lcd_conn_opt(uint8_t conn)
 
     if (delay_t <= 0)
     {
-        printf("fun:%s line:%d conn:%d knob screen operation fail", __FUNCTION__, __LINE__, conn);
+        printf("fun:%s line:%d conn:%d knob screen operation fail\n", __FUNCTION__, __LINE__, conn);
         return 0;
     }
 
@@ -127,6 +128,7 @@ uint8_t lcd_conn_opt(uint8_t conn)
 */
 uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
 {
+    printf("fun:%s line:%d figure_num:%d\n", __FUNCTION__, __LINE__,figure_num);
     // comm_msg_t's len + figure_msg_t's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(figure_msg_t) * figure_num + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -141,19 +143,19 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
     pMsg->payload_len = sizeof(figure_msg_t) * figure_num;
     pMsg->cmd = COMM_FILL_BG_AND_ICON_CMD;
     memcpy(pMsg->payload, figure, pMsg->payload_len);
-    uint8_t *pbuf = (uint8_t *)(pMsg->cmd);
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
     // crc not include head and crc len
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
     *pbuf = crc;
 
-    // pbuf = (uint8_t *)pMsg;
-    // printf("send data:\n");
-    // for (size_t i = 0; i < msg_len; i++)
-    // {
-    //     printf("%02x ", pbuf[i]);
-    // }
-    // printf("\n");
+    pbuf = (uint8_t *)pMsg;
+    printf("send data:\n");
+    for (size_t i = 0; i < msg_len; i++)
+    {
+        printf("%02x ", pbuf[i]);
+    }
+    printf("\n");
 
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
     int32_t time_send = 0;
@@ -188,6 +190,7 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
 
 uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
 {
+    printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
     // comm_msg_t's len + area_color_msg_t's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(area_color_msg_t) + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -202,7 +205,7 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
     pMsg->payload_len = sizeof(area_color_msg_t);
     pMsg->cmd = COMM_FILL_AREA_COLOR_CMD;
     memcpy(pMsg->payload, &area_color, sizeof(area_color_msg_t));
-    uint8_t *pbuf = (uint8_t *)(pMsg->cmd);
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
     // crc not include head and crc len
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
@@ -249,6 +252,7 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
 
 uint8_t lcd_screen_display_ctrl(uint8_t on_off)
 {
+    printf("fun:%s line:%d on_off:%d\n", __FUNCTION__, __LINE__,on_off);
     // comm_msg_t's len + on_off data's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -263,7 +267,7 @@ uint8_t lcd_screen_display_ctrl(uint8_t on_off)
     pMsg->payload_len = sizeof(uint8_t);
     pMsg->cmd = COMM_CRTL_SCREEN_DISPLAY_CMD;
     memcpy(pMsg->payload, &on_off, sizeof(uint8_t));
-    uint8_t *pbuf = (uint8_t *)(pMsg->cmd);
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
     // crc not include head and crc len
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
@@ -310,6 +314,7 @@ uint8_t lcd_screen_display_ctrl(uint8_t on_off)
 
 uint8_t lcd_get_screen_info_cmd()
 {
+    printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
     uint8_t def_payload = 0;
     // comm_msg_t's len + default data's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
@@ -325,7 +330,7 @@ uint8_t lcd_get_screen_info_cmd()
     pMsg->payload_len = sizeof(uint8_t);
     pMsg->cmd = COMM_GET_SLAVE_SOFTWARE_VER_CMD;
     memcpy(pMsg->payload, &def_payload, sizeof(uint8_t));
-    uint8_t *pbuf = (uint8_t *)(pMsg->cmd);
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
     // crc not include head and crc len
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
@@ -370,23 +375,54 @@ uint8_t lcd_get_screen_info_cmd()
     return 1;
 }
 
-void controller_msg_process(uint8_t *msg, uint16_t len)
+void controller_msg_process(void)
 {
-    if (NULL == msg || len <= 0)
+    uint8_t head;
+    uint8_t cmd;
+    uint8_t payload_len;
+    uint8_t msg[COM_BUFFER_SIZE] = {0};
+    uint8_t *pbuf = msg;
+
+    if (!buffer_read(&head) || head != COMM_HEADER)
     {
-        printf("fun:%s line:%d invalid params\r\n",__FUNCTION__,__LINE__);
+        // printf("fun:%s line:%d invalid header\r\n",__FUNCTION__,__LINE__);
         return;
     }
 
-    // 考虑是否需要分包拆包解析?
+    *pbuf = head;
+    pbuf++;
+    if (!buffer_read(&cmd) || cmd < COMM_SOFTWARE_VER_REPORT_CMD)
+    {
+        printf("fun:%s line:%d invalid cmd[%x]\r\n",__FUNCTION__,__LINE__,cmd);
+        return;
+    }
+    *pbuf = cmd;
+    pbuf++;
+    if (!buffer_read(&payload_len))
+    {
+        printf("fun:%s line:%d invalid payload len\r\n",__FUNCTION__,__LINE__);
+        return;
+    }
+    *pbuf = payload_len;
+    pbuf++;
+    // get payload info and one byte crc
+    if (buffer_reads(pbuf, payload_len+1) < (payload_len+1))
+    {
+        printf("fun:%s line:%d recv invalid payload_len:%d data\r\n",__FUNCTION__,__LINE__,payload_len);
+        return;
+    }
+
+    printf("\n recv [%d] data:\n", payload_len+4);
+    for (size_t i = 0; i < payload_len+4; i++)
+    {
+        printf("%02x ", msg[i]);
+    }
+    printf("\n");
+
     comm_msg_t *pdata = (comm_msg_t *)msg;
-
-    uint8_t cmd = pdata->cmd;
-    uint8_t payload_len = pdata->payload_len;
-
     // crc not include head and crc len
     uint8_t crc = _calc_CRC((uint8_t *)&pdata->cmd, payload_len+1+1);
-    uint8_t *pbuf = (uint8_t *)(pdata->cmd);
+    pbuf = (uint8_t *)(&pdata->cmd);
     pbuf = pbuf + payload_len+1+1;
     uint8_t buf_crc = *pbuf;
     if (crc != buf_crc)
@@ -395,7 +431,7 @@ void controller_msg_process(uint8_t *msg, uint16_t len)
         return;
     }
 
-    if (COMM_HEADER == pdata->head)
+    if (COMM_HEADER == head)
     {
         switch (cmd)
         {
@@ -846,10 +882,10 @@ uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type)
 
 void lcd_time_display(uint32_t timestamp)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[5];
     uint16_t seconds = timestamp / 1000;
@@ -918,10 +954,10 @@ void lcd_time_display(uint32_t timestamp)
 
 void lcd_total_volume_display(uint16_t volume)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[5];
     uint16_t v1 = volume % 10;
@@ -959,10 +995,10 @@ void lcd_total_volume_display(uint16_t volume)
 
 void lcd_dilute_ratio_display(uint16_t ratio)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[3];
     uint16_t r1 = ratio % 10;
@@ -988,10 +1024,10 @@ void lcd_dilute_ratio_display(uint16_t ratio)
 
 void lcd_running_status_display(uint16_t status_sn)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
     uint16_t x = 0;
@@ -1031,10 +1067,10 @@ void lcd_running_status_display(uint16_t status_sn)
 
 void lcd_temperature_display(uint16_t temp)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[4];
     uint8_t figure_num = 4;
@@ -1078,10 +1114,10 @@ void lcd_temperature_display(uint16_t temp)
 
 void lcd_cup_num_display(uint16_t cups)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[5];
     uint16_t sn = 0;
@@ -1119,10 +1155,10 @@ void lcd_cup_num_display(uint16_t cups)
 
 void lcd_setting_display(uint16_t set_sn)
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
     uint16_t x = 0;
@@ -1170,10 +1206,10 @@ void lcd_setting_display(uint16_t set_sn)
 
 void lcd_main_bg_display()
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
 
@@ -1187,10 +1223,10 @@ void lcd_main_bg_display()
 
 void lcd_main_circle_bg_display()
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
 
@@ -1205,10 +1241,10 @@ void lcd_main_circle_bg_display()
 
 void lcd_main_menu_bg_display()
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
 
@@ -1222,10 +1258,10 @@ void lcd_main_menu_bg_display()
 
 void lcd_main_middle_bg_display()
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[8];
 
@@ -1267,10 +1303,10 @@ void lcd_main_middle_bg_display()
 
 void lcd_main_cup_bg_display()
 {
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    // }
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+    }
 
     figure_msg_t imgs[2];
 

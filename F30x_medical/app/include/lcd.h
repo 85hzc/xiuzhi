@@ -241,7 +241,7 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num);
 uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color);
 uint8_t lcd_screen_display_ctrl(uint8_t on_off);
 uint8_t lcd_get_screen_info_cmd(void);
-void controller_msg_process(uint8_t *msg, uint16_t len);
+void controller_msg_process(void);
 void notice_flash(uint8_t idx);
 void lcd_status_display( void );
 uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type);

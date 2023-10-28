@@ -336,7 +336,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>--gnu</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,GD32F30X_HD,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
               <IncludePath>..\Firmware\CMSIS;..\Firmware\CMSIS\GD\GD32F30x\Include;..\Firmware\GD32F30x_standard_peripheral\Include;..\app;..\app\include;..\Firmware\GD32F30x_usbd_driver\Include</IncludePath>

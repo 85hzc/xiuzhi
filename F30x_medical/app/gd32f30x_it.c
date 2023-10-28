@@ -263,23 +263,8 @@ void USART2_IRQHandler(void)
     if(RESET != usart_interrupt_flag_get(USART2, USART_INT_FLAG_RBNE)){
         /* clear flag first */
         usart_interrupt_flag_clear(USART2, USART_INT_FLAG_RBNE);
-        /* read one byte from the receive data register */
-        rx_buffer[rx_counter++] = (uint8_t)usart_data_receive(USART2);
-
-        /* check if end of msg or is full */
-        if (rx_buffer[rx_counter] == '\n' || rx_counter >= COM_BUFFER_SIZE - 1) {
-            // Process the received data
-            // process_received_data(rx_buffer, rx_counter);
-            rx_counter_app = rx_counter;
-            memcpy(rx_buffer_app, rx_buffer, rx_counter);
-
-            // Clear the receive buffer for new data
-            memset(rx_buffer, 0, COM_BUFFER_SIZE);
-
-            // Reset the receive index
-            rx_counter = 0;
-            rx_ok = 1;
-        }
+        uint8_t ch = (uint8_t)usart_data_receive(USART2);
+        buffer_write(ch);
     }
 }
 

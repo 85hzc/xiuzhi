@@ -2,14 +2,12 @@
     \file    usart.c
     \brief   FOC demo
 */
-
-
 #include "global.h"
 
 /* public variables */
-uint8_t rx_buffer[COM_BUFFER_SIZE];
-uint8_t rx_buffer_app[COM_BUFFER_SIZE];
-uint16_t tx_counter = 0, rx_counter = 0, rx_counter_app = 0, rx_ok = 0;
+int32_t sg_write_index = 0;
+int32_t sg_read_index = 0;
+uint8_t rx_buffer[COM_BUFFER_SIZE] = {0};
 
 /*!
     \brief      data transmission with USART
@@ -23,11 +21,11 @@ void usart2_data_transfer(uint8_t *usart_data, uint8_t len)
 
     for (index = 0; index < len; index++)
     {
-        usart_data_transmit(USART2, (uint8_t) usart_data[index]);
-        while(RESET == usart_flag_get(USART2, USART_FLAG_TBE));
+        usart_data_transmit(USART2, (uint8_t)usart_data[index]);
+        while (RESET == usart_flag_get(USART2, USART_FLAG_TBE))
+            ;
     }
 }
-
 
 /*!
     \brief      configure USART
@@ -44,8 +42,8 @@ void usart2_init(void)
     gpio_init(COM_USART_RX_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, COM_USART_RX_PIN);
     /* USART2_TX: PC10 */
     gpio_init(COM_USART_TX_PORT, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, COM_USART_TX_PIN);
-    //gpio_pin_remap_config(GPIO_USART2_FULL_REMAP,ENABLE);
-    gpio_pin_remap_config(GPIO_USART2_PARTIAL_REMAP,ENABLE);
+    // gpio_pin_remap_config(GPIO_USART2_FULL_REMAP,ENABLE);
+    gpio_pin_remap_config(GPIO_USART2_PARTIAL_REMAP, ENABLE);
 
     /* clock enable */
     rcu_periph_clock_enable(RCU_USART2);
@@ -67,5 +65,46 @@ void usart2_init(void)
     /* enable USART2 receive interrupt */
     usart_interrupt_enable(USART2, USART_INT_RBNE);
     /* enable USART2 transmit interrupt */
-    //usart_interrupt_enable(USART2, USART_INT_TBE);
+    // usart_interrupt_enable(USART2, USART_INT_TBE);
+}
+
+uint8_t buffer_write(uint8_t ch)
+{
+    if (sg_read_index == (sg_write_index + 1) % COM_BUFFER_SIZE)
+    {
+        /* buffer is full */
+        return 0;
+    }
+
+    rx_buffer[sg_write_index] = ch;
+    sg_write_index = (sg_write_index + 1) % COM_BUFFER_SIZE;
+    return 1;
+}
+
+uint8_t buffer_read(uint8_t *ch)
+{
+    if (sg_read_index == sg_write_index)
+    {
+        /* buffer is empty */
+        return 0;
+    }
+
+    *ch = rx_buffer[sg_read_index];
+    sg_read_index = (sg_read_index + 1) % COM_BUFFER_SIZE;
+    return 1;
+}
+
+uint8_t buffer_reads(uint8_t *data, uint8_t len)
+{
+    uint8_t cnt = 0;
+    uint8_t *pdata = data;
+
+    while ((cnt < len) && buffer_read(pdata))
+    {
+        cnt++;
+        pdata++;
+    }
+
+    printf("fun:%s line:%d cnt:%d\r\n",__FUNCTION__,__LINE__,cnt);
+    return cnt;
 }
