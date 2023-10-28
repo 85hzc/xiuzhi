@@ -162,8 +162,8 @@ void heat_running( void )
 {
     //0 ---- 500
     /* configure TIMER channel output pulse value */
-		//printf("qout=%.1f\r\n", pidParm.qOut);
-		timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
+    //printf("qout=%.1f\r\n", pidParm.qOut);
+    timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
 }
 
 void ebike_check_warning()

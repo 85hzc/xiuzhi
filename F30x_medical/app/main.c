@@ -133,7 +133,7 @@ int main(void)
             bTimeFlag_500ms = 0;
 
             ebike_check_warning();
-            display_process();
+            //display_process();
             //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             heat_running();
         }
@@ -153,7 +153,7 @@ int main(void)
                 cup_flag = 0;
                 flash_value_flash();
             }
-            //printf("[AD]temperature:%.1f %.1f\r\n", temperature_f, temperature_cb);
+            printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
         }
     }
 }
