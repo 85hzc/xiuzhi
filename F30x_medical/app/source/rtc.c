@@ -181,7 +181,6 @@ void time_display(uint32_t timevar)
 */
 void time_show(void)
 {
-
     /* if 1s has paased */
     if (timedisplay == 1){
         /* display current time */

@@ -64,7 +64,7 @@ void position1_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(N1S_LUOBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N1S_LUOBEI_GPIO_PIN);
+    gpio_init(N1S_LUOBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, N1S_LUOBEI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
     gpio_exti_source_select(N1S_LUOBEI_EXTI_SRC_PORT, N1S_LUOBEI_EXTI_SRC_PIN);
@@ -84,7 +84,7 @@ void position2_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(N2S_ZHUSHUI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N2S_ZHUSHUI_GPIO_PIN);
+    gpio_init(N2S_ZHUSHUI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, N2S_ZHUSHUI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
     gpio_exti_source_select(N2S_ZHUSHUI_EXTI_SRC_PORT, N2S_ZHUSHUI_EXTI_SRC_PIN);
@@ -104,7 +104,7 @@ void position3_exit_init(void)
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(N3S_CHUBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, N3S_CHUBEI_GPIO_PIN);
+    gpio_init(N3S_CHUBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, N3S_CHUBEI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
     gpio_exti_source_select(N3S_CHUBEI_EXTI_SRC_PORT, N3S_CHUBEI_EXTI_SRC_PIN);

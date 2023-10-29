@@ -173,6 +173,20 @@ void debug_msg_process(uint8_t *msg)
             }
             break;
 
+        case 11://查看时间
+            time_show();
+            break;
+
+        case 12:
+            start_work = 1;
+            break;
+
+        case 13:
+            self_test_init();
+            break;
+
+        case 14:
+            printf_exti_flags();
         default:
             break;
     }

@@ -86,12 +86,13 @@ void step_motor_move_forward(uint16_t steps)
             g_exti_chubei_position_flag ||
             g_exti_zhushui_position_flag ||
             state_position_error_timeout) {
+            printf_exti_flags();
             clear_position_flags();
             drv_motor_move_execute(MOVE_STEP_S);
             return;
         }
         drv_motor_move_execute(motor_steps[step]);
-        step = (step + 1) % MOVE_CYCLE;
+        step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
         delay_1ms(1);
     }
     drv_motor_move_execute(MOVE_STEP_S);
@@ -105,13 +106,14 @@ void step_motor_move_reverse(uint16_t steps)
     {
         if (g_exti_qibei_position_flag ||
             state_position_error_timeout ||
-            (self_diagnose && g_exti_luobei_position_flag)) {
+            (self_diagnose && g_exti_luobei_position_flag && !self_diag_first_time_flag)) {
+            printf_exti_flags();
             clear_position_flags();
             drv_motor_move_execute(MOVE_STEP_S);
             return;
         }
         drv_motor_move_execute(motor_steps[step]);
-        step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
+        step = (step + 1) % MOVE_CYCLE;
         delay_1ms(1);
     }
     drv_motor_move_execute(MOVE_STEP_S);
@@ -140,6 +142,7 @@ static void drv_motor_move_execute(uint8_t step)
             break;
         case MOVE_STEP_S:
             MOTOR_MOVE_STOP;
+            printf("----step stop\r\n");
             break;
     }
 }

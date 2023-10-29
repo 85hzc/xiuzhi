@@ -67,11 +67,11 @@ OF SUCH DAMAGE.
 #define TEMPERATURE_PWM_MIN                 (0)                                 /* the minimum value of mosfet temperature in centigrade */
 #define TEMPERATURE_PWM_MAX                 (200U)                              /* the maximum value of mosfet temperature in centigrade */
 
-#define STEP_MOTOR_STEPS                    (0x5FF)
-
+#define STEP_MOTOR_STEPS                    (0xFFFF)
+#define QIBEI_TIMEROUT_TIMER                (15*60*1000)                        /* 弃杯超时计时时间 1分钟/15分钟*/
 
 /* ADC sample time */
-#define ADC_SAMPLE_TIME                     (ADC_SAMPLETIME_41POINT5)            /* ADC sampling time configuration */
+#define ADC_SAMPLE_TIME                     (ADC_SAMPLETIME_41POINT5)           /* ADC sampling time configuration */
 
 
 /* pid parameter configuration */
@@ -221,7 +221,7 @@ extern flash_page_type page_type;
 extern usart_debug debug_data;
 extern PID_Parm pidParm;
 
-extern uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose;
+extern uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose, self_diag_first_time_flag;
 extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
 extern uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
@@ -236,5 +236,9 @@ extern uint16_t g_water_count, water_count_signals, enzyme_count_times;
 extern uint32_t position_error_count_times, temperature_error_count_times, jiazhu_error_count_times;
 extern float temperature, temperature_f, temperature_cb;
 extern uint16_t error_bits_flag;
+extern uint8_t start_work;
+
+extern void step_motor_move_forward(uint16_t steps);
+extern void step_motor_move_reverse(uint16_t steps);
 
 #endif /* GLOBAL_H */
