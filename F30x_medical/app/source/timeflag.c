@@ -138,7 +138,7 @@ void qubei_timer_init( void )
 void check_qubei_timer( void )
 {
     g_rCounter_qubei++;
-    if (g_rCounter_qubei == 15*60*1000) {   //15min
+    if (g_rCounter_qubei == QIBEI_TIMEROUT_TIMER) {   //15min
         
         state_qubei_count_running = 0;
         state_qubei_timeout = 1;

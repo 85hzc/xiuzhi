@@ -79,6 +79,7 @@ int main(void)
     /* tool function initialization */
     utils_sample_init();
     config_init();
+    self_test_init();
     // init knob screen display
     lcd_init_display();
 
@@ -143,7 +144,6 @@ int main(void)
             bTimeFlag_1s = 0;
 
             /* display time in loop */
-            time_show();
             lcd_time_display(rtc_counter_get());
 
             /* lcd status update */
@@ -153,7 +153,7 @@ int main(void)
                 cup_flag = 0;
                 flash_value_flash();
             }
-            printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
+            //printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
         }
     }
 }

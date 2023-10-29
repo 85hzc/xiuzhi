@@ -40,7 +40,7 @@ OF SUCH DAMAGE.
 void debug_msg_process(uint8_t *msg);
 
 /* reference variable */
-uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose = 0;
+uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose = 1, self_diag_first_time_flag = 1;
 uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
 uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
@@ -75,7 +75,23 @@ void clear_position_flags( void )
     g_exti_chubei_position_flag = 0;
     g_exti_zhushui_position_flag = 0;
 }
-            
+
+void printf_exti_flags( void )
+{
+    printf("cb:%d, zs:%d, lb:%d, qb:%d, err:%d", 
+        g_exti_chubei_position_flag, 
+        g_exti_zhushui_position_flag,
+        g_exti_luobei_position_flag, 
+        g_exti_qibei_position_flag,
+        state_position_error_timeout);
+}
+
+void self_test_init( void )
+{
+    self_diag_first_time_flag = 1;
+    self_diagnose = 1;
+    loop_state = LOOP_QIBEI;
+}
 
 void work_loop( void )
 {
@@ -86,11 +102,14 @@ void work_loop( void )
             if (!state_youbei && read_qibei_position_switch()) {
                 printf(">>>LOOP_IDLE, go to LOOP_LUOBEI\r\n");
                 //弃杯成功，启动前进至落杯位置
-                position_error_timer_start(5);
+                position_error_timer_start(10);
+                self_diag_first_time_flag = 0;  //从出杯口自检返回时，防止经过落杯位置停机
                 step_motor_move_forward(STEP_MOTOR_STEPS);
                 loop_state = LOOP_LUOBEI;
             } else if (read_qibei_position_switch()) {  //显示返回到位，重置超时预警定时器
                 position_error_timer_clear();
+
+                //弃杯不成功的告警提示，待补充
             }
             break;
 
@@ -105,6 +124,7 @@ void work_loop( void )
                     luobei_delay = 0;
                     luobei_retry = 0;
                 } else if (self_diagnose){          //自检流程
+                    printf(">>>[self diagnos]LOOP_LUOBEI, go to LOOP_LUOBEI_DETECT\r\n");
                     loop_state = LOOP_LUOBEI_DETECT;
                 }
             }
@@ -114,7 +134,7 @@ void work_loop( void )
             if (state_youbei) {
                 luobei_motor_stop();
                 delay_1ms(500);
-                position_error_timer_start(5);
+                position_error_timer_start(10);
                 step_motor_move_forward(STEP_MOTOR_STEPS);
                 printf(">>>LOOP_LUOBEI_DETECT, go to LOOP_ZHUYE\r\n");
                 loop_state = LOOP_ZHUYE;
@@ -124,6 +144,7 @@ void work_loop( void )
 
                 if (luobei_retry) { // 1：执行一次落杯操作，尝试二次落杯过程
                     if (luobei_retry>=2) {  //二次落杯失败，提示无杯错误
+                        printf("stop retry cup\r\n");
                         luobei_motor_stop();
                         luobei_delay++;
                         //延时判断落杯状态，因为落杯动作需要时间（落杯状态key判断需要SWITCH_LUOBEI_TIME=2（200ms））
@@ -135,17 +156,18 @@ void work_loop( void )
                     }
                 }
             } else if (self_diagnose){          //自检流程
-                printf(">>>[self diagnos]LOOP_LUOBEI_DETECT, go to LOOP_ZHUYE\r\n");
                 loop_state = LOOP_ZHUYE;
-                position_error_timer_start(5);
+                position_error_timer_start(10);
+                step_motor_move_forward(STEP_MOTOR_STEPS);
+                printf(">>>[self diagnos]LOOP_LUOBEI_DETECT, go to LOOP_ZHUYE\r\n");
             }
             break;
 
         case LOOP_ZHUYE: //注液过程
             if (self_diagnose && read_zhushui_position_switch()) {
                 position_error_timer_clear();
-                position_error_timer_start(5);
-                printf(">>>LOOP_ZHUYE, go to LOOP_CHUBEI\r\n");
+                position_error_timer_start(10);
+                printf(">>>[self diagnos]LOOP_ZHUYE, go to LOOP_CHUBEI\r\n");
                 loop_state = LOOP_CHUBEI;
             } else if (read_zhushui_position_switch()) {    //到位检测
                 position_error_timer_clear();
@@ -171,7 +193,7 @@ void work_loop( void )
 
         case LOOP_CHUBEI://出杯过程
             printf(">>>LOOP_CHUBEI, go to LOOP_CHUBEI_DETECT\r\n");
-            position_error_timer_start(5);
+            position_error_timer_start(10);
             step_motor_move_forward(STEP_MOTOR_STEPS);      //驱动到取杯位置
             loop_state = LOOP_CHUBEI_DETECT;
             if (!self_diagnose) {
@@ -185,22 +207,24 @@ void work_loop( void )
                 if (self_diagnose) {
                     //自检流程回退到落杯位置
                     printf(">>>[self diagnos]LOOP_CHUBEI_DETECT, go to LOOP_LUOBEI\r\n");
-                    position_error_timer_start(5);
+                    position_error_timer_start(10);
                     step_motor_move_reverse(STEP_MOTOR_STEPS);
                     loop_state = LOOP_LUOBEI;
-                    self_diagnose = 0;          //自己流程结束
+                    self_diagnose = 0;          //自检流程结束
                 } else if (start_work || state_qubei_timeout) { //按下启动/复位开关 or 取杯超时
-                    printf(">>>LOOP_CHUBEI_DETECT, go to LOOP_QIBEI\r\n");
+                    printf(">>>LOOP_CHUBEI_DETECT, go to LOOP_QIBEI [%s]\r\n", start_work ? "start_work" : "qubei timeout");
                     loop_state = LOOP_QIBEI;
                     qubei_timer_init();
                 }
             }
             break;
 
-        case LOOP_QIBEI: //弃杯过程
+        case LOOP_QIBEI:
+            //弃杯过程，自检流程入口
+            //需要同时复位自检流程标记参数：self_diag_first_time_flag = 1, self_diagnose = 1;
             if (!read_qibei_position_switch()) {//不在弃杯位置，需要返回初始位置
                 printf(">>>1 LOOP_QIBEI, go to LOOP_IDLE\r\n");
-                position_error_timer_start(10);
+                position_error_timer_start(20);
                 step_motor_move_reverse(STEP_MOTOR_STEPS);
                 loop_state = LOOP_IDLE;
             } else {    //在弃杯位置，可以正常启动工作

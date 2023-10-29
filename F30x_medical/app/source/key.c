@@ -78,6 +78,16 @@ static FlagStatus key_read(key_switch key)
         case KEY_fuzi:
             data = gpio_input_bit_get(SWITCH_WATER_GPIO_PORT, SWITCH_WATER_PIN);
             break;
+
+        case KEY_N1s:
+            data = gpio_input_bit_get(N1S_LUOBEI_GPIO_PORT, N1S_LUOBEI_GPIO_PIN);
+            break;
+        case KEY_N2s:
+            data = gpio_input_bit_get(N2S_ZHUSHUI_GPIO_PORT, N2S_ZHUSHUI_GPIO_PIN);
+            break;
+        case KEY_N3s:
+            data = gpio_input_bit_get(N3S_CHUBEI_GPIO_PORT, N3S_CHUBEI_GPIO_PIN);
+            break;
         default: data = 0;
     }
 
@@ -134,6 +144,7 @@ static FlagStatus key_read_state(key_switch key)
 void key_process(void)
 {
     static uint8_t yb=0,fz=0;
+    static uint8_t state_N1s=0, state_N2s=0, state_N3s=0;
 
     /* drive mode up key is pressed */
     if(!key_read_debouncing(KEY_youbei)){
@@ -179,5 +190,46 @@ void key_process(void)
             }
         }
     }
+/*
+    /////中断冗余逻辑，安全保护
+    if(key_read_debouncing(KEY_N1s)){   //落杯位置到位中断
+        if (!state_N1s) {
+            printf("N1s 1\r\n");
+            g_exti_luobei_position_flag = 1;
+            state_N1s = 1;
+        }
+    } else {
+        if (state_N1s) {
+            printf("N1s 0\r\n");
+            state_N1s = 0;
+        }
+    }
+
+    if(key_read_debouncing(KEY_N2s)){
+        if (!state_N2s) {
+            printf("N2s 1\r\n");
+            state_N2s = 1;
+            g_exti_zhushui_position_flag = 1;
+        }
+    } else {
+        if (state_N2s) {
+            printf("N2s 0\r\n");
+            state_N2s = 0;
+        }
+    }
+
+    if(key_read_debouncing(KEY_N3s)){
+        if (!state_N3s) {
+            printf("N3s 1\r\n");
+            state_N3s = 1;
+            g_exti_chubei_position_flag = 1;
+        }
+    } else {
+        if (state_N3s) {
+            printf("N3s 0\r\n");
+            state_N3s = 0;
+        }
+    }
+    */
 }
 
