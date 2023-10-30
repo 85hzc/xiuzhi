@@ -90,12 +90,9 @@ int main(void)
         {
             bTimeFlag_5ms = 0;
 
-            // controller_msg_process();
-
             if (debug_rx_ok)
             {
                 debug_rx_ok = 0;
-                //printf("debug echo:%s\r\n", debug_rx_buffer_app);
                 debug_msg_process(debug_rx_buffer_app);
                 memset(debug_rx_buffer_app, 0, USART1_BUFFER_SIZE);
             }
@@ -104,9 +101,7 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
-
             controller_msg_process();
-
             EBI_calcPI(&pidParm);
         }
 

@@ -448,12 +448,12 @@ void controller_msg_process(void)
     // get payload info and one byte crc
     cnt = buffer_reads(pbuf, payload_len+1);
 
-    printf("\n recv [%d] data:\n", cnt+3);
+    /*printf("\n recv [%d] data:\n", cnt+3);
     for (size_t i = 0; i < cnt+3; i++)
     {
         printf("%02x ", msg[i]);
     }
-    printf("\n");
+    printf("\n");*/
 
     if (cnt < (payload_len+1))
     {
@@ -479,7 +479,7 @@ void controller_msg_process(void)
         {
         case COMM_RESPONSE_CMD:
             sg_lcd_status = pdata->payload[0];
-            printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
+            //printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
             if (sg_lcd_status == COMM_ACK_NORMAL)
             {
                 // if (sg_lcd_stage == COMM_UNCONN_STAGE)
@@ -1169,8 +1169,8 @@ void lcd_temperature_display(uint16_t temp)
         return;
     }
 
-    figure_msg_t imgs[4];
-    uint8_t figure_num = 4;
+    figure_msg_t imgs[3];
+    uint8_t figure_num = 3;
 
     _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_CELSIUS_SERIAL_NUMBER, imgs[0].figure_no);
     _u16_2_byte2_big_endian(324, imgs[0].x_coordinate);
@@ -1188,7 +1188,7 @@ void lcd_temperature_display(uint16_t temp)
         uint16_t sn = 0;
         uint16_t t1 = temp % 10;
         uint16_t t10 = temp / 10 % 10;
-        uint16_t t100 = temp / 10 % 10;
+        //uint16_t t100 = temp / 100 % 10;
 
         sn = lcd_get_image_serial_number(t1, IMAGE_TYPE_TEMPERATURE_SHOW);
         _u16_2_byte2_big_endian(sn, imgs[1].figure_no);
@@ -1199,11 +1199,11 @@ void lcd_temperature_display(uint16_t temp)
         _u16_2_byte2_big_endian(sn, imgs[2].figure_no);
         _u16_2_byte2_big_endian(286, imgs[2].x_coordinate);
         _u16_2_byte2_big_endian(204, imgs[2].y_coordinate);
-
+/*
         sn = lcd_get_image_serial_number(t100, IMAGE_TYPE_TEMPERATURE_SHOW);
         _u16_2_byte2_big_endian(sn, imgs[3].figure_no);
         _u16_2_byte2_big_endian(266, imgs[3].x_coordinate);
-        _u16_2_byte2_big_endian(204, imgs[3].y_coordinate);
+        _u16_2_byte2_big_endian(204, imgs[3].y_coordinate);*/
     }
 
     lcd_fill_bg_and_icon_cmd(imgs, figure_num);
@@ -1588,7 +1588,7 @@ void lcd_display_update(void)
     uint16_t v1 = water_set % 10;
     uint16_t v10 = water_set / 10 % 10;
     uint16_t v100 = water_set / 100 % 10;
-    uint16_t v1000 = water_set / 1000 % 10;
+    //uint16_t v1000 = water_set / 1000 % 10;
     _u16_2_byte2_big_endian(IMAGES_TOTAL_SET_ML_SERIAL_NUMBER, imgs[12].figure_no);
     _u16_2_byte2_big_endian(160, imgs[12].x_coordinate);
     _u16_2_byte2_big_endian(146, imgs[12].y_coordinate);
@@ -1607,28 +1607,28 @@ void lcd_display_update(void)
     _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
     _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
     _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
-
+/*
     sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
     _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
     _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
     _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
-
+*/
     // 显示稀释比例
     uint16_t r1 = enzyme_rate % 10;
     uint16_t r10 = enzyme_rate / 10 % 10;
-    _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_PERCENT_SERIAL_NUMBER, imgs[17].figure_no);
-    _u16_2_byte2_big_endian(317, imgs[17].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[17].y_coordinate);
+    _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_PERCENT_SERIAL_NUMBER, imgs[16].figure_no);
+    _u16_2_byte2_big_endian(317, imgs[16].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
 
     sn = lcd_get_image_serial_number(r1, IMAGE_TYPE_DILUTE_SET);
-    _u16_2_byte2_big_endian(sn, imgs[18].figure_no);
-    _u16_2_byte2_big_endian(296, imgs[18].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[18].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[17].figure_no);
+    _u16_2_byte2_big_endian(296, imgs[17].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[17].y_coordinate);
 
     sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
-    _u16_2_byte2_big_endian(sn, imgs[19].figure_no);
-    _u16_2_byte2_big_endian(275, imgs[19].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[19].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[18].figure_no);
+    _u16_2_byte2_big_endian(275, imgs[18].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[18].y_coordinate);
 
     // 显示出杯数量
     uint16_t c1 = cup_count % 10;
@@ -1636,26 +1636,26 @@ void lcd_display_update(void)
     uint16_t c100 = cup_count / 100 % 10;
     uint16_t c1000 = cup_count / 1000 % 10;
     sn = lcd_get_image_serial_number(c1, IMAGE_TYPE_MEASURE_DATA);
-    _u16_2_byte2_big_endian(sn, imgs[20].figure_no);
-    _u16_2_byte2_big_endian(209, imgs[20].x_coordinate);
-    _u16_2_byte2_big_endian(271, imgs[20].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[19].figure_no);
+    _u16_2_byte2_big_endian(209, imgs[19].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[19].y_coordinate);
 
     sn = lcd_get_image_serial_number(c10, IMAGE_TYPE_MEASURE_DATA);
-    _u16_2_byte2_big_endian(sn, imgs[21].figure_no);
-    _u16_2_byte2_big_endian(189, imgs[21].x_coordinate);
-    _u16_2_byte2_big_endian(271, imgs[21].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[20].figure_no);
+    _u16_2_byte2_big_endian(189, imgs[20].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[20].y_coordinate);
 
     sn = lcd_get_image_serial_number(c100, IMAGE_TYPE_MEASURE_DATA);
-    _u16_2_byte2_big_endian(sn, imgs[22].figure_no);
-    _u16_2_byte2_big_endian(169, imgs[22].x_coordinate);
-    _u16_2_byte2_big_endian(271, imgs[22].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[21].figure_no);
+    _u16_2_byte2_big_endian(169, imgs[21].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[21].y_coordinate);
 
     sn = lcd_get_image_serial_number(c1000, IMAGE_TYPE_MEASURE_DATA);
-    _u16_2_byte2_big_endian(sn, imgs[23].figure_no);
-    _u16_2_byte2_big_endian(149, imgs[23].x_coordinate);
-    _u16_2_byte2_big_endian(271, imgs[23].y_coordinate);
+    _u16_2_byte2_big_endian(sn, imgs[22].figure_no);
+    _u16_2_byte2_big_endian(149, imgs[22].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[22].y_coordinate);
 
-    lcd_fill_bg_and_icon_cmd(imgs, 24);
+    lcd_fill_bg_and_icon_cmd(imgs, 23);
     // // 显示温度
     // lcd_temperature_display(temperature_set);
     // // 显示默认设置

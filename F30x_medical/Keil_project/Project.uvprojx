@@ -501,7 +501,7 @@
             <File>
               <FileName>lcd_ctrl.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\xiuzhi\F30x_medical\app\source\lcd_ctrl.c</FilePath>
+              <FilePath>..\app\source\lcd_ctrl.c</FilePath>
             </File>
           </Files>
         </Group>
