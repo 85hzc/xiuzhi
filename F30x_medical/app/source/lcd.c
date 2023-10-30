@@ -189,7 +189,7 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
 
     if (delay_t <= 0)
     {
-        printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+        //printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
         return 0;
     }
 #endif // 0

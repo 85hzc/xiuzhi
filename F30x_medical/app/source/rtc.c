@@ -169,7 +169,6 @@ void time_display(uint32_t timevar)
     tmm = (timevar % 3600) / 60;
     /* compute seconds */
     tss = (timevar % 3600) % 60;
-
     printf(" Time: %0.2d:%0.2d:%0.2d\r\n", thh, tmm, tss);
 }
 

@@ -47,8 +47,9 @@ OF SUCH DAMAGE.
 typedef enum {
     KEY_youbei,
     KEY_fuzi,
-    //KEY_T1,
-    //KEY_T2,
+    KEY_N1s,
+    KEY_N2s,
+    KEY_N3s,
 } key_switch;
 
 /* function declarations */

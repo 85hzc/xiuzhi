@@ -137,14 +137,7 @@ int main(void)
             bTimeFlag_1s = 0;
 
             /* display time in loop */
-            time_show();
-
-            // lcd_time_display(rtc_counter_get());
-            // if (seconds++ >= 60)
-            // {
-            //     seconds = 0;
-            //     lcd_time_display(rtc_counter_get());
-            // }
+            lcd_time_display(rtc_counter_get());
 
             /* lcd status update */
             lcd_status_display();
