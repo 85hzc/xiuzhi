@@ -238,6 +238,9 @@ extern uint32_t position_error_count_times, temperature_error_count_times, jiazh
 extern float temperature, temperature_f, temperature_cb;
 extern uint16_t error_bits_flag;
 extern uint8_t start_work;
+extern uint8_t g_set_opt;
+extern uint8_t g_short_press;
+extern uint8_t g_long_press;
 
 extern void step_motor_move_forward(uint16_t steps);
 extern void step_motor_move_reverse(uint16_t steps);

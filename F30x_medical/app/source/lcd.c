@@ -411,6 +411,7 @@ void controller_msg_process(void)
     uint8_t msg[COM_BUFFER_SIZE] = {0};
     uint8_t *pbuf = msg;
     uint8_t cnt = 0;
+    uint8_t opt = 0;
 
     if (!buffer_read(&head) || head != COMM_HEADER)
     {
@@ -526,7 +527,7 @@ void controller_msg_process(void)
             printf("Screen version info:%s\n",pdata->payload);
             break;
         case COMM_OPT_BTN_OR_KNOBS_CMD:
-            uint8_t opt = pdata->payload[0];
+            opt = pdata->payload[0];
             printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
             report_operation_handle(opt);
             break;
@@ -1252,9 +1253,10 @@ void lcd_cup_num_display(uint16_t cups)
     lcd_fill_bg_and_icon_cmd(&imgs[1], 5);
 }
 
-void lcd_setting_display(uint16_t set_sn)
+void lcd_setting_display(uint8_t set_opt)
 {
-    printf("fun:%s line:%d set_sn:%x\n", __FUNCTION__, __LINE__,set_sn);
+    uint16_t sn = IMAGES_SETTING_TIME_SET_SERIAL_NUMBER;
+    printf("fun:%s line:%d set option:%x\n", __FUNCTION__, __LINE__,set_opt);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
@@ -1265,40 +1267,46 @@ void lcd_setting_display(uint16_t set_sn)
     uint16_t x = 0;
     uint16_t y = 0;
 
-    switch (set_sn)
+    switch (set_opt)
     {
-    case IMAGES_SETTING_CLEAR_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_CLEAR:
         x = 264;
         y = 297;
+        sn = IMAGES_SETTING_CLEAR_SET_SERIAL_NUMBER;
         break;
-    case IMAGES_SETTING_DILUTE_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_DILUTE:
         x = 162;
         y = 317;
+        sn = IMAGES_SETTING_DILUTE_SET_SERIAL_NUMBER;
         break;
-    case IMAGES_SETTING_RESET_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_RESET:
         x = 302;
         y = 257;
+        sn = IMAGES_SETTING_RESET_SET_SERIAL_NUMBER;
         break;
-    case IMAGES_SETTING_TEMPERATURE_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_TEMPERATURE:
         x = 216;
         y = 317;
+        sn = IMAGES_SETTING_TEMPERATURE_SET_SERIAL_NUMBER;
         break;
-    case IMAGES_SETTING_TIME_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_TIME:
         x = 76;
         y = 258;
+        sn = IMAGES_SETTING_TIME_SET_SERIAL_NUMBER;
         break;
-    case IMAGES_SETTING_TOTAL_SET_SERIAL_NUMBER:
+    case SETTING_OPTIONS_TATAL_VOLUME:
         x = 111;
         y = 295;
+        sn = IMAGES_SETTING_TOTAL_SET_SERIAL_NUMBER;
         break;
 
     default:
-        printf("fun:%s line:%d unknown setting sn:%x\n",__FUNCTION__,__LINE__,set_sn);
+        printf("fun:%s line:%d unknown setting option:%d\n",__FUNCTION__,__LINE__,set_opt);
         return;
         // break;
     }
 
-    _u16_2_byte2_big_endian(set_sn, imgs[0].figure_no);
+    _u16_2_byte2_big_endian(sn, imgs[0].figure_no);
     _u16_2_byte2_big_endian(x, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(y, imgs[0].y_coordinate);
 
@@ -1461,7 +1469,7 @@ void lcd_init_display(void)
     // 显示出杯数量
     lcd_cup_num_display(cup_count);
     // 显示默认设置
-    lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+    lcd_setting_display(SETTING_OPTIONS_TIME);
 #endif // 0
 }
 
@@ -1511,7 +1519,7 @@ void lcd_display_update(void)
         // 显示出杯数量
         lcd_cup_num_display(cup_count);
         // 显示默认设置
-        lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+        lcd_setting_display(SETTING_OPTIONS_TIME);
         break;
 
     default:

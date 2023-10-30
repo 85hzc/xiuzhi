@@ -55,6 +55,11 @@ uint8_t luobei_retry = 0, luobei_delay = 0;   //二次尝试取杯操作
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 uint32_t position_error_count_times = 0, temperature_error_count_times = 0, jiazhu_error_count_times = 0;
 
+// 设置选项默认在time位置,可选保存flash使其具有记忆功能
+uint8_t g_set_opt = SETTING_OPTIONS_TIME;
+uint8_t g_short_press = 0;
+uint8_t g_long_press = 0;
+
 /* global structure */
 flash_page_type page_type;
 Loop_State_e loop_state = LOOP_QIBEI;    //机器运行状态机

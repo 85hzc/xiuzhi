@@ -164,7 +164,19 @@ typedef enum
     IMAGE_TYPE_TEMPERATURE_SHOW,
     IMAGE_TYPE_TIME_SHOW,
     IMAGE_TYPE_TOTAL_SET,
-} image_type_e;
+} image_number_type_e;
+
+/** 设置类型枚举 */
+typedef enum
+{
+    SETTING_OPTIONS_TIME,
+    SETTING_OPTIONS_TATAL_VOLUME,
+    SETTING_OPTIONS_DILUTE,
+    SETTING_OPTIONS_TEMPERATURE,
+    SETTING_OPTIONS_CLEAR,
+    SETTING_OPTIONS_RESET,
+    SETTING_OPTIONS_NONE,
+} setting_option_type_e;
 
 /** 与旋钮屏通信协议命令码定义 */
 typedef enum
@@ -256,7 +268,7 @@ void lcd_dilute_ratio_display(uint16_t ratio);
 void lcd_running_status_display(uint16_t status_sn);
 void lcd_temperature_display(uint16_t temp);
 void lcd_cup_num_display(uint16_t cups);
-void lcd_setting_display(uint16_t set_sn);
+void lcd_setting_display(uint8_t set_opt);
 void lcd_main_bg_display(void);
 void lcd_main_circle_bg_display(void);
 void lcd_main_menu_bg_display(void);

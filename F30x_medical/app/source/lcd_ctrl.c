@@ -206,6 +206,136 @@ void CW_press_handle( void )
     }
 }
 
+#if 1
+void report_operation_handle(uint8_t opt)
+{
+    printf("fun:%s line:%d operation:%x g_short_press:%d\n",__FUNCTION__,__LINE__,opt,g_short_press);
+    if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
+    {
+        if (0 == g_short_press)
+            g_set_opt = (g_set_opt + 1) % SETTING_OPTIONS_NONE;
+    }
+    else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
+    {
+        if (0 == g_short_press)
+            g_set_opt = (g_set_opt - 1) % SETTING_OPTIONS_NONE;
+    }
+    else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+    {
+        g_short_press = 1;
+    }
+    else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
+    {
+        g_long_press = 1;
+    }
+
+    if (g_short_press)
+    {
+        switch (g_set_opt)
+        {
+        case SETTING_OPTIONS_TIME:
+            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
+            {
+                // time increase
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
+            {
+                // time decrease
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                g_short_press = 0;
+                // save and sync
+            }
+            break;
+        case SETTING_OPTIONS_TATAL_VOLUME:
+            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
+            {
+                // total volume increase
+                water_set = (water_set + 1) % 10000;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
+            {
+                // total volume decrease
+                water_set = (water_set - 1) % 10000;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                g_short_press = 0;
+                // save and sync
+            }
+            break;
+        case SETTING_OPTIONS_DILUTE:
+            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
+            {
+                // enzyme_rate increase
+                enzyme_rate = (enzyme_rate + 1) % 100;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
+            {
+                // enzyme_rate decrease
+                enzyme_rate = (enzyme_rate - 1) % 100;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                g_short_press = 0;
+                // save and sync
+            }
+            break;
+        case SETTING_OPTIONS_TEMPERATURE:
+            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
+            {
+                // temperature_set increase
+                temperature_set = (temperature_set + 1) % 1000;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
+            {
+                // temperature_set decrease
+                temperature_set = (temperature_set - 1) % 1000;
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                g_short_press = 0;
+                // save and sync
+            }
+            break;
+        case SETTING_OPTIONS_CLEAR:
+            if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                // clear what you want to
+                g_short_press = 0;
+                // save and sync
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
+            {
+                // clear what you want to
+                g_short_press = 0;
+                g_long_press = 0;
+                // save and sync
+            }
+            break;
+        case SETTING_OPTIONS_RESET:
+            if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
+            {
+                // reset what you want to
+                g_short_press = 0;
+                // save and sync
+            }
+            else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
+            {
+                // reset what you want to
+                g_short_press = 0;
+                g_long_press = 0;
+                // save and sync
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+#else
 
 void report_operation_handle(uint8_t opt)
 {
@@ -227,3 +357,4 @@ void report_operation_handle(uint8_t opt)
             break;
     }
 }
+#endif // 0

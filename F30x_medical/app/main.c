@@ -133,7 +133,7 @@ int main(void)
             // 显示温度
             lcd_temperature_display(temperature_set);
             // 显示默认设置
-            lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+            lcd_setting_display(g_set_opt);
             lcd_time_display(rtc_counter_get());
             /* lcd status update */
             lcd_status_display();
