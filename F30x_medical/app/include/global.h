@@ -52,6 +52,7 @@ OF SUCH DAMAGE.
 #include "flash.h"
 #include "app_exti.h"
 #include "usart2.h"
+#include "lcd_ctrl.h"
 
 #include "type.h"
 #include "timeflag.h"
