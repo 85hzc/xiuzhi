@@ -82,7 +82,7 @@ int main(void)
     config_init();
     self_test_init();
     // init knob screen display
-    // lcd_init_display();
+    lcd_init_display();
 
     while(1){
 
@@ -104,6 +104,8 @@ int main(void)
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
+
+            // lcd_display_update();
 
             controller_msg_process();
 
@@ -139,17 +141,14 @@ int main(void)
             /* display time in loop */
             time_show();
 
-            // lcd_time_display(rtc_counter_get());
-            // if (seconds++ >= 60)
-            // {
-            //     seconds = 0;
-            //     lcd_time_display(rtc_counter_get());
-            // }
-
+            lcd_display_update();
+            // 显示温度
+            lcd_temperature_display(temperature_set);
+            // 显示默认设置
+            lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+            lcd_time_display(rtc_counter_get());
             /* lcd status update */
             lcd_status_display();
-
-            lcd_display_update();
 
             if (cup_flag) {
                 cup_flag = 0;

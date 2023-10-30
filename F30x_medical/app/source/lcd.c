@@ -408,6 +408,7 @@ void controller_msg_process(void)
     uint8_t payload_len;
     uint8_t msg[COM_BUFFER_SIZE] = {0};
     uint8_t *pbuf = msg;
+    uint8_t cnt = 0;
 
     if (!buffer_read(&head) || head != COMM_HEADER)
     {
@@ -427,7 +428,11 @@ void controller_msg_process(void)
     // 经多次验证cmd为COMM_FILL_BG_AND_ICON_COMPLETE_CMD时,数据不按照协议实现 故需做特殊处理
     if (COMM_FILL_BG_AND_ICON_COMPLETE_CMD == cmd)
     {
-        lcd_screen_display_ctrl(COMM_CTRL_DISPLAY_ON);
+        cnt = buffer_reads(pbuf, 3);
+        if (cnt == 3 && pbuf[0] == 0xF2 && pbuf[1] == 0x00 && pbuf[2] == 0x1A)
+        {
+            lcd_screen_display_ctrl(COMM_CTRL_DISPLAY_ON);
+        }
         return;
     }
 
@@ -439,14 +444,14 @@ void controller_msg_process(void)
     *pbuf = payload_len;
     pbuf++;
     // get payload info and one byte crc
-    uint8_t cnt = buffer_reads(pbuf, payload_len+1);
+    cnt = buffer_reads(pbuf, payload_len+1);
 
-    // printf("\n recv [%d] data:\n", cnt+3);
-    // for (size_t i = 0; i < cnt+3; i++)
-    // {
-    //     printf("%02x ", msg[i]);
-    // }
-    // printf("\n");
+    printf("\n recv [%d] data:\n", cnt+3);
+    for (size_t i = 0; i < cnt+3; i++)
+    {
+        printf("%02x ", msg[i]);
+    }
+    printf("\n");
 
     if (cnt < (payload_len+1))
     {
@@ -472,16 +477,44 @@ void controller_msg_process(void)
         {
         case COMM_RESPONSE_CMD:
             sg_lcd_status = pdata->payload[0];
-            // printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
+            printf("fun:%s line:%d sg_lcd_status:%x\n",__FUNCTION__,__LINE__,sg_lcd_status);
             if (sg_lcd_status == COMM_ACK_NORMAL)
             {
-                if (sg_lcd_stage == COMM_UNCONN_STAGE)
+                // if (sg_lcd_stage == COMM_UNCONN_STAGE)
+                // {
+                //     // sg_lcd_stage = COMM_INIT_CONN_STAGE;
+                //     sg_lcd_stage = COMM_FILL_MAIN_BG_STAGE;
+                // }
+                // else if (sg_lcd_stage == COMM_DIS_CONN_STAGE)
+                // {
+                //     sg_lcd_stage = COMM_CONN_STAGE;
+                // }
+                switch (sg_lcd_stage)
                 {
-                    sg_lcd_stage = COMM_INIT_CONN_STAGE;
-                }
-                else if (sg_lcd_stage == COMM_DIS_CONN_STAGE)
-                {
+                case COMM_UNCONN_STAGE:
+                    sg_lcd_stage = COMM_FILL_MAIN_BG_STAGE;
+                    break;
+                case COMM_FILL_MAIN_BG_STAGE:
+                    sg_lcd_stage = COMM_FILL_MAIN_CIRCLE_BG_STAGE;
+                    break;
+                case COMM_FILL_MAIN_CIRCLE_BG_STAGE:
+                    sg_lcd_stage = COMM_FILL_MAIN_MENU_BG_STAGE;
+                    break;
+                case COMM_FILL_MAIN_MENU_BG_STAGE:
+                    sg_lcd_stage = COMM_FILL_MAIN_MIDDLE_BG_STAGE;
+                    break;
+                case COMM_FILL_MAIN_MIDDLE_BG_STAGE:
+                    sg_lcd_stage = COMM_FILL_MAIN_CUP_BG_STAGE;
+                    break;
+                case COMM_FILL_MAIN_CUP_BG_STAGE:
                     sg_lcd_stage = COMM_CONN_STAGE;
+                    break;
+                case COMM_DIS_CONN_STAGE:
+                    sg_lcd_stage = COMM_CONN_STAGE;
+                    break;
+
+                default:
+                    break;
                 }
             }
 
@@ -509,7 +542,7 @@ void controller_msg_process(void)
 
 void notice_flash(uint8_t idx)
 {
-    printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
+    // printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
     if (idx == POSITION_ERROR) {
         //显示“走位错误”
         lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER);
@@ -1076,13 +1109,19 @@ void lcd_dilute_ratio_display(uint16_t ratio)
 
 void lcd_running_status_display(uint16_t status_sn)
 {
-    printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
+    if (sg_lcd_stage != COMM_CONN_STAGE)
+    {
+        return;
+    }
+
+    // printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
         return;
     }
 
+    printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
     figure_msg_t imgs[2];
     uint16_t x = 0;
     uint16_t y = 203;
@@ -1386,15 +1425,16 @@ void lcd_main_cup_bg_display()
     lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
-void lcd_init_display()
+void lcd_init_display(void)
 {
-    // // 建立连接
-    // if (lcd_check_conn_status() == COMM_DISCONN)
-    // {
-    //     lcd_conn_opt(COMM_CONN);
-    //     return;
-    // }
+    // 建立连接
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+        return;
+    }
 
+#if 0
     // 显示主屏背景
     lcd_main_bg_display();
     // 显示背景大圆圈 可选自己喜欢的颜色
@@ -1420,22 +1460,202 @@ void lcd_init_display()
     lcd_cup_num_display(cup_count);
     // 显示默认设置
     lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+#endif // 0
 }
+
+#if 0
+void lcd_display_update(void)
+{
+    // 建立连接
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+        return;
+    }
+
+    switch (sg_lcd_stage)
+    {
+    case COMM_FILL_MAIN_BG_STAGE:
+        // 显示主屏背景
+        lcd_main_bg_display();
+        break;
+    case COMM_FILL_MAIN_CIRCLE_BG_STAGE:
+        // 显示背景大圆圈 可选自己喜欢的颜色
+        lcd_main_circle_bg_display();
+        break;
+    case COMM_FILL_MAIN_MENU_BG_STAGE:
+        // 显示底部菜单背景图标
+        lcd_main_menu_bg_display();
+        break;
+    case COMM_FILL_MAIN_MIDDLE_BG_STAGE:
+        // 显示中间信息背景图标
+        lcd_main_middle_bg_display();
+        break;
+    case COMM_FILL_MAIN_CUP_BG_STAGE:
+        // 显示中间杯背景图标
+        lcd_main_cup_bg_display();
+        break;
+    case COMM_CONN_STAGE:
+        // 显示时间
+        lcd_time_display(rtc_counter_get());
+        // 显示总容量
+        lcd_total_volume_display(water_set);
+        // 显示稀释比例
+        lcd_dilute_ratio_display(enzyme_rate);
+        // 显示运行状态
+        lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER);
+        // 显示温度
+        lcd_temperature_display(temperature_set);
+        // 显示出杯数量
+        lcd_cup_num_display(cup_count);
+        // 显示默认设置
+        lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+        break;
+
+    default:
+        break;
+    }
+}
+#endif // 0
 
 void lcd_display_update(void)
 {
-    // 显示时间
-    lcd_time_display(rtc_counter_get());
+    uint16_t sn = 0;
+    // 建立连接
+    if (lcd_check_conn_status() == COMM_DISCONN)
+    {
+        lcd_conn_opt(COMM_CONN);
+        return;
+    }
+
+    figure_msg_t imgs[24];
+
+    // 显示黑屏大背景
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BACKGROUND_BLACK_SERIAL_NUMBER, imgs[0].figure_no);
+    _u16_2_byte2_big_endian(0, imgs[0].x_coordinate);
+    _u16_2_byte2_big_endian(0, imgs[0].y_coordinate);
+
+    // 显示背景大圆圈 可选自己喜欢的颜色
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_CIRCLE_GREEN_SERIAL_NUMBER, imgs[1].figure_no);
+    _u16_2_byte2_big_endian(8, imgs[1].x_coordinate);
+    _u16_2_byte2_big_endian(8, imgs[1].y_coordinate);
+
+    // 显示底部菜单背景图标
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BOTTOM_MENU_SERIAL_NUMBER, imgs[2].figure_no);
+    _u16_2_byte2_big_endian(25, imgs[2].x_coordinate);
+    _u16_2_byte2_big_endian(197, imgs[2].y_coordinate);
+
+    // 显示中间总容量信息图标
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_TOTAL_SET_BG_SERIAL_NUMBER, imgs[3].figure_no);
+    _u16_2_byte2_big_endian(38, imgs[3].x_coordinate);
+    _u16_2_byte2_big_endian(141, imgs[3].y_coordinate);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_TOTAL_CAPACITY_SERIAL_NUMBER, imgs[4].figure_no);
+    _u16_2_byte2_big_endian(48, imgs[4].x_coordinate);
+    _u16_2_byte2_big_endian(147, imgs[4].y_coordinate);
+
+    // 显示中间稀释比例信息图标
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_DILUTE_SET_BG_SERIAL_NUMBER, imgs[5].figure_no);
+    _u16_2_byte2_big_endian(209, imgs[5].x_coordinate);
+    _u16_2_byte2_big_endian(141, imgs[5].y_coordinate);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_DILUTE_RATIO_SERIAL_NUMBER, imgs[6].figure_no);
+    _u16_2_byte2_big_endian(216, imgs[6].x_coordinate);
+    _u16_2_byte2_big_endian(147, imgs[6].y_coordinate);
+
+    // 显示中间运行状态信息图标
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_STATUS_SET_BG_SERIAL_NUMBER, imgs[7].figure_no);
+    _u16_2_byte2_big_endian(38, imgs[7].x_coordinate);
+    _u16_2_byte2_big_endian(197, imgs[7].y_coordinate);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_STATUS_SERIAL_NUMBER, imgs[8].figure_no);
+    _u16_2_byte2_big_endian(46, imgs[8].x_coordinate);
+    _u16_2_byte2_big_endian(202, imgs[8].y_coordinate);
+
+    // 显示中间温度信息图标
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_TEMPERATURE_SET_BG_SERIAL_NUMBER, imgs[9].figure_no);
+    _u16_2_byte2_big_endian(210, imgs[9].x_coordinate);
+    _u16_2_byte2_big_endian(197, imgs[9].y_coordinate);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_TEMPERATURE_SERIAL_NUMBER, imgs[10].figure_no);
+    _u16_2_byte2_big_endian(220, imgs[10].x_coordinate);
+    _u16_2_byte2_big_endian(201, imgs[10].y_coordinate);
+
+    // 显示中间杯图标
+    _u16_2_byte2_big_endian(IMAGES_MEASURE_DATA_CUP_SERIAL_NUMBER, imgs[11].figure_no);
+    _u16_2_byte2_big_endian(240, imgs[11].x_coordinate);
+    _u16_2_byte2_big_endian(282, imgs[11].y_coordinate);
+
     // 显示总容量
-    lcd_total_volume_display(water_set);
+    uint16_t v1 = water_set % 10;
+    uint16_t v10 = water_set / 10 % 10;
+    uint16_t v100 = water_set / 100 % 10;
+    uint16_t v1000 = water_set / 1000 % 10;
+    _u16_2_byte2_big_endian(IMAGES_TOTAL_SET_ML_SERIAL_NUMBER, imgs[12].figure_no);
+    _u16_2_byte2_big_endian(160, imgs[12].x_coordinate);
+    _u16_2_byte2_big_endian(146, imgs[12].y_coordinate);
+
+    sn = lcd_get_image_serial_number(v1, IMAGE_TYPE_TOTAL_SET);
+    _u16_2_byte2_big_endian(sn, imgs[13].figure_no);
+    _u16_2_byte2_big_endian(139, imgs[13].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[13].y_coordinate);
+
+    sn = lcd_get_image_serial_number(v10, IMAGE_TYPE_TOTAL_SET);
+    _u16_2_byte2_big_endian(sn, imgs[14].figure_no);
+    _u16_2_byte2_big_endian(120, imgs[14].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[14].y_coordinate);
+
+    sn = lcd_get_image_serial_number(v100, IMAGE_TYPE_TOTAL_SET);
+    _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
+    _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
+
+    sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
+    _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
+    _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
+
     // 显示稀释比例
-    lcd_dilute_ratio_display(enzyme_rate);
-    // 显示运行状态
-    lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER);
-    // 显示温度
-    lcd_temperature_display(temperature_set);
+    uint16_t r1 = enzyme_rate % 10;
+    uint16_t r10 = enzyme_rate / 10 % 10;
+    _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_PERCENT_SERIAL_NUMBER, imgs[17].figure_no);
+    _u16_2_byte2_big_endian(317, imgs[17].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[17].y_coordinate);
+
+    sn = lcd_get_image_serial_number(r1, IMAGE_TYPE_DILUTE_SET);
+    _u16_2_byte2_big_endian(sn, imgs[18].figure_no);
+    _u16_2_byte2_big_endian(296, imgs[18].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[18].y_coordinate);
+
+    sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
+    _u16_2_byte2_big_endian(sn, imgs[19].figure_no);
+    _u16_2_byte2_big_endian(275, imgs[19].x_coordinate);
+    _u16_2_byte2_big_endian(148, imgs[19].y_coordinate);
+
     // 显示出杯数量
-    lcd_cup_num_display(cup_count);
-    // 显示默认设置
-    lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
+    uint16_t c1 = cup_count % 10;
+    uint16_t c10 = cup_count / 10 % 10;
+    uint16_t c100 = cup_count / 100 % 10;
+    uint16_t c1000 = cup_count / 1000 % 10;
+    sn = lcd_get_image_serial_number(c1, IMAGE_TYPE_MEASURE_DATA);
+    _u16_2_byte2_big_endian(sn, imgs[20].figure_no);
+    _u16_2_byte2_big_endian(209, imgs[20].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[20].y_coordinate);
+
+    sn = lcd_get_image_serial_number(c10, IMAGE_TYPE_MEASURE_DATA);
+    _u16_2_byte2_big_endian(sn, imgs[21].figure_no);
+    _u16_2_byte2_big_endian(189, imgs[21].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[21].y_coordinate);
+
+    sn = lcd_get_image_serial_number(c100, IMAGE_TYPE_MEASURE_DATA);
+    _u16_2_byte2_big_endian(sn, imgs[22].figure_no);
+    _u16_2_byte2_big_endian(169, imgs[22].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[22].y_coordinate);
+
+    sn = lcd_get_image_serial_number(c1000, IMAGE_TYPE_MEASURE_DATA);
+    _u16_2_byte2_big_endian(sn, imgs[23].figure_no);
+    _u16_2_byte2_big_endian(149, imgs[23].x_coordinate);
+    _u16_2_byte2_big_endian(271, imgs[23].y_coordinate);
+
+    lcd_fill_bg_and_icon_cmd(imgs, 24);
+    // // 显示温度
+    // lcd_temperature_display(temperature_set);
+    // // 显示默认设置
+    // lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
 }
