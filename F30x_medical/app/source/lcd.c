@@ -12,6 +12,8 @@ static uint8_t sg_lcd_stage = COMM_UNCONN_STAGE;
 static uint8_t sg_lcd_status = COMM_ACK_NORMAL;
 
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
+extern void report_operation_handle(uint8_t opt);
+
 
 static void _u16_2_byte2_big_endian(unsigned short value, unsigned char *buf)
 {
@@ -524,9 +526,9 @@ void controller_msg_process(void)
             printf("Screen version info:%s\n",pdata->payload);
             break;
         case COMM_OPT_BTN_OR_KNOBS_CMD:
-            // uint8_t opt = pdata->payload[0];
+            uint8_t opt = pdata->payload[0];
             printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
-            // report_operation_handle(opt);
+            report_operation_handle(opt);
             break;
         case COMM_FILL_BG_AND_ICON_COMPLETE_CMD:
             printf("fill the graph ok\n");

@@ -105,8 +105,6 @@ int main(void)
         {
             bTimeFlag_50ms = 0;
 
-            // lcd_display_update();
-
             controller_msg_process();
 
             EBI_calcPI(&pidParm);
@@ -121,7 +119,7 @@ int main(void)
             #endif
             /* key process routine */
             key_process();
-            work_loop();
+            //work_loop();
         }
 
         if (bTimeFlag_500ms)
@@ -129,17 +127,12 @@ int main(void)
             bTimeFlag_500ms = 0;
 
             ebike_check_warning();
-            //display_process();
-            //led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
-            heat_running();
+            //heat_running();
         }
 
         if (bTimeFlag_1s)
         {
             bTimeFlag_1s = 0;
-
-            /* display time in loop */
-            time_show();
 
             lcd_display_update();
             // 显示温度

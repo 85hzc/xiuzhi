@@ -187,6 +187,12 @@ void debug_msg_process(uint8_t *msg)
 
         case 14:
             printf_exti_flags();
+            break;
+
+        case 15:
+            printf("[AD]temperature:%.1f  %.1f, pwm=%d\r\n", temperature_f, temperature_cb, (uint32_t)pidParm.qOut);
+            break;
+
         default:
             break;
     }
