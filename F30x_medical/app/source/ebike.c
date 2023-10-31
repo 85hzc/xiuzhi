@@ -9,6 +9,7 @@
 uint16_t error_bits_flag = 0;
 float temperature = 0.0, temperature_f = 0.0, temperature_cb = 0.0;;
 PID_Parm pidParm;
+uint16_t water_set;         //注水纯水容量 （ml）
 
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
 void beep_on( void );
@@ -24,9 +25,9 @@ void config_init( void )
     cup_count = fmc_data[0][0]<<8 | fmc_data[0][1];
     
     water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
-    enzyme_count_times = ( (water_set * enzyme_rate/100.0f) / (float)(100.0 - enzyme_rate) ) * 1000; //流速：1 ml/s
+    enzyme_count_times = (water_set * enzyme_rate/1000.0f)  * 1000; //流速：1 ml/s
 
-    printf("water: %d ml, enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, enzyme_rate
+    printf("water: %d ml(%d), enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, water_count_signals, enzyme_rate
             , temperature_set, cup_count);
 
     memset(&pidParm, 0, sizeof(PID_Parm));

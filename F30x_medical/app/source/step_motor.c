@@ -82,9 +82,9 @@ void step_motor_move_forward(uint16_t steps)
 
     for (i=0,step=0; i<steps; i++)
     {
-        if (g_exti_luobei_position_flag ||
-            g_exti_chubei_position_flag ||
-            g_exti_zhushui_position_flag ||
+        if (((loop_state == LOOP_LUOBEI) && g_exti_luobei_position_flag ) ||
+            ((loop_state == LOOP_CHUBEI_DETECT) && g_exti_chubei_position_flag ) ||
+            ((loop_state == LOOP_ZHUYE) && g_exti_zhushui_position_flag ) ||
             state_position_error_timeout) {
             printf_exti_flags();
             clear_position_flags();
@@ -106,7 +106,8 @@ void step_motor_move_reverse(uint16_t steps)
     {
         if (g_exti_qibei_position_flag ||
             state_position_error_timeout ||
-            (self_diagnose && g_exti_luobei_position_flag && !self_diag_first_time_flag)) {
+            ((loop_state == LOOP_LUOBEI) && self_diagnose && 
+                g_exti_luobei_position_flag && !self_diag_first_time_flag)) {
             printf_exti_flags();
             clear_position_flags();
             drv_motor_move_execute(MOVE_STEP_S);

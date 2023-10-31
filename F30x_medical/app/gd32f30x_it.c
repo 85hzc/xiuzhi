@@ -198,7 +198,7 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_9);
         joggle_delay(10000);
         if(SET == gpio_input_bit_get(VELOCITY_GPIO_PORT, VELOCITY_GPIO_PIN)){
-            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
+            led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
             g_water_count++;
 
             if (g_water_count > water_count_signals) {

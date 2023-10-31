@@ -8,7 +8,6 @@
 
 static uint16_t delay_joggle = 0;
 uint16_t cup_count, cup_flag; //统计数量 （杯）
-uint16_t water_set;         //注水纯水容量 （ml）
 
 /*!
     \brief      initialize the TOR port
