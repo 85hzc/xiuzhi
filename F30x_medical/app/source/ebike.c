@@ -11,7 +11,6 @@ float temperature = 0.0, temperature_f = 0.0, temperature_cb = 0.0;;
 PID_Parm pidParm;
 uint16_t water_set;         //注水纯水容量 （ml）
 
-extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
 void beep_on( void );
 void beep_off( void );
 
@@ -23,7 +22,6 @@ void config_init( void )
     enzyme_rate = fmc_data[0][3];
     temperature_set = fmc_data[0][2];
     cup_count = fmc_data[0][0]<<8 | fmc_data[0][1];
-    
     water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
     enzyme_count_times = (water_set * enzyme_rate/1000.0f)  * 1000; //流速：1 ml/s
 
@@ -38,6 +36,10 @@ void config_init( void )
     pidParm.qKc = 0.1;
     pidParm.qOutMax = TEMPERATURE_PWM_MAX;   //PWM占空比0-500范围，限制功率80%，设置最大400
     pidParm.qOutMin = TEMPERATURE_PWM_MIN;
+
+    lcd_temperature_set = temperature_set;
+    lcd_water_set = water_set;
+    lcd_enzyme_rate = enzyme_rate;
 }
 
 //校验和计算

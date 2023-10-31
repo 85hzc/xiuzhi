@@ -21,10 +21,10 @@
 
 #define COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS (0x01)
 #define COMM_OPT_BTN_OR_KNOBS_LONG_PRESS (0x02)
-// 左旋即用户正面面对旋钮模组屏逆时针旋转
-#define COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE (0x03)
-// 右旋即用户正面面对旋钮模组屏顺时针旋转
-#define COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE (0x04)
+// 用户正面面对旋钮模组屏逆时针旋转
+#define COMM_OPT_BTN_OR_KNOBS_CCW_ROTATE (0x03)
+// 用户正面面对旋钮模组屏顺时针旋转
+#define COMM_OPT_BTN_OR_KNOBS_CW_ROTATE (0x04)
 
 #define COMM_MAX_RESEND_TIMES (3)
 #define COMM_MAX_DELAY_TIME (50*2)
@@ -174,8 +174,8 @@ typedef enum
     SETTING_OPTIONS_DILUTE,
     SETTING_OPTIONS_TEMPERATURE,
     SETTING_OPTIONS_CLEAR,
-    SETTING_OPTIONS_RESET,
-    SETTING_OPTIONS_NONE,
+    SETTING_OPTIONS_INJECT,
+    SETTING_OPTIONS_MAX_NUM
 } setting_option_type_e;
 
 /** 与旋钮屏通信协议命令码定义 */

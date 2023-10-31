@@ -9,12 +9,12 @@
 #include "string.h"
 
 ctrl_opt_type_e ctrlOptType = OPT_TYPE_SELECT;
-ctrl_func_opt_e ctrlFuncOpt = WATER_FUNC_SET;
+setting_option_type_e ctrlFuncOpt = SETTING_OPTIONS_TATAL_VOLUME;
 ctrl_clock_domain_type_e clockSetDomain = CLOCK_HOUR;
 
 uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
-
+uint8_t lcd_enzyme_rate, lcd_temperature_set;
 
 void short_press_handle( void )
 {
@@ -25,27 +25,27 @@ void short_press_handle( void )
 
         switch (ctrlFuncOpt) {
 
-            case CLOCK_FUNC_SET:
+            case SETTING_OPTIONS_TIME:
                 clockSetDomain = CLOCK_HOUR;
                 lcd_timestamp_set = rtc_counter_get();
                 break;
             
-            case WATER_FUNC_SET:
+            case SETTING_OPTIONS_TATAL_VOLUME:
+                lcd_water_set = water_set;
                 break;
-
-            case ENZYME_FUNC_SET:
+            case SETTING_OPTIONS_DILUTE:
+                lcd_enzyme_rate = enzyme_rate;
                 break;
-
-            case TEMP_FUNC_SET:
+            case SETTING_OPTIONS_TEMPERATURE:
+                lcd_temperature_set = temperature_set;
                 break;
-
-            case CLEAR_FUNC_SET:
+            case SETTING_OPTIONS_CLEAR:
+                cup_count = 0;
+                flash_value_flash();
+                config_init();
                 break;
-
-            case RESET_FUNC_SET:
-                break;
-
-            case ENZYME_INJECT_FUNC_SET:
+            case SETTING_OPTIONS_INJECT:
+                //TODO
                 break;
         }
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
@@ -53,7 +53,7 @@ void short_press_handle( void )
         ctrlOptType = OPT_TYPE_SELECT;
 
         switch (ctrlFuncOpt) {
-            case CLOCK_FUNC_SET:
+            case SETTING_OPTIONS_TIME:
                 if (clockSetDomain == CLOCK_MINUTE) {
                     /* RTC configuration */
                     printf("RTC reconfigured....\r\n");
@@ -71,26 +71,29 @@ void short_press_handle( void )
                 }
                 break;
 
-            case WATER_FUNC_SET:
+            case SETTING_OPTIONS_TATAL_VOLUME:
                 water_set = lcd_water_set;
                 flash_value_flash();
                 config_init();
                 break;
 
-            case ENZYME_FUNC_SET:
+            case SETTING_OPTIONS_DILUTE:
+                enzyme_rate = lcd_enzyme_rate;
+                flash_value_flash();
+                config_init();
                 break;
 
-            case TEMP_FUNC_SET:
+            case SETTING_OPTIONS_TEMPERATURE:
+                temperature_set = lcd_temperature_set;
+                flash_value_flash();
+                config_init();
                 break;
-
-            case CLEAR_FUNC_SET:
+            /*
+            case SETTING_OPTIONS_CLEAR:
                 break;
-
-            case RESET_FUNC_SET:
+            case SETTING_OPTIONS_INJECT:
                 break;
-
-            case ENZYME_INJECT_FUNC_SET:
-                break;
+            */
         }
     }
 }
@@ -100,57 +103,58 @@ void long_press_handle( void )
 {
     //  TODO:
     //  factory reset
+    printf("long press\r\n");
 }
-
 
 
 void CCW_press_handle( void )
 {
 
-    if (ctrlOptType == OPT_TYPE_SELECT) {   //功能选择模式，逆时针旋转进入功能项
+    if (ctrlOptType == OPT_TYPE_SELECT) {                       //功能选择模式，逆时针旋转进入功能项
 
-        if (ctrlFuncOpt < ENZYME_INJECT_FUNC_SET) {
-            ctrlFuncOpt = ctrlFuncOpt + 1;
+        if (ctrlFuncOpt == SETTING_OPTIONS_INJECT) {
+            ctrlFuncOpt = SETTING_OPTIONS_TIME;
+        } else {
+            ctrlFuncOpt = (ctrlFuncOpt + 1) % SETTING_OPTIONS_MAX_NUM;
         }
-    } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
+    } else if (ctrlOptType == OPT_TYPE_SET) {                   //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 
         switch (ctrlFuncOpt) {
-            case CLOCK_FUNC_SET:
+            case SETTING_OPTIONS_TIME:
 
                 if (clockSetDomain == CLOCK_MINUTE) {
 
                     //uint16_t seconds = (lcd_timestamp_set % 3600) % 60;
-                    //uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
-                    //uint16_t hours = lcd_timestamp_set / 3600;
-                    if (lcd_timestamp_set > 60)
+                    uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
+                    uint16_t hours = lcd_timestamp_set / 3600;
+                    printf("time:%2d:%2d\r\n",hours,minutes);
+                    if (minutes > 0)
                         lcd_timestamp_set = lcd_timestamp_set - 60;
+                } else if (clockSetDomain == CLOCK_HOUR){
 
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
                     printf("time:%2d:%2d\r\n",hours,minutes);
-                } else {
-
-                    if (lcd_timestamp_set > 3600)
+                    if (hours > 0)
                         lcd_timestamp_set = lcd_timestamp_set - 3600;
-
-                    uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
-                    uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                 }
 
                 break;
-            case WATER_FUNC_SET:
+            case SETTING_OPTIONS_TATAL_VOLUME:
+                lcd_water_set++;
                 break;
-            case ENZYME_FUNC_SET:
+            case SETTING_OPTIONS_DILUTE:
+                lcd_enzyme_rate++;
                 break;
-            case TEMP_FUNC_SET:
+            case SETTING_OPTIONS_TEMPERATURE:
+                lcd_temperature_set++;
                 break;
-            case CLEAR_FUNC_SET:
+            /*
+            case SETTING_OPTIONS_CLEAR:
                 break;
-            case RESET_FUNC_SET:
+            case SETTING_OPTIONS_INJECT:
                 break;
-            case ENZYME_INJECT_FUNC_SET:
-                break;
+            */
         }
     }
 }
@@ -162,199 +166,87 @@ void CW_press_handle( void )
 
     if (ctrlOptType == OPT_TYPE_SELECT) {   //功能选择模式，厂按进入功能项
 
-        if (ctrlFuncOpt > CLOCK_FUNC_SET) {
-            ctrlFuncOpt = ctrlFuncOpt - 1;
+        if (ctrlFuncOpt == SETTING_OPTIONS_TIME) {
+            ctrlFuncOpt = SETTING_OPTIONS_INJECT;
+        } else {
+            ctrlFuncOpt = (ctrlFuncOpt - 1) % SETTING_OPTIONS_MAX_NUM;
         }
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 
         switch (ctrlFuncOpt) {
-            case CLOCK_FUNC_SET:
+            case SETTING_OPTIONS_TIME:
                 if (clockSetDomain == CLOCK_MINUTE) {
 
                     //uint16_t seconds = (lcd_timestamp_set % 3600) % 60;
-                    //uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
-                    //uint16_t hours = lcd_timestamp_set / 3600;
-                    if (lcd_timestamp_set < 0xffffffff - 60)
+                    uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
+                    uint16_t hours = lcd_timestamp_set / 3600;
+                    printf("time:%2d:%2d\r\n",hours,minutes);
+                    if (minutes < 59)
                         lcd_timestamp_set = lcd_timestamp_set + 60;
+                } else if (clockSetDomain == CLOCK_HOUR) {
 
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
                     printf("time:%2d:%2d\r\n",hours,minutes);
-                } else {
-
-                    if (lcd_timestamp_set < 0xffffffff - 3600)
+                    if (hours < 23)
                         lcd_timestamp_set = lcd_timestamp_set + 3600;
-
-                    uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
-                    uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                 }
                 break;
-            case WATER_FUNC_SET:
+            case SETTING_OPTIONS_TATAL_VOLUME:
+                lcd_water_set--;
                 break;
-            case ENZYME_FUNC_SET:
+            case SETTING_OPTIONS_DILUTE:
+                lcd_enzyme_rate--;
                 break;
-            case TEMP_FUNC_SET:
+            case SETTING_OPTIONS_TEMPERATURE:
+                lcd_temperature_set--;
                 break;
-            case CLEAR_FUNC_SET:
+            case SETTING_OPTIONS_CLEAR:
                 break;
-            case RESET_FUNC_SET:
-                break;
-            case ENZYME_INJECT_FUNC_SET:
+            case SETTING_OPTIONS_INJECT:
                 break;
         }
     }
 }
 
-#if 1
-void report_operation_handle(uint8_t opt)
-{
-    printf("fun:%s line:%d operation:%x g_short_press:%d\n",__FUNCTION__,__LINE__,opt,g_short_press);
-    if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
-    {
-        if (0 == g_short_press)
-            g_set_opt = (g_set_opt + 1) % SETTING_OPTIONS_NONE;
-    }
-    else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
-    {
-        if (0 == g_short_press)
-            g_set_opt = (g_set_opt - 1) % SETTING_OPTIONS_NONE;
-    }
-    else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-    {
-        g_short_press = 1;
-    }
-    else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
-    {
-        g_long_press = 1;
-    }
-
-    if (g_short_press)
-    {
-        switch (g_set_opt)
-        {
-        case SETTING_OPTIONS_TIME:
-            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
-            {
-                // time increase
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
-            {
-                // time decrease
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                g_short_press = 0;
-                // save and sync
-            }
-            break;
-        case SETTING_OPTIONS_TATAL_VOLUME:
-            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
-            {
-                // total volume increase
-                water_set = (water_set + 1) % 10000;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
-            {
-                // total volume decrease
-                water_set = (water_set - 1) % 10000;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                g_short_press = 0;
-                // save and sync
-            }
-            break;
-        case SETTING_OPTIONS_DILUTE:
-            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
-            {
-                // enzyme_rate increase
-                enzyme_rate = (enzyme_rate + 1) % 100;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
-            {
-                // enzyme_rate decrease
-                enzyme_rate = (enzyme_rate - 1) % 100;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                g_short_press = 0;
-                // save and sync
-            }
-            break;
-        case SETTING_OPTIONS_TEMPERATURE:
-            if (COMM_OPT_BTN_OR_KNOBS_LEFT_ROTATE == opt)
-            {
-                // temperature_set increase
-                temperature_set = (temperature_set + 1) % 1000;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_RIGHT_ROTATE == opt)
-            {
-                // temperature_set decrease
-                temperature_set = (temperature_set - 1) % 1000;
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                g_short_press = 0;
-                // save and sync
-            }
-            break;
-        case SETTING_OPTIONS_CLEAR:
-            if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                // clear what you want to
-                g_short_press = 0;
-                // save and sync
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
-            {
-                // clear what you want to
-                g_short_press = 0;
-                g_long_press = 0;
-                // save and sync
-            }
-            break;
-        case SETTING_OPTIONS_RESET:
-            if (COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS == opt)
-            {
-                // reset what you want to
-                g_short_press = 0;
-                // save and sync
-            }
-            else if (COMM_OPT_BTN_OR_KNOBS_LONG_PRESS == opt)
-            {
-                // reset what you want to
-                g_short_press = 0;
-                g_long_press = 0;
-                // save and sync
-            }
-            break;
-
-        default:
-            break;
-        }
-    }
-}
-#else
 
 void report_operation_handle(uint8_t opt)
 {
+    printf("ctrl mode:%s\r\n", (ctrlOptType==OPT_TYPE_SELECT) ? "select" : "set");
+    printf("ctrl func:%d\r\n", ctrlFuncOpt);
+
     switch (opt) {
-        case 1: //short press
+        case COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS: //short press
             short_press_handle();
             break;
 
-        case 2: //long press
+        case COMM_OPT_BTN_OR_KNOBS_LONG_PRESS: //long press
             long_press_handle();
             break;
 
-        case 3: //CCW
+        case COMM_OPT_BTN_OR_KNOBS_CCW_ROTATE: //CCW
             CCW_press_handle();
             break;
 
-        case 4: //CW
+        case COMM_OPT_BTN_OR_KNOBS_CW_ROTATE: //CW
             CW_press_handle();
             break;
     }
+
+    printf("ctrl mode:%s\r\n", (ctrlOptType==OPT_TYPE_SELECT) ? "select" : "set");
+    printf("ctrl func:%d\r\n\r\n", ctrlFuncOpt);
 }
-#endif // 0
+
+
+void lcd_update( void )
+{
+    lcd_display_update();
+    // 显示温度
+    lcd_temperature_display(lcd_temperature_set);
+    // 显示默认设置
+    lcd_setting_display(ctrlFuncOpt);
+    lcd_time_display(rtc_counter_get());
+    /* lcd status update */
+    lcd_status_display();
+}
+

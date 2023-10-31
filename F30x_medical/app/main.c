@@ -129,14 +129,9 @@ int main(void)
         {
             bTimeFlag_1s = 0;
 
-            lcd_display_update();
-            // 显示温度
-            lcd_temperature_display(temperature_set);
-            // 显示默认设置
-            lcd_setting_display(g_set_opt);
-            lcd_time_display(rtc_counter_get());
-            /* lcd status update */
-            lcd_status_display();
+            //if (lcd_update_flag) {
+                lcd_update();
+            //}
 
             if (cup_flag) {
                 cup_flag = 0;

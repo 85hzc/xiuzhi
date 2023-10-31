@@ -160,6 +160,7 @@ OF SUCH DAMAGE.
 #define MOTOR_STEP_h_GPIO_CLK               RCU_GPIOA
 #define MOTOR_STEP_h_GPIO_PORT              GPIOA
 
+#define TIME_23_59_59 (0x00015180)
 
 /* conflicting configuration */
 
@@ -238,11 +239,14 @@ extern uint32_t position_error_count_times, temperature_error_count_times, jiazh
 extern float temperature, temperature_f, temperature_cb;
 extern uint16_t error_bits_flag;
 extern uint8_t start_work;
-extern uint8_t g_set_opt;
-extern uint8_t g_short_press;
-extern uint8_t g_long_press;
+extern uint16_t lcd_water_set;
+extern uint8_t lcd_enzyme_rate, lcd_temperature_set;
+extern uint32_t lcd_timestamp_set;
+extern Loop_State_e loop_state;
 
 extern void step_motor_move_forward(uint16_t steps);
 extern void step_motor_move_reverse(uint16_t steps);
+extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
+extern void report_operation_handle(uint8_t opt);
 
 #endif /* GLOBAL_H */
