@@ -66,6 +66,7 @@ void short_press_handle( void )
                     uint16_t hours = lcd_timestamp_set / 3600;
                     time_adjust(hours, minutes, 0);
                     printf("time:%2d:%2d\r\n", hours, minutes);
+                    bkp_write_data(BKP_DATA_0, 0xA5A5);
                 } else {
                     ctrlOptType = OPT_TYPE_SET;
                     clockSetDomain = CLOCK_MINUTE;
