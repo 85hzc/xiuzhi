@@ -129,16 +129,18 @@ void CCW_press_handle( void )
                     //uint16_t seconds = (lcd_timestamp_set % 3600) % 60;
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                     if (minutes > 0)
                         lcd_timestamp_set = lcd_timestamp_set - 60;
+                    minutes = (lcd_timestamp_set % 3600) / 60;
+                    printf("minute time:%2d:%2d\r\n",hours,minutes);
                 } else if (clockSetDomain == CLOCK_HOUR){
 
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                     if (hours > 0)
                         lcd_timestamp_set = lcd_timestamp_set - 3600;
+                    hours = lcd_timestamp_set / 3600;
+                    printf("hours time:%2d:%2d\r\n",hours,minutes);
                 }
 
                 break;
@@ -188,16 +190,19 @@ void CW_press_handle( void )
                     //uint16_t seconds = (lcd_timestamp_set % 3600) % 60;
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                     if (minutes < 59)
                         lcd_timestamp_set = lcd_timestamp_set + 60;
+
+                    minutes = (lcd_timestamp_set % 3600) / 60;
+                    printf("minute time:%2d:%2d\r\n",hours,minutes);
                 } else if (clockSetDomain == CLOCK_HOUR) {
 
                     uint16_t minutes = (lcd_timestamp_set % 3600) / 60;
                     uint16_t hours = lcd_timestamp_set / 3600;
-                    printf("time:%2d:%2d\r\n",hours,minutes);
                     if (hours < 23)
                         lcd_timestamp_set = lcd_timestamp_set + 3600;
+                    hours = lcd_timestamp_set / 3600;
+                    printf("hours time:%2d:%2d\r\n",hours,minutes);
                 }
                 break;
             case SETTING_OPTIONS_TATAL_VOLUME:
