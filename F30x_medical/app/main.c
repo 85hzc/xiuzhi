@@ -81,8 +81,6 @@ int main(void)
     utils_sample_init();
     config_init();
     self_test_init();
-    // init knob screen display
-    lcd_init_display();
 
     while(1){
 
@@ -123,15 +121,20 @@ int main(void)
 
             ebike_check_warning();
             //heat_running();
+
+            if (lcd_check_conn_status() == COMM_DISCONN) {
+                // init knob screen display
+                lcd_init_display();
+            }
         }
 
         if (bTimeFlag_1s)
         {
             bTimeFlag_1s = 0;
 
-            //if (lcd_update_flag) {
+            if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
                 lcd_update();
-            //}
+            }
 
             if (cup_flag) {
                 cup_flag = 0;

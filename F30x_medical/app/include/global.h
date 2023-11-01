@@ -243,10 +243,11 @@ extern uint16_t lcd_water_set;
 extern uint8_t lcd_enzyme_rate, lcd_temperature_set;
 extern uint32_t lcd_timestamp_set;
 extern Loop_State_e loop_state;
+extern uint8_t lcd_update_flag;
 
 extern void step_motor_move_forward(uint16_t steps);
 extern void step_motor_move_reverse(uint16_t steps);
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
 extern void report_operation_handle(uint8_t opt);
-
+extern uint8_t lcd_check_conn_status();
 #endif /* GLOBAL_H */

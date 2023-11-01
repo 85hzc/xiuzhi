@@ -11,9 +11,6 @@
 static uint8_t sg_lcd_stage = COMM_UNCONN_STAGE;
 static uint8_t sg_lcd_status = COMM_ACK_NORMAL;
 
-extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);
-extern void report_operation_handle(uint8_t opt);
-
 
 static void _u16_2_byte2_big_endian(unsigned short value, unsigned char *buf)
 {
@@ -51,7 +48,7 @@ static uint8_t _calc_CRC(const uint8_t* data, size_t length) {
     return crc;
 }
 
-static uint8_t lcd_check_conn_status()
+uint8_t lcd_check_conn_status()
 {
     if (sg_lcd_stage == COMM_UNCONN_STAGE
         || sg_lcd_stage == COMM_DIS_CONN_STAGE)
@@ -136,7 +133,7 @@ uint8_t lcd_conn_opt(uint8_t conn)
 */
 uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
 {
-    printf("fun:%s line:%d figure_num:%d\n", __FUNCTION__, __LINE__,figure_num);
+    //printf("fun:%s line:%d figure_num:%d\n", __FUNCTION__, __LINE__,figure_num);
     // comm_msg_t's len + figure_msg_t's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(figure_msg_t) * figure_num + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -270,7 +267,7 @@ uint8_t lcd_fill_area_color_cmd(area_color_msg_t area_color)
 
 uint8_t lcd_screen_display_ctrl(uint8_t on_off)
 {
-    printf("fun:%s line:%d on_off:%d\n", __FUNCTION__, __LINE__,on_off);
+    //printf("fun:%s line:%d on_off:%d\n", __FUNCTION__, __LINE__,on_off);
     // comm_msg_t's len + on_off data's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -528,7 +525,7 @@ void controller_msg_process(void)
             break;
         case COMM_OPT_BTN_OR_KNOBS_CMD:
             opt = pdata->payload[0];
-            printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
+            //printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
             report_operation_handle(opt);
             break;
         case COMM_FILL_BG_AND_ICON_COMPLETE_CMD:
@@ -545,7 +542,7 @@ void controller_msg_process(void)
 
 void notice_flash(uint8_t idx)
 {
-    // printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
+    //printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
     if (idx == POSITION_ERROR) {
         //显示“走位错误”
         lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER);
@@ -959,7 +956,8 @@ uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type)
 
 void lcd_time_display(uint32_t timestamp)
 {
-    printf("fun:%s line:%d timestamp:%ld\n", __FUNCTION__, __LINE__,timestamp);
+    static uint16_t minutes_last = 0xff;
+    //printf("fun:%s line:%d timestamp:%ld\n", __FUNCTION__, __LINE__,timestamp);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
@@ -967,15 +965,16 @@ void lcd_time_display(uint32_t timestamp)
     }
 
     figure_msg_t imgs[5];
-    // uint16_t seconds = timestamp / 1000;
-    // uint16_t minutes = seconds / 60;
-    // uint16_t hours = minutes / 60;
-    uint16_t seconds = (timestamp % 3600) % 60;
-    uint16_t minutes = (timestamp % 3600) / 60;
-    uint16_t hours = timestamp / 3600;
+    //uint8_t seconds = (timestamp % 3600) % 60;
+    uint8_t minutes = (timestamp % 3600) / 60;
+    uint8_t hours = timestamp / 3600;
     uint16_t sn = 0;
 
-    printf("fun:%s line:%d hours:%02x minutes:%02x seconds:%02x\n", __FUNCTION__, __LINE__,hours,minutes,seconds);
+    /*if (minutes == minutes_last)
+        return;
+    minutes_last = minutes;*/
+
+    //printf("fun:%s line:%d hours:%02x minutes:%02x\n", __FUNCTION__, __LINE__,hours,minutes);
 
     _u16_2_byte2_big_endian(237, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(59, imgs[0].y_coordinate);
@@ -1003,8 +1002,8 @@ void lcd_time_display(uint32_t timestamp)
     }
     else
     {
-        uint16_t m0 = minutes % 10;
-        uint16_t m1 = minutes / 10;
+        uint8_t m0 = minutes % 10;
+        uint8_t m1 = minutes / 10;
 
         sn = lcd_get_image_serial_number(m0, IMAGE_TYPE_TIME_SHOW);
         _u16_2_byte2_big_endian(sn, imgs[0].figure_no);
@@ -1038,7 +1037,7 @@ void lcd_time_display(uint32_t timestamp)
 
 void lcd_total_volume_display(uint16_t volume)
 {
-    printf("fun:%s line:%d volume:%d\n", __FUNCTION__, __LINE__,volume);
+    //printf("fun:%s line:%d volume:%d\n", __FUNCTION__, __LINE__,volume);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
@@ -1124,7 +1123,7 @@ void lcd_running_status_display(uint16_t status_sn)
         return;
     }
 
-    printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
+    //printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
     figure_msg_t imgs[2];
     uint16_t x = 0;
     uint16_t y = 203;
@@ -1163,7 +1162,7 @@ void lcd_running_status_display(uint16_t status_sn)
 
 void lcd_temperature_display(uint16_t temp)
 {
-    printf("fun:%s line:%d temp:%d\n", __FUNCTION__, __LINE__,temp);
+    //printf("fun:%s line:%d temp:%d\n", __FUNCTION__, __LINE__,temp);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
@@ -1256,7 +1255,7 @@ void lcd_cup_num_display(uint16_t cups)
 void lcd_setting_display(uint8_t set_opt)
 {
     uint16_t sn = IMAGES_SETTING_TIME_SET_SERIAL_NUMBER;
-    printf("fun:%s line:%d set option:%x\n", __FUNCTION__, __LINE__,set_opt);
+    //printf("fun:%s line:%d set option:%x\n", __FUNCTION__, __LINE__,set_opt);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
         lcd_conn_opt(COMM_CONN);
@@ -1279,7 +1278,7 @@ void lcd_setting_display(uint8_t set_opt)
         y = 317;
         sn = IMAGES_SETTING_DILUTE_SET_SERIAL_NUMBER;
         break;
-    case SETTING_OPTIONS_RESET:
+    case SETTING_OPTIONS_INJECT:
         x = 302;
         y = 257;
         sn = IMAGES_SETTING_RESET_SET_SERIAL_NUMBER;
@@ -1440,6 +1439,7 @@ void lcd_init_display(void)
     // 建立连接
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
+        printf("lcd init conn req\r\n");
         lcd_conn_opt(COMM_CONN);
         return;
     }
@@ -1593,9 +1593,9 @@ void lcd_display_update(void)
     _u16_2_byte2_big_endian(282, imgs[11].y_coordinate);
 
     // 显示总容量
-    uint16_t v1 = water_set % 10;
-    uint16_t v10 = water_set / 10 % 10;
-    uint16_t v100 = water_set / 100 % 10;
+    uint16_t v1 = lcd_water_set % 10;
+    uint16_t v10 = lcd_water_set / 10 % 10;
+    uint16_t v100 = lcd_water_set / 100 % 10;
     //uint16_t v1000 = water_set / 1000 % 10;
     _u16_2_byte2_big_endian(IMAGES_TOTAL_SET_ML_SERIAL_NUMBER, imgs[12].figure_no);
     _u16_2_byte2_big_endian(160, imgs[12].x_coordinate);
@@ -1622,8 +1622,8 @@ void lcd_display_update(void)
     _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
 */
     // 显示稀释比例
-    uint16_t r1 = enzyme_rate % 10;
-    uint16_t r10 = enzyme_rate / 10 % 10;
+    uint16_t r1 = lcd_enzyme_rate % 10;
+    uint16_t r10 = lcd_enzyme_rate / 10 % 10;
     _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_PERCENT_SERIAL_NUMBER, imgs[16].figure_no);
     _u16_2_byte2_big_endian(317, imgs[16].x_coordinate);
     _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
@@ -1664,8 +1664,4 @@ void lcd_display_update(void)
     _u16_2_byte2_big_endian(271, imgs[22].y_coordinate);
 
     lcd_fill_bg_and_icon_cmd(imgs, 23);
-    // // 显示温度
-    // lcd_temperature_display(temperature_set);
-    // // 显示默认设置
-    // lcd_setting_display(IMAGES_SETTING_TIME_SET_SERIAL_NUMBER);
 }

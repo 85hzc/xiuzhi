@@ -15,6 +15,7 @@ ctrl_clock_domain_type_e clockSetDomain = CLOCK_HOUR;
 uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
 uint8_t lcd_enzyme_rate, lcd_temperature_set;
+uint8_t lcd_update_flag = 1;
 
 void short_press_handle( void )
 {
@@ -141,13 +142,19 @@ void CCW_press_handle( void )
 
                 break;
             case SETTING_OPTIONS_TATAL_VOLUME:
-                lcd_water_set++;
+                if (lcd_water_set > 0) {
+                    lcd_water_set--;
+                }
                 break;
             case SETTING_OPTIONS_DILUTE:
-                lcd_enzyme_rate++;
+                if (lcd_enzyme_rate > 0) {
+                    lcd_enzyme_rate--;
+                }
                 break;
             case SETTING_OPTIONS_TEMPERATURE:
-                lcd_temperature_set++;
+                if (lcd_temperature_set > 0) {
+                    lcd_temperature_set--;
+                }
                 break;
             /*
             case SETTING_OPTIONS_CLEAR:
@@ -193,13 +200,19 @@ void CW_press_handle( void )
                 }
                 break;
             case SETTING_OPTIONS_TATAL_VOLUME:
-                lcd_water_set--;
+                if (lcd_water_set < 999) {
+                    lcd_water_set++;
+                }
                 break;
             case SETTING_OPTIONS_DILUTE:
-                lcd_enzyme_rate--;
+                if (lcd_enzyme_rate < 255) {
+                    lcd_enzyme_rate++;
+                }
                 break;
             case SETTING_OPTIONS_TEMPERATURE:
-                lcd_temperature_set--;
+                if (lcd_temperature_set < 99) {
+                    lcd_temperature_set++;
+                }
                 break;
             case SETTING_OPTIONS_CLEAR:
                 break;
@@ -212,8 +225,6 @@ void CW_press_handle( void )
 
 void report_operation_handle(uint8_t opt)
 {
-    printf("ctrl mode:%s\r\n", (ctrlOptType==OPT_TYPE_SELECT) ? "select" : "set");
-    printf("ctrl func:%d\r\n", ctrlFuncOpt);
 
     switch (opt) {
         case COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS: //short press
@@ -232,9 +243,6 @@ void report_operation_handle(uint8_t opt)
             CW_press_handle();
             break;
     }
-
-    printf("ctrl mode:%s\r\n", (ctrlOptType==OPT_TYPE_SELECT) ? "select" : "set");
-    printf("ctrl func:%d\r\n\r\n", ctrlFuncOpt);
 }
 
 
