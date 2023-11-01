@@ -12,7 +12,7 @@ static uint8_t sg_lcd_stage = COMM_UNCONN_STAGE;
 static uint8_t sg_lcd_status = COMM_ACK_NORMAL;
 
 
-static void _u16_2_byte2_big_endian(unsigned short value, unsigned char *buf)
+void _u16_2_byte2_big_endian(unsigned short value, unsigned char *buf)
 {
     buf[0] = (unsigned char)((value >> 8) & 0xFF);
     buf[1] = (unsigned char)(value & 0xFF);
