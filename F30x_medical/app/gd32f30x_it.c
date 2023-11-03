@@ -190,6 +190,7 @@ void EXTI5_9_IRQHandler(void)
             trige_count();
             luobei_retry += 1;   //完成一次落杯操作，作为二次尝试落杯判断依据（如果空杯情况）
             //luobei_motor_stop();
+            lcd_update_flag = 1;
         }
     }
 

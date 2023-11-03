@@ -11,20 +11,19 @@
 
 
 #define drCnt5ms            5
-#define drCnt10ms           10
-#define drCnt20ms           20
 #define drCnt50ms           50
-#define drCnt500ms          500
 #define drCnt100ms          100
+#define drCnt200ms          200
+#define drCnt500ms          500
 #define drCnt1s             1000
 
 extern void periodTask_1ms(void);
 
+extern uint8_t bTimeFlag_50ms;
+extern uint8_t bTimeFlag_5ms;
 extern uint8_t bTimeFlag_100ms;
+extern uint8_t bTimeFlag_200ms;
 extern uint8_t bTimeFlag_500ms;
 extern uint8_t bTimeFlag_1s;
-extern uint8_t bTimeFlag_50ms;
-extern uint8_t bTimeFlag_20ms;
-extern uint8_t bTimeFlag_5ms;
 
 #endif /* TIME_FLAG_H */

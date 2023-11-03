@@ -157,22 +157,22 @@ void key_process(void)
     }
 
     if(key_read_debouncing(KEY_fuzi)){
-        if (!state_fuzi) {
+        if (state_fuzi == FULL_WATER_LEVEL) {
             fz++;
             if (fz>=SWITCH_DETECT_TIME) {
                 printf("Lack Water\r\n");
-                state_fuzi = 1;
+                state_fuzi = EMPTY_WATER_LEVEL;
                 fz = 0;
                 //输出“水位不足”
                 set_error(SHUIWEI_ERROR);
             }
         }
     } else {
-        if (state_fuzi) {
+        if (state_fuzi == EMPTY_WATER_LEVEL) {
             fz++;
             if (fz>=SWITCH_DETECT_TIME) {
                 printf("full water\r\n");
-                state_fuzi = 0;
+                state_fuzi = FULL_WATER_LEVEL;
                 fz = 0;
                 //清除“水位不足”
                 clear_error(SHUIWEI_ERROR);

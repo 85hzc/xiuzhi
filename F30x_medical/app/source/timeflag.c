@@ -16,10 +16,10 @@
     Private variable definitions
 */
 static uint16_t g_rCounter_5ms   = 0;
-static uint16_t g_rCounter_20ms  = 0;
 static uint16_t g_rCounter_50ms  = 0;
-static uint16_t g_rCounter_500ms = 0;
 static uint16_t g_rCounter_100ms = 0;
+static uint16_t g_rCounter_200ms = 0;
+static uint16_t g_rCounter_500ms = 0;
 static uint16_t g_rCounter_1s    = 0;
 static uint16_t g_rCounter_enzyme = 0;  //酶液注入量计时
 static uint32_t g_rCounter_qubei = 0;  //取杯操作超时计时  15分钟=15*60*1000
@@ -29,11 +29,12 @@ static uint32_t g_rCounter_jiazhu_error = 0; //注水超时计时
 /* 
     Public variable definitions
 */
-uint8_t bTimeFlag_100ms;
-uint8_t bTimeFlag_500ms;
-uint8_t bTimeFlag_50ms;
-uint8_t bTimeFlag_20ms;
+
 uint8_t bTimeFlag_5ms;
+uint8_t bTimeFlag_50ms;
+uint8_t bTimeFlag_100ms;
+uint8_t bTimeFlag_200ms;
+uint8_t bTimeFlag_500ms;
 uint8_t bTimeFlag_1s;
 
 void periodTask_1ms(void)
@@ -60,6 +61,13 @@ void periodTask_1ms(void)
         bTimeFlag_500ms = 1;
     }
 
+    g_rCounter_200ms++;
+    if (g_rCounter_200ms >= drCnt200ms)
+    {
+        g_rCounter_200ms = 0;
+        bTimeFlag_200ms = 1;
+    }
+
     g_rCounter_100ms++;
     if (g_rCounter_100ms >= drCnt100ms)
     {
@@ -73,6 +81,11 @@ void periodTask_1ms(void)
         g_rCounter_50ms = 0;
         bTimeFlag_50ms = 1;
     }
+}
+
+void lcd_response_delay_sync()
+{
+    g_rCounter_200ms = 0;
 }
 
 void temperature_error_timer_start(uint8_t secs)

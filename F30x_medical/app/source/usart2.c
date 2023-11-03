@@ -5,8 +5,7 @@
 #include "global.h"
 
 /* public variables */
-int32_t sg_write_index = 0;
-int32_t sg_read_index = 0;
+uint16_t sg_write_index = 0, sg_read_index = 0;
 uint8_t rx_buffer[COM_BUFFER_SIZE] = {0};
 
 /*!
@@ -73,6 +72,7 @@ uint8_t buffer_write(uint8_t ch)
     if (sg_read_index == (sg_write_index + 1) % COM_BUFFER_SIZE)
     {
         /* buffer is full */
+        printf("[error]:buffer is full!\r\n");
         return 0;
     }
 
@@ -107,4 +107,11 @@ uint8_t buffer_reads(uint8_t *data, uint8_t len)
 
     // printf("fun:%s line:%d cnt:%d\r\n",__FUNCTION__,__LINE__,cnt);
     return cnt;
+}
+
+void ringbuff_init()
+{
+    sg_read_index = 0;
+    sg_write_index = 0;
+    memset(rx_buffer, 0, COM_BUFFER_SIZE);
 }

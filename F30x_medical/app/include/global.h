@@ -193,20 +193,26 @@ typedef enum {
 } Loop_State_e;
 
 typedef enum {
-    POSITION_ERROR = 0,
+    READY_ = 0,
+    RESET_,
+    CHUBEI_,
+    HUISHOU_,
+
+    POSITION_ERROR = 4, //用于告警状态显示，值不可随意调整
     WUBEI_ERROR,
     QIBEI_ERROR,
     ZHUSHUI_ERROR,
     WENDU_ERROR,
     SHUIWEI_ERROR,
 
-    RESET_,
-    READY_,
-    CHUBEI_,
-    HUISHOU_,
-
     ERROR_max
-}error_type_e;
+} error_type_e;
+
+typedef enum {
+    FULL_WATER_LEVEL,
+    EMPTY_WATER_LEVEL,
+
+} water_level_e;
 
 
 /* global variable declaration */
@@ -223,7 +229,7 @@ extern flash_page_type page_type;
 extern usart_debug debug_data;
 extern PID_Parm pidParm;
 
-extern uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose, self_diag_first_time_flag;
+extern uint8_t state_youbei, state_t1, state_t2, self_diagnose, self_diag_first_time_flag;
 extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
 extern uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
@@ -243,7 +249,8 @@ extern uint16_t lcd_water_set;
 extern uint8_t lcd_enzyme_rate, lcd_temperature_set;
 extern uint32_t lcd_timestamp_set;
 extern Loop_State_e loop_state;
-extern uint8_t lcd_update_flag;
+extern uint8_t lcd_update_flag, lcd_ok_flag;
+extern water_level_e state_fuzi;
 
 extern void step_motor_move_forward(uint16_t steps);
 extern void step_motor_move_reverse(uint16_t steps);

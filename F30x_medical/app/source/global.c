@@ -40,7 +40,7 @@ OF SUCH DAMAGE.
 void debug_msg_process(uint8_t *msg);
 
 /* reference variable */
-uint8_t state_youbei, state_t1, state_t2, state_fuzi, self_diagnose = 1, self_diag_first_time_flag = 1;
+uint8_t state_youbei, state_t1, state_t2, self_diagnose = 1, self_diag_first_time_flag = 1;
 uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
 uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
@@ -54,6 +54,7 @@ uint8_t start_work = 0;     //机器开启运行指令（触摸屏控件启动�
 uint8_t luobei_retry = 0, luobei_delay = 0;   //二次尝试取杯操作
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 uint32_t position_error_count_times = 0, temperature_error_count_times = 0, jiazhu_error_count_times = 0;
+water_level_e state_fuzi = EMPTY_WATER_LEVEL;
 
 /* global structure */
 flash_page_type page_type;

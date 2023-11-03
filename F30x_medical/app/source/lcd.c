@@ -155,7 +155,7 @@ uint8_t lcd_fill_bg_and_icon_cmd(figure_msg_t *figure, uint8_t figure_num)
     *pbuf = crc;
 
     // pbuf = (uint8_t *)pMsg;
-    // printf("send data:\n");
+    //printf("send data[%d]:\n", msg_len);
     // for (size_t i = 0; i < msg_len; i++)
     // {
     //     printf("%02x ", pbuf[i]);
@@ -527,6 +527,7 @@ void controller_msg_process(void)
             opt = pdata->payload[0];
             //printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
             report_operation_handle(opt);
+            lcd_response_delay_sync();
             break;
         case COMM_FILL_BG_AND_ICON_COMPLETE_CMD:
             printf("fill the graph ok\n");
@@ -539,7 +540,7 @@ void controller_msg_process(void)
         }
     }
 }
-
+#if 0
 void notice_flash(uint8_t idx)
 {
     //printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
@@ -595,6 +596,7 @@ void lcd_status_display( void )
         next_warnning = loop+1;
     }
 }
+#endif
 
 #if 1
 static uint16_t lcd_get_image_dilute_sn(uint8_t num)
@@ -956,7 +958,6 @@ uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type)
 
 void lcd_time_display(uint32_t timestamp)
 {
-    static uint16_t minutes_last = 0xff;
     //printf("fun:%s line:%d timestamp:%ld\n", __FUNCTION__, __LINE__,timestamp);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
@@ -969,10 +970,6 @@ void lcd_time_display(uint32_t timestamp)
     uint8_t minutes = (timestamp % 3600) / 60;
     uint8_t hours = timestamp / 3600;
     uint16_t sn = 0;
-
-    /*if (minutes == minutes_last)
-        return;
-    minutes_last = minutes;*/
 
     //printf("fun:%s line:%d hours:%02x minutes:%02x\n", __FUNCTION__, __LINE__,hours,minutes);
 
@@ -1109,13 +1106,8 @@ void lcd_dilute_ratio_display(uint16_t ratio)
     lcd_fill_bg_and_icon_cmd(imgs, 3);
 }
 
-void lcd_running_status_display(uint16_t status_sn)
+void lcd_running_status_display(uint16_t status_sn, figure_msg_t imgs[])
 {
-    if (sg_lcd_stage != COMM_CONN_STAGE)
-    {
-        return;
-    }
-
     // printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
@@ -1124,7 +1116,6 @@ void lcd_running_status_display(uint16_t status_sn)
     }
 
     //printf("fun:%s line:%d status_sn:%x\n", __FUNCTION__, __LINE__,status_sn);
-    figure_msg_t imgs[2];
     uint16_t x = 0;
     uint16_t y = 203;
 
@@ -1157,7 +1148,7 @@ void lcd_running_status_display(uint16_t status_sn)
     _u16_2_byte2_big_endian(x, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(y, imgs[0].y_coordinate);
 
-    lcd_fill_bg_and_icon_cmd(imgs, 1);
+    //lcd_fill_bg_and_icon_cmd(imgs, 1);
 }
 
 void lcd_temperature_display(uint16_t temp)

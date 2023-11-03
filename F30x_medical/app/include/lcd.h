@@ -300,7 +300,7 @@ uint16_t lcd_get_image_serial_number(uint8_t num, uint8_t num_type);
 void lcd_time_display(uint32_t timestamp);
 void lcd_total_volume_display(uint16_t volume);
 void lcd_dilute_ratio_display(uint16_t ratio);
-void lcd_running_status_display(uint16_t status_sn);
+void lcd_running_status_display(uint16_t status_sn, figure_msg_t imgs[]);
 void lcd_temperature_display(uint16_t temp);
 void lcd_cup_num_display(uint16_t cups);
 void lcd_setting_display(uint8_t set_opt);

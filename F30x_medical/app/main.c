@@ -81,6 +81,7 @@ int main(void)
     utils_sample_init();
     config_init();
     self_test_init();
+    ringbuff_init();
 
     while(1){
 
@@ -94,12 +95,16 @@ int main(void)
                 debug_msg_process(debug_rx_buffer_app);
                 memset(debug_rx_buffer_app, 0, USART1_BUFFER_SIZE);
             }
+
+            /*
+            ** Handle knob screen cmd
+            */
+            controller_msg_process();
         }
 
         if (bTimeFlag_50ms)
         {
             bTimeFlag_50ms = 0;
-            controller_msg_process();
             EBI_calcPI(&pidParm);
         }
 
@@ -112,9 +117,26 @@ int main(void)
             #endif
             /* key process routine */
             key_process();
-            //work_loop();
-        }
 
+            if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
+                //work_loop();
+            }
+        }
+#if 1
+        if (bTimeFlag_200ms)
+        {
+            bTimeFlag_200ms = 0;
+
+            /* 
+            **  response display pixels.
+            */
+            if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
+                lcd_update_flag = 0;
+                lcd_update();
+                lcd_ok_flag = 1;
+            }
+        }
+#endif
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;
@@ -132,14 +154,12 @@ int main(void)
         {
             bTimeFlag_1s = 0;
 
-            if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
-                lcd_update();
-            }
-
             if (cup_flag) {
                 cup_flag = 0;
                 flash_value_flash();
             }
+
+            lcd_update_flag_check();
             //printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
         }
     }

@@ -15,12 +15,12 @@ ctrl_clock_domain_type_e clockSetDomain = CLOCK_HOUR;
 uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
 uint8_t lcd_enzyme_rate, lcd_temperature_set;
-uint8_t lcd_update_flag = 1;
+uint8_t lcd_update_flag = 1, lcd_ok_flag = 0, lcd_time_set_flag = 0;
 
 void short_press_handle( void )
 {
 
-    if (ctrlOptType == OPT_TYPE_SELECT) {   //功能选择模式，短按进入功能项
+    if (ctrlOptType == OPT_TYPE_SELECT) {                   //功能选择模式，短按进入功能项
 
         ctrlOptType = OPT_TYPE_SET;
 
@@ -29,6 +29,7 @@ void short_press_handle( void )
             case SETTING_OPTIONS_TIME:
                 clockSetDomain = CLOCK_HOUR;
                 lcd_timestamp_set = rtc_counter_get();
+                lcd_time_set_flag = 1;
                 break;
             
             case SETTING_OPTIONS_TATAL_VOLUME:
@@ -44,9 +45,19 @@ void short_press_handle( void )
                 cup_count = 0;
                 flash_value_flash();
                 config_init();
+                ctrlOptType = OPT_TYPE_SELECT;                  //清空数据，功能选项保持选择模式
                 break;
             case SETTING_OPTIONS_INJECT:
                 //TODO
+                static uint8_t enzyme_motor_ctrl = 1;
+                if (enzyme_motor_ctrl) {
+                    enzyme_motor_start();
+                    enzyme_motor_ctrl = 0;
+                } else {
+                    enzyme_motor_stop();
+                    enzyme_motor_ctrl = 1;
+                }
+                ctrlOptType = OPT_TYPE_SELECT;                                 //INJECT模式，可重复操作注液电机
                 break;
         }
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
@@ -67,6 +78,7 @@ void short_press_handle( void )
                     time_adjust(hours, minutes, 0);
                     printf("time:%2d:%2d\r\n", hours, minutes);
                     bkp_write_data(BKP_DATA_0, 0xA5A5);
+                    lcd_time_set_flag = 0;
                 } else {
                     ctrlOptType = OPT_TYPE_SET;
                     clockSetDomain = CLOCK_MINUTE;
@@ -112,7 +124,7 @@ void long_press_handle( void )
 void CCW_press_handle( void )
 {
 
-    if (ctrlOptType == OPT_TYPE_SELECT) {                       //功能选择模式，逆时针旋转进入功能项
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt == SETTING_OPTIONS_INJECT)) {                       //功能选择模式，逆时针旋转进入功能项
 
         if (ctrlFuncOpt == SETTING_OPTIONS_INJECT) {
             ctrlFuncOpt = SETTING_OPTIONS_TIME;
@@ -174,7 +186,7 @@ void CCW_press_handle( void )
 void CW_press_handle( void )
 {
 
-    if (ctrlOptType == OPT_TYPE_SELECT) {   //功能选择模式，厂按进入功能项
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt == SETTING_OPTIONS_INJECT)) {   //功能选择模式，厂按进入功能项
 
         if (ctrlFuncOpt == SETTING_OPTIONS_TIME) {
             ctrlFuncOpt = SETTING_OPTIONS_INJECT;
@@ -253,6 +265,7 @@ void report_operation_handle(uint8_t opt)
             CW_press_handle();
             break;
     }
+    lcd_update_flag = 1;
 }
 
 
@@ -278,11 +291,11 @@ void lcd_update( void )
         lcd_conn_opt(COMM_CONN);
         return;
     }
-
+    printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
     figure_msg_t imgs[64];
 
     // 显示黑屏大背景
-    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BACKGROUND_BLACK_SERIAL_NUMBER, imgs[0].figure_no);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BACKGROUND_BLUE_SKY_SERIAL_NUMBER, imgs[0].figure_no);
     _u16_2_byte2_big_endian(0, imgs[0].x_coordinate);
     _u16_2_byte2_big_endian(0, imgs[0].y_coordinate);
     figure_num++;
@@ -294,7 +307,7 @@ void lcd_update( void )
     figure_num++;
 
     // 显示底部菜单背景图标
-    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BOTTOM_MENU_SERIAL_NUMBER, imgs[2].figure_no);
+    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_BOTTOM_MENU_2_SERIAL_NUMBER, imgs[2].figure_no);
     _u16_2_byte2_big_endian(25, imgs[2].x_coordinate);
     _u16_2_byte2_big_endian(197, imgs[2].y_coordinate);
     figure_num++;
@@ -349,10 +362,10 @@ void lcd_update( void )
     figure_num++;
 
     // 显示总容量
-    uint16_t v1 = lcd_water_set % 10;
-    uint16_t v10 = lcd_water_set / 10 % 10;
-    uint16_t v100 = lcd_water_set / 100 % 10;
-    //uint16_t v1000 = lcd_water_set / 1000 % 10;
+    uint8_t v1 = lcd_water_set % 10;
+    uint8_t v10 = lcd_water_set / 10 % 10;
+    uint8_t v100 = lcd_water_set / 100 % 10;
+    uint8_t v1000 = lcd_water_set / 1000 % 10;
     _u16_2_byte2_big_endian(IMAGES_TOTAL_SET_ML_SERIAL_NUMBER, imgs[12].figure_no);
     _u16_2_byte2_big_endian(160, imgs[12].x_coordinate);
     _u16_2_byte2_big_endian(146, imgs[12].y_coordinate);
@@ -370,44 +383,61 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(148, imgs[14].y_coordinate);
     figure_num++;
 
-    sn = lcd_get_image_serial_number(v100, IMAGE_TYPE_TOTAL_SET);
-    _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
-    _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
-    figure_num++;
-    /*
-    sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
-    _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
-    _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
-    figure_num++;
-    */
+    if (v100 || v1000) {
+        sn = lcd_get_image_serial_number(v100, IMAGE_TYPE_TOTAL_SET);
+        _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
+        _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
+        _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
+        figure_num++;
+    }
+
+    if (v1000) {
+        sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
+        _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
+        _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
+        _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
+        figure_num++;
+    }
 
     // 显示稀释比例
-    uint16_t r1 = lcd_enzyme_rate % 10;
-    uint16_t r10 = lcd_enzyme_rate / 10 % 10;
+    uint8_t r_1 = lcd_enzyme_rate % 10;
+    uint8_t r1 = lcd_enzyme_rate / 10 % 10;
+    uint8_t r10 = lcd_enzyme_rate / 100 % 10;
     _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_PERCENT_SERIAL_NUMBER, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(317, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[figure_num].y_coordinate);
+    _u16_2_byte2_big_endian(327, imgs[figure_num].x_coordinate);
+    _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
+    figure_num++;
+
+    sn = lcd_get_image_serial_number(r_1, IMAGE_TYPE_DILUTE_SET);
+    _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+    _u16_2_byte2_big_endian(307, imgs[figure_num].x_coordinate);
+    _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
+    figure_num++;
+
+    _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_2_DOT_SERIAL_NUMBER, imgs[figure_num].figure_no);
+    _u16_2_byte2_big_endian(300, imgs[figure_num].x_coordinate);
+    _u16_2_byte2_big_endian(167, imgs[figure_num].y_coordinate);
     figure_num++;
 
     sn = lcd_get_image_serial_number(r1, IMAGE_TYPE_DILUTE_SET);
     _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(296, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[figure_num].y_coordinate);
+    _u16_2_byte2_big_endian(280, imgs[figure_num].x_coordinate);
+    _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
     figure_num++;
 
-    sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
-    _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(275, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[figure_num].y_coordinate);
-    figure_num++;
+    if (r10) {
+        sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
+        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+        _u16_2_byte2_big_endian(260, imgs[figure_num].x_coordinate);
+        _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
+        figure_num++;
+    }
 
     // 显示出杯数量
-    uint16_t c1 = cup_count % 10;
-    uint16_t c10 = cup_count / 10 % 10;
-    uint16_t c100 = cup_count / 100 % 10;
-    uint16_t c1000 = cup_count / 1000 % 10;
+    uint8_t c1 = cup_count % 10;
+    uint8_t c10 = cup_count / 10 % 10;
+    uint8_t c100 = cup_count / 100 % 10;
+    uint8_t c1000 = cup_count / 1000 % 10;
     sn = lcd_get_image_serial_number(c1, IMAGE_TYPE_MEASURE_DATA);
     _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
     _u16_2_byte2_big_endian(209, imgs[figure_num].x_coordinate);
@@ -431,7 +461,6 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(149, imgs[figure_num].x_coordinate);
     _u16_2_byte2_big_endian(271, imgs[figure_num].y_coordinate);
     figure_num++;
-
 
     //temperature
      _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_CELSIUS_SERIAL_NUMBER, imgs[figure_num].figure_no);
@@ -511,15 +540,16 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(y, imgs[figure_num].y_coordinate);
     figure_num++;
 
-
     //timer
-    uint32_t timestamp = rtc_counter_get();
-    uint8_t minutes = (timestamp % 3600) / 60;
-    uint8_t hours = timestamp / 3600;
-
-    /*if (minutes == minutes_last)
-        return;
-    minutes_last = minutes;*/
+    uint32_t timestamp;
+    uint8_t minutes, hours;
+    if (!lcd_time_set_flag) {               //实时时钟显示
+        timestamp = rtc_counter_get();
+    } else {                                //时钟设置阶段显示
+        timestamp = lcd_timestamp_set;
+    }
+    minutes = (timestamp % 3600) / 60;
+    hours = timestamp / 3600;
 
     if (minutes < 10)
     {
@@ -566,7 +596,6 @@ void lcd_update( void )
         _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
         figure_num++;
 
-
         sn = lcd_get_image_serial_number(0, IMAGE_TYPE_TIME_SHOW);
         _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
         _u16_2_byte2_big_endian(135, imgs[figure_num].x_coordinate);
@@ -592,10 +621,98 @@ void lcd_update( void )
     }
 
     //warnning
+    uint8_t loop = 0;
+    static uint8_t next_warnning = READY_;
+    loop = next_warnning;
+    while (!(error_bits_flag & 1<<loop)) {
+        loop++;
+        if (loop >= ERROR_max) {
+            next_warnning = READY_;
+            loop = READY_;
+            break;
+        }
+    }
+    next_warnning = loop+1;
+    printf("loop=%d\r\n", loop);
+    if (error_bits_flag & 1<<loop) {
 
+        switch (loop) {
+            case POSITION_ERROR:
+                //显示“走位错误”
+                lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case WUBEI_ERROR:
+                //显示“无纸杯”
+                lcd_running_status_display(IMAGES_STATUS_NO_CUP_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case QIBEI_ERROR:
+                //显示“弃杯错误”
+                lcd_running_status_display(IMAGES_STATUS_THROW_CUP_ERR_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case ZHUSHUI_ERROR:
+                //显示“加注失败”
+                lcd_running_status_display(IMAGES_STATUS_JIAZHU_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case WENDU_ERROR:
+                //显示“温度失控”
+                lcd_running_status_display(IMAGES_STATUS_HEAT_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case SHUIWEI_ERROR:
+                //显示“水位不足”
+                lcd_running_status_display(IMAGES_STATUS_LOW_WATER_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case RESET_:
+                //显示“复位”
+                lcd_running_status_display(IMAGES_STATUS_RESET_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case READY_:
+                //显示“待机”
+                lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case CHUBEI_:
+                //显示“出杯”
+                lcd_running_status_display(IMAGES_STATUS_OUT_CUP_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+
+            case HUISHOU_:
+                //显示“回收”
+                lcd_running_status_display(IMAGES_STATUS_RECYCLE_SERIAL_NUMBER, &imgs[figure_num]);
+                break;
+        }
+        figure_num++;
+    }
 
     lcd_fill_bg_and_icon_cmd(imgs, figure_num);
     #endif
 
+}
+
+
+void lcd_update_flag_check( void )
+{
+    static uint16_t minutes_last = 0xff;
+    uint32_t timestamp;
+    uint8_t minutes, hours;
+    if (!lcd_time_set_flag) {             //实时时钟显示
+        timestamp = rtc_counter_get();
+    } else {            //时钟设置阶段显示
+        timestamp = lcd_timestamp_set;
+    }
+    minutes = (timestamp % 3600) / 60;
+    hours = timestamp / 3600;
+
+    if (minutes == minutes_last) {
+        return;
+    }
+    minutes_last = minutes;
+    lcd_update_flag = 1;
 }
 

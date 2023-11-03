@@ -148,12 +148,12 @@ void beep_off( void )
     timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_1, 0);
 }
 
-void set_error(uint8_t err_bit)
+void set_error(error_type_e err_bit)
 {
     error_bits_flag |= 1<<err_bit;
 }
 
-void clear_error(uint8_t err_bit)
+void clear_error(error_type_e err_bit)
 {
     error_bits_flag &= ~(1<<err_bit);
 }
@@ -209,6 +209,13 @@ void ebike_check_warning()
 
     if (state_youbei) {
         clear_error(WUBEI_ERROR);
+    }
+
+    if (error_bits_flag & 0xfff0) {   //
+        clear_error(READY_);
+        clear_error(RESET_);
+        clear_error(CHUBEI_);
+        clear_error(HUISHOU_);
     }
     
 }
