@@ -13,7 +13,7 @@
 #define drCnt5ms            5
 #define drCnt50ms           50
 #define drCnt100ms          100
-#define drCnt200ms          200
+#define drCnt200ms          300
 #define drCnt500ms          500
 #define drCnt1s             1000
 

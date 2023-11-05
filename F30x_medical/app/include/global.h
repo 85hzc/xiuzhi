@@ -205,6 +205,7 @@ typedef enum {
     WENDU_ERROR,
     SHUIWEI_ERROR,
 
+    STATUS_NULL,
     ERROR_max
 } error_type_e;
 
@@ -246,7 +247,7 @@ extern float temperature, temperature_f, temperature_cb;
 extern uint16_t error_bits_flag;
 extern uint8_t start_work;
 extern uint16_t lcd_water_set;
-extern uint8_t lcd_enzyme_rate, lcd_temperature_set;
+extern uint8_t lcd_enzyme_rate, lcd_temperature_set, heat_disable;
 extern uint32_t lcd_timestamp_set;
 extern Loop_State_e loop_state;
 extern uint8_t lcd_update_flag, lcd_ok_flag;

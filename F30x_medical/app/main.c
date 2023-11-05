@@ -119,22 +119,14 @@ int main(void)
             key_process();
 
             if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
-                //work_loop();
+                work_loop();
             }
         }
-#if 1
+#if 1   //设置定时器，200ms同步一次给旋钮屏
         if (bTimeFlag_200ms)
         {
             bTimeFlag_200ms = 0;
-
-            /* 
-            **  response display pixels.
-            */
-            if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
-                lcd_update_flag = 0;
-                lcd_update();
-                lcd_ok_flag = 1;
-            }
+            lcd_display_inform();
         }
 #endif
         if (bTimeFlag_500ms)
@@ -142,7 +134,10 @@ int main(void)
             bTimeFlag_500ms = 0;
 
             ebike_check_warning();
-            //heat_running();
+
+            if (TEMPERATURE_NORMAL_VALUE != heat_disable) {
+                heat_running();
+            }
 
             if (lcd_check_conn_status() == COMM_DISCONN) {
                 // init knob screen display

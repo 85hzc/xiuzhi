@@ -1656,3 +1656,17 @@ void lcd_display_update(void)
 
     lcd_fill_bg_and_icon_cmd(imgs, 23);
 }
+
+
+void lcd_display_inform()
+{
+    /* 
+    **  response display pixels.
+    */
+    if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
+        lcd_update_flag = 0;
+        lcd_update();
+        lcd_ok_flag = 1;
+    }
+}
+

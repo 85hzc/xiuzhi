@@ -14,7 +14,7 @@ ctrl_clock_domain_type_e clockSetDomain = CLOCK_HOUR;
 
 uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
-uint8_t lcd_enzyme_rate, lcd_temperature_set;
+uint8_t lcd_enzyme_rate, lcd_temperature_set, heat_disable = 0;
 uint8_t lcd_update_flag = 1, lcd_ok_flag = 0, lcd_time_set_flag = 0;
 
 void short_press_handle( void )
@@ -116,8 +116,9 @@ void short_press_handle( void )
 void long_press_handle( void )
 {
     //  TODO:
-    //  factory reset
+    //  启动落杯
     printf("long press\r\n");
+    start_work = 1;
 }
 
 
@@ -169,6 +170,10 @@ void CCW_press_handle( void )
             case SETTING_OPTIONS_TEMPERATURE:
                 if (lcd_temperature_set > 0) {
                     lcd_temperature_set--;
+                }
+                //常温模式，不加热
+                if (lcd_temperature_set == 0) {
+                    heat_disable = TEMPERATURE_NORMAL_VALUE;
                 }
                 break;
             /*
@@ -230,6 +235,7 @@ void CW_press_handle( void )
             case SETTING_OPTIONS_TEMPERATURE:
                 if (lcd_temperature_set < 99) {
                     lcd_temperature_set++;
+                    heat_disable = 0;
                 }
                 break;
             case SETTING_OPTIONS_CLEAR:
@@ -463,12 +469,7 @@ void lcd_update( void )
     figure_num++;
 
     //temperature
-     _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_CELSIUS_SERIAL_NUMBER, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(324, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(203, imgs[figure_num].y_coordinate);
-    figure_num++;
-
-    if (TEMPERATURE_NORMAL_VALUE == lcd_temperature_set)
+    if (TEMPERATURE_NORMAL_VALUE == heat_disable)
     {
         _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_NORMAL_TEMP_SERIAL_NUMBER, imgs[figure_num].figure_no);
         _u16_2_byte2_big_endian(275, imgs[figure_num].x_coordinate);
@@ -477,6 +478,11 @@ void lcd_update( void )
     }
     else
     {
+        _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_CELSIUS_SERIAL_NUMBER, imgs[figure_num].figure_no);
+        _u16_2_byte2_big_endian(324, imgs[figure_num].x_coordinate);
+        _u16_2_byte2_big_endian(203, imgs[figure_num].y_coordinate);
+        figure_num++;
+
         uint16_t sn = 0;
         uint16_t t1 = lcd_temperature_set % 10;
         uint16_t t10 = lcd_temperature_set / 10 % 10;
@@ -633,7 +639,7 @@ void lcd_update( void )
         }
     }
     next_warnning = loop+1;
-    printf("loop=%d\r\n", loop);
+    printf("bit=0x%x, loop=%d\r\n", error_bits_flag, loop);
     if (error_bits_flag & 1<<loop) {
 
         switch (loop) {
@@ -686,6 +692,11 @@ void lcd_update( void )
                 //显示“回收”
                 lcd_running_status_display(IMAGES_STATUS_RECYCLE_SERIAL_NUMBER, &imgs[figure_num]);
                 break;
+
+            default: //STATUS_NULL
+                break;
+                figure_num--;
+                //显示空
         }
         figure_num++;
     }

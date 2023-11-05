@@ -28,6 +28,10 @@ void config_init( void )
     printf("water: %d ml(%d), enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, water_count_signals, enzyme_rate
             , temperature_set, cup_count);
 
+    if (temperature_set == 0) {
+        heat_disable = TEMPERATURE_NORMAL_VALUE;
+    }
+
     memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
     pidParm.qInRef = temperature_set;
@@ -150,12 +154,18 @@ void beep_off( void )
 
 void set_error(error_type_e err_bit)
 {
-    error_bits_flag |= 1<<err_bit;
+    //if (!(error_bits_flag & ~(1<<err_bit))) {
+        error_bits_flag |= 1<<err_bit;
+        //lcd_update_flag = 1;
+    //}
 }
 
 void clear_error(error_type_e err_bit)
 {
-    error_bits_flag &= ~(1<<err_bit);
+    //if (error_bits_flag & ~(1<<err_bit)) {
+        error_bits_flag &= ~(1<<err_bit);
+        //lcd_update_flag = 1;
+    //}
 }
 
 /*
@@ -187,14 +197,14 @@ void ebike_check_warning()
         set_error(ZHUSHUI_ERROR);
     }
 
-    if ((uint8_t)temperature_f > temperature_set+3) {
+    if (((uint8_t)temperature_f > temperature_set+3) && heat_disable != TEMPERATURE_NORMAL_VALUE) {
 
         temperature_error_timer_start(15*60);
         if (state_temperature_error_timeout) {
             //输出“温度过高”
             set_error(WENDU_ERROR);
         }
-    } else if ((uint8_t)temperature_f < temperature_set-3) {
+    } else if (((uint8_t)temperature_f < temperature_set-3) && heat_disable != TEMPERATURE_NORMAL_VALUE) {
 
         temperature_error_timer_start(5*60);
         if (state_temperature_error_timeout) {
