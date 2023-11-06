@@ -317,3 +317,21 @@ void RTC_IRQHandler(void)
         }
     }
 }
+
+
+/**
+  * @brief  This function handles TIMER2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIMER2_IRQHandler(void)
+{
+    if(SET == timer_interrupt_flag_get(TIMER2, TIMER_INT_UP)) {
+        /* clear update interrupt bit */
+        timer_interrupt_flag_clear(TIMER2, TIMER_INT_UP);
+        /* toggle selected led */
+        led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+        lcd_display_inform();
+    }
+}
+

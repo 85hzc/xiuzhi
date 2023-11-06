@@ -59,6 +59,7 @@ void hardware_config()
     nvic_config();
     gpio_config();
 
+    timer2_config();
     timer7_config();
     adc_config();
     i2c_init();
@@ -80,7 +81,7 @@ static void rcu_config(void)
     rcu_periph_clock_enable(RCU_GPIOC);
     rcu_periph_clock_enable(RCU_AF);
     
-    //rcu_periph_clock_enable(RCU_TIMER0);
+    rcu_periph_clock_enable(RCU_TIMER2);
     rcu_periph_clock_enable(RCU_TIMER7);
 
     rcu_adc_clock_config(RCU_CKADC_CKAPB2_DIV6);
@@ -121,14 +122,60 @@ static void nvic_config(void)
     /* configure the NVIC Preemption Priority Bits */
     nvic_priority_group_set(NVIC_PRIGROUP_PRE2_SUB2);
 
-    /* configure ADC0 interrupt priority */
-    //nvic_irq_enable(ADC0_1_IRQn, 0, 0);
+    /* configure timer2 interrupt priority */
+    nvic_irq_enable(TIMER2_IRQn, 0, 0);
 
     /* USART interrupt configuration */
     nvic_irq_enable(USART1_IRQn, 0, 0);
     nvic_irq_enable(USART2_IRQn, 0, 0);
     nvic_irq_enable(RTC_IRQn, 1, 0);
 }
+
+
+
+/**
+    \brief      configure the TIMER2 peripheral
+    \param[in]  none
+    \param[out] none
+    \retval     none
+  */
+void timer2_config(void)
+{
+    /* ----------------------------------------------------------------------------
+    TIMER2 Configuration:
+    TIMER2CLK = SystemCoreClock/8400(GD32F330)or 10800(GD32F350) = 10KHz.
+    the period is 1s(10000/10000 = 1s).
+    ---------------------------------------------------------------------------- */
+    timer_parameter_struct timer_initpara;
+
+    /* enable the peripherals clock */
+    rcu_periph_clock_enable(RCU_TIMER2);
+
+    /* deinit a TIMER */
+    timer_deinit(TIMER2);
+    /* initialize TIMER init parameter struct */
+    timer_struct_para_init(&timer_initpara);
+    /* TIMER2 configuration */
+#if 1//def GD32F330
+    timer_initpara.prescaler         = 8399;
+#endif /* GD32F330 */
+#ifdef GD32F350
+    timer_initpara.prescaler         = 10799;
+#endif /* GD32F350 */
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 4999;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_init(TIMER2, &timer_initpara);
+
+    /* clear channel 0 interrupt bit */
+    timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_UP);
+    /* enable the TIMER interrupt */
+    timer_interrupt_enable(TIMER2, TIMER_INT_UP);
+    /* enable a TIMER */
+    timer_enable(TIMER2);
+}
+
 
 /*!
     \brief      TIMER7 configuration, generator control timer

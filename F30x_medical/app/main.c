@@ -99,7 +99,9 @@ int main(void)
             /*
             ** Handle knob screen cmd
             */
-            controller_msg_process();
+            if (len_ok()) {
+                controller_msg_process();
+            }
         }
 
         if (bTimeFlag_50ms)
@@ -122,13 +124,7 @@ int main(void)
                 work_loop();
             }
         }
-#if 1   //设置定时器，200ms同步一次给旋钮屏
-        if (bTimeFlag_200ms)
-        {
-            bTimeFlag_200ms = 0;
-            lcd_display_inform();
-        }
-#endif
+
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;

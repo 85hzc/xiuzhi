@@ -67,6 +67,19 @@ void usart2_init(void)
     // usart_interrupt_enable(USART2, USART_INT_TBE);
 }
 
+uint8_t len_ok()
+{
+    if (sg_write_index > sg_read_index) {
+        if (sg_write_index - sg_read_index >= 5)
+            return 1;
+    } else if (sg_write_index < sg_read_index) {
+        if (sg_write_index + 128 - sg_read_index >= 5)
+            return 1;
+    }
+
+    return 0;
+}
+
 uint8_t buffer_write(uint8_t ch)
 {
     if (sg_read_index == (sg_write_index + 1) % COM_BUFFER_SIZE)

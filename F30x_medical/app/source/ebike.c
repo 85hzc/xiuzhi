@@ -154,10 +154,14 @@ void beep_off( void )
 
 void set_error(error_type_e err_bit)
 {
-    //if (!(error_bits_flag & ~(1<<err_bit))) {
+    warnning_loop = err_bit;
+
+    //printf("bits:0x%x\r\n", error_bits_flag);
+    if (!(error_bits_flag & (1<<err_bit))) {
         error_bits_flag |= 1<<err_bit;
-        //lcd_update_flag = 1;
-    //}
+        lcd_update_flag = 1;
+        //printf("set ok bits:0x%x\r\n", error_bits_flag);
+    }
 }
 
 void clear_error(error_type_e err_bit)

@@ -193,6 +193,16 @@ void debug_msg_process(uint8_t *msg)
             printf("[AD]temperature:%.1f  %.1f, pwm=%d\r\n", temperature_f, temperature_cb, (uint32_t)pidParm.qOut);
             break;
 
+        case 16:
+            printf("set status:%d\r\n", msg[1]);
+            set_error(msg[1]);
+            break;
+
+        case 17:
+            printf("clear status:%d\r\n", msg[1]);
+            clear_error(msg[1]);
+            break;
+
         default:
             break;
     }

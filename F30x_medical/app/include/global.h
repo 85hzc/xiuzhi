@@ -252,7 +252,10 @@ extern uint32_t lcd_timestamp_set;
 extern Loop_State_e loop_state;
 extern uint8_t lcd_update_flag, lcd_ok_flag;
 extern water_level_e state_fuzi;
+extern uint8_t warnning_loop;
 
+extern void set_error(error_type_e err_bit);
+extern void clear_error(error_type_e err_bit);
 extern void step_motor_move_forward(uint16_t steps);
 extern void step_motor_move_reverse(uint16_t steps);
 extern void usart2_data_transfer(uint8_t *usart_data, uint8_t len);

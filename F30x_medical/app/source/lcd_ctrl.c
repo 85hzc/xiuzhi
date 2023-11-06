@@ -16,6 +16,7 @@ uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
 uint8_t lcd_enzyme_rate, lcd_temperature_set, heat_disable = 0;
 uint8_t lcd_update_flag = 1, lcd_ok_flag = 0, lcd_time_set_flag = 0;
+uint8_t warnning_loop = READY_;
 
 void short_press_handle( void )
 {
@@ -499,11 +500,6 @@ void lcd_update( void )
         _u16_2_byte2_big_endian(286, imgs[figure_num].x_coordinate);
         _u16_2_byte2_big_endian(204, imgs[figure_num].y_coordinate);
         figure_num++;
-
-        //sn = lcd_get_image_serial_number(t100, IMAGE_TYPE_TEMPERATURE_SHOW);
-        //_u16_2_byte2_big_endian(sn, imgs[3].figure_no);
-        //_u16_2_byte2_big_endian(266, imgs[3].x_coordinate);
-        //_u16_2_byte2_big_endian(204, imgs[3].y_coordinate);
     }
 
     //setting icon
@@ -627,22 +623,9 @@ void lcd_update( void )
     }
 
     //warnning
-    uint8_t loop = 0;
-    static uint8_t next_warnning = READY_;
-    loop = next_warnning;
-    while (!(error_bits_flag & 1<<loop)) {
-        loop++;
-        if (loop >= ERROR_max) {
-            next_warnning = READY_;
-            loop = READY_;
-            break;
-        }
-    }
-    next_warnning = loop+1;
-    printf("bit=0x%x, loop=%d\r\n", error_bits_flag, loop);
-    if (error_bits_flag & 1<<loop) {
+    //if (error_bits_flag & 1<<warnning_loop) {
 
-        switch (loop) {
+        switch (warnning_loop) {
             case POSITION_ERROR:
                 //显示“走位错误”
                 lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER, &imgs[figure_num]);
@@ -699,7 +682,7 @@ void lcd_update( void )
                 //显示空
         }
         figure_num++;
-    }
+    //}
 
     lcd_fill_bg_and_icon_cmd(imgs, figure_num);
     #endif
@@ -727,3 +710,22 @@ void lcd_update_flag_check( void )
     lcd_update_flag = 1;
 }
 
+/*
+void lcd_update_flag_warnning_check( void )
+{
+    static uint8_t next_warnning = READY_;
+    warnning_loop = next_warnning;
+    while (!(error_bits_flag & 1<<warnning_loop)) {
+        warnning_loop++;
+        if (warnning_loop >= ERROR_max) {
+            next_warnning = READY_;
+            //warnning_loop = READY_;
+            break;
+        }
+    }
+    next_warnning = warnning_loop+1;
+
+    if (warnning_loop >= ERROR_max) {  //有效状态信息，需要显示
+        printf("bit=0x%x, loop=%d\r\n", error_bits_flag, warnning_loop);
+    }
+}*/
