@@ -1670,14 +1670,3 @@ void lcd_display_inform()
     }
 }
 
-#if 0
-void lcd_display_inform_no_flag()
-{
-    /* 
-    **  response display pixels.
-    */
-    if ((lcd_check_conn_status() == COMM_CONN)) {
-        lcd_update();
-    }
-}
-#endif

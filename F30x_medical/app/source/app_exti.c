@@ -35,24 +35,24 @@ void luobei_exti_init(void)
     nvic_irq_enable(LUOBEI_IRQ_EXTI_IRQ, 2U, 0U);
 }
 
-void protect_exit_init(void)
+void qibei_exit_init(void)
 {
     /* enable the clock of GPIO */
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_AF);
 
     /* configure button pin A as input */
-    gpio_init(PROTECT_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, PROTECT_GPIO_PIN);
+    gpio_init(QIBEI_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, QIBEI_GPIO_PIN);
 
     /* connect key EXTI line to key GPIO pin */
-    gpio_exti_source_select(PROTECT_EXTI_SRC_PORT, PROTECT_EXTI_SRC_PIN);
+    gpio_exti_source_select(QIBEI_EXTI_SRC_PORT, QIBEI_EXTI_SRC_PIN);
 
     /* configure key EXTI line */
-    exti_init(PROTECT_EXTI_LINE, EXTI_INTERRUPT, PROTECT_EXTI_LINE_EDGE);
-    exti_interrupt_flag_clear(PROTECT_EXTI_LINE);
+    exti_init(QIBEI_EXTI_LINE, EXTI_INTERRUPT, QIBEI_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(QIBEI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
-    nvic_irq_enable(PROTECT_EXTI_IRQ, 2U, 0U);
+    nvic_irq_enable(QIBEI_EXTI_IRQ, 2U, 0U);
 }
 
 
@@ -71,6 +71,7 @@ void position1_exit_init(void)
     /* configure key EXTI line */
     exti_init(N1S_LUOBEI_EXTI_LINE, EXTI_INTERRUPT, N1S_LUOBEI_EXTI_LINE_EDGE);
     exti_interrupt_flag_clear(N1S_LUOBEI_EXTI_LINE);
+    exti_interrupt_disable(N1S_LUOBEI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
     nvic_irq_enable(N1S_LUOBEI_EXTI_IRQ, 2U, 0U);
@@ -91,6 +92,7 @@ void position2_exit_init(void)
     /* configure key EXTI line */
     exti_init(N2S_ZHUSHUI_EXTI_LINE, EXTI_INTERRUPT, N2S_ZHUSHUI_EXTI_LINE_EDGE);
     exti_interrupt_flag_clear(N2S_ZHUSHUI_EXTI_LINE);
+    exti_interrupt_disable(N2S_ZHUSHUI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
     nvic_irq_enable(N2S_ZHUSHUI_EXTI_IRQ, 2U, 0U);
@@ -111,6 +113,7 @@ void position3_exit_init(void)
     /* configure key EXTI line */
     exti_init(N3S_CHUBEI_EXTI_LINE, EXTI_INTERRUPT, N3S_CHUBEI_EXTI_LINE_EDGE);
     exti_interrupt_flag_clear(N3S_CHUBEI_EXTI_LINE);
+    exti_interrupt_disable(N3S_CHUBEI_EXTI_LINE);
 
     /* enable and set key EXTI interrupt to the lowest priority */
     nvic_irq_enable(N3S_CHUBEI_EXTI_IRQ, 2U, 0U);

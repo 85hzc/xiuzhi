@@ -154,7 +154,7 @@ void beep_off( void )
 
 void set_error(error_type_e err_bit)
 {
-    warnning_loop = err_bit;
+    warnning_loop = err_bit;    //用于屏幕提示告警信息
 
     //printf("bits:0x%x\r\n", error_bits_flag);
     if (!(error_bits_flag & (1<<err_bit))) {
@@ -231,13 +231,12 @@ void ebike_check_warning()
         clear_error(CHUBEI_);
         clear_error(HUISHOU_);
     }
-    
 }
 
 //四个中断信号脚
 uint8_t read_qibei_position_switch()
 {
-    return (RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)) ? 1 : 0;
+    return (RESET == gpio_input_bit_get(QIBEI_GPIO_PORT, QIBEI_GPIO_PIN)) ? 1 : 0;
 }
 
 uint8_t read_luobei_position_switch()

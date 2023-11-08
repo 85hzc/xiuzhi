@@ -42,21 +42,6 @@ OF SUCH DAMAGE.
 uint32_t RTCSRC_FLAG = 0; 
 
 
-/* enter the second interruption,set the second interrupt flag to 1 */
-__IO uint32_t timedisplay;
-
-/*!
-    \brief      configure the nested vectored interrupt controller
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void nvic_configuration(void)
-{
-    nvic_priority_group_set(NVIC_PRIGROUP_PRE1_SUB3);
-    nvic_irq_enable(RTC_IRQn,1,0);
-}
-
 /*!
     \brief      configure the RTC
     \param[in]  none
@@ -74,13 +59,21 @@ void rtc_configuration(void)
     /* reset backup domain */
     bkp_deinit();
 
+#if 0
     /* enable LXTAL */
     rcu_osci_on(RCU_HXTAL);
     /* wait till LXTAL is ready */
     rcu_osci_stab_wait(RCU_HXTAL);
-    
     /* select RCU_LXTAL as RTC clock source */
     rcu_rtc_clock_config(RCU_RTCSRC_HXTAL_DIV_128);
+#else
+    /* enable LXTAL */
+    rcu_osci_on(RCU_LXTAL);
+    /* wait till LXTAL is ready */
+    rcu_osci_stab_wait(RCU_LXTAL);
+    /* select RCU_LXTAL as RTC clock source */
+    rcu_rtc_clock_config(RCU_RTCSRC_LXTAL);
+#endif
 
     /* enable RTC Clock */
     rcu_periph_clock_enable(RCU_RTC);
@@ -98,8 +91,8 @@ void rtc_configuration(void)
     rtc_lwoff_wait();
 
     /* set RTC prescaler: set RTC period to 1s */
-    //rtc_prescaler_set(32767);
-    rtc_prescaler_set(62500);
+    rtc_prescaler_set(32767);
+    //rtc_prescaler_set(62500);
 
     /* wait until last write operation on RTC registers has finished */
     rtc_lwoff_wait();
@@ -181,12 +174,8 @@ void time_display(uint32_t timevar)
 */
 void time_show(void)
 {
-    /* if 1s has paased */
-    if (timedisplay == 1){
-        /* display current time */
-        time_display(rtc_counter_get());
-        timedisplay = 0;
-    }
+    /* display current time */
+    time_display(rtc_counter_get());
 }
 
 #if 0

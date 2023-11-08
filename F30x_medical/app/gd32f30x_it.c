@@ -38,7 +38,6 @@ OF SUCH DAMAGE.
 #include "global.h"
 #include "gd32f30x_it.h"
 
-extern __IO uint32_t timedisplay;
 /*!
     \brief      this function handles NMI exception
     \param[in]  none
@@ -175,7 +174,7 @@ void EXTI5_9_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_6) != RESET){
         exti_interrupt_flag_clear(EXTI_6);
         joggle_delay(10000);
-        if(RESET == gpio_input_bit_get(PROTECT_GPIO_PORT, PROTECT_GPIO_PIN)){
+        if(read_qibei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_qibei_position_flag = 1;
         }
@@ -204,6 +203,7 @@ void EXTI5_9_IRQHandler(void)
 
             if (g_water_count > water_count_signals) {
                 water_motor_stop();
+                exti_interrupt_disable(VELOCITY_EXTI_LINE);
                 g_water_count = 0;
                 state_water_ok = 1;
             }
@@ -225,9 +225,10 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_10) != RESET){
         exti_interrupt_flag_clear(EXTI_10);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(N1S_LUOBEI_GPIO_PORT, N1S_LUOBEI_GPIO_PIN)){
+        if(read_luobei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_luobei_position_flag = 1;
+            exti_interrupt_disable(N1S_LUOBEI_EXTI_LINE);
         }
     }
 
@@ -235,9 +236,10 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_11) != RESET){
         exti_interrupt_flag_clear(EXTI_11);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(N2S_ZHUSHUI_GPIO_PORT, N2S_ZHUSHUI_GPIO_PIN)){
+        if(read_zhushui_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_zhushui_position_flag = 1;
+            exti_interrupt_disable(N2S_ZHUSHUI_EXTI_LINE);
         }
     }
 
@@ -245,9 +247,10 @@ void EXTI10_15_IRQHandler(void)
     if(exti_interrupt_flag_get(EXTI_12) != RESET){
         exti_interrupt_flag_clear(EXTI_12);
         joggle_delay(10000);
-        if(SET == gpio_input_bit_get(N3S_CHUBEI_GPIO_PORT, N3S_CHUBEI_GPIO_PIN)){
+        if(read_chubei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_chubei_position_flag = 1;
+            exti_interrupt_disable(N3S_CHUBEI_EXTI_LINE);
         }
     }
 }
@@ -304,13 +307,11 @@ void RTC_IRQHandler(void)
         /* clear the RTC second interrupt flag*/
         rtc_flag_clear(RTC_FLAG_SECOND);
 
-        /* enable time update */
-        timedisplay = 1;
-
+        //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
         /* wait until last write operation on RTC registers has finished */
         rtc_lwoff_wait();
         /* reset RTC counter when time is 23:59:59 */
-        if (rtc_counter_get() == 0x00015180){
+        if (rtc_counter_get() >= 0x00015180){
             rtc_counter_set(0x0);
             /* wait until last write operation on RTC registers has finished */
             rtc_lwoff_wait();
@@ -330,7 +331,7 @@ void TIMER2_IRQHandler(void)
         /* clear update interrupt bit */
         timer_interrupt_flag_clear(TIMER2, TIMER_INT_UP);
         /* toggle selected led */
-        led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+        //led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
         lcd_display_inform();
     }
 }

@@ -60,7 +60,7 @@ int main(void)
 
     /* hardware initialization */
     luobei_exti_init();             //落杯器完成落杯动作，计数
-    protect_exit_init();            //安全限位开关
+    qibei_exit_init();              //安全限位开关
     velocity_exti_init();           //流量传感器信号中断输入
     position1_exit_init();
     position2_exit_init();

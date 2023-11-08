@@ -16,51 +16,16 @@ uint16_t lcd_water_set;
 uint32_t lcd_timestamp_set;
 uint8_t lcd_enzyme_rate, lcd_temperature_set, heat_disable = 0;
 uint8_t lcd_update_flag = 1, lcd_ok_flag = 0, lcd_time_set_flag = 0;
-uint8_t warnning_loop = READY_;
+uint8_t warnning_loop = READY_;     //用于屏幕提示告警信息
 
 void short_press_handle( void )
 {
 
     if (ctrlOptType == OPT_TYPE_SELECT) {                   //功能选择模式，短按进入功能项
 
-        ctrlOptType = OPT_TYPE_SET;
+        //  启动落杯
+        start_work = 1;
 
-        switch (ctrlFuncOpt) {
-
-            case SETTING_OPTIONS_TIME:
-                clockSetDomain = CLOCK_HOUR;
-                lcd_timestamp_set = rtc_counter_get();
-                lcd_time_set_flag = 1;
-                break;
-            
-            case SETTING_OPTIONS_TATAL_VOLUME:
-                lcd_water_set = water_set;
-                break;
-            case SETTING_OPTIONS_DILUTE:
-                lcd_enzyme_rate = enzyme_rate;
-                break;
-            case SETTING_OPTIONS_TEMPERATURE:
-                lcd_temperature_set = temperature_set;
-                break;
-            case SETTING_OPTIONS_CLEAR:
-                cup_count = 0;
-                flash_value_flash();
-                config_init();
-                ctrlOptType = OPT_TYPE_SELECT;                  //清空数据，功能选项保持选择模式
-                break;
-            case SETTING_OPTIONS_INJECT:
-                //TODO
-                static uint8_t enzyme_motor_ctrl = 1;
-                if (enzyme_motor_ctrl) {
-                    enzyme_motor_start();
-                    enzyme_motor_ctrl = 0;
-                } else {
-                    enzyme_motor_stop();
-                    enzyme_motor_ctrl = 1;
-                }
-                ctrlOptType = OPT_TYPE_SELECT;                                 //INJECT模式，可重复操作注液电机
-                break;
-        }
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 
         ctrlOptType = OPT_TYPE_SELECT;
@@ -116,10 +81,47 @@ void short_press_handle( void )
 
 void long_press_handle( void )
 {
-    //  TODO:
-    //  启动落杯
-    printf("long press\r\n");
-    start_work = 1;
+    if (ctrlOptType == OPT_TYPE_SELECT) {                   //功能选择模式，短按进入功能项
+
+        ctrlOptType = OPT_TYPE_SET;
+
+        switch (ctrlFuncOpt) {
+
+            case SETTING_OPTIONS_TIME:
+                clockSetDomain = CLOCK_HOUR;
+                lcd_timestamp_set = rtc_counter_get();
+                lcd_time_set_flag = 1;
+                break;
+            
+            case SETTING_OPTIONS_TATAL_VOLUME:
+                lcd_water_set = water_set;
+                break;
+            case SETTING_OPTIONS_DILUTE:
+                lcd_enzyme_rate = enzyme_rate;
+                break;
+            case SETTING_OPTIONS_TEMPERATURE:
+                lcd_temperature_set = temperature_set;
+                break;
+            case SETTING_OPTIONS_CLEAR:
+                cup_count = 0;
+                flash_value_flash();
+                config_init();
+                ctrlOptType = OPT_TYPE_SELECT;                  //清空数据，功能选项保持选择模式
+                break;
+            case SETTING_OPTIONS_INJECT:
+                //TODO
+                static uint8_t enzyme_motor_ctrl = 1;
+                if (enzyme_motor_ctrl) {
+                    enzyme_motor_start();
+                    enzyme_motor_ctrl = 0;
+                } else {
+                    enzyme_motor_stop();
+                    enzyme_motor_ctrl = 1;
+                }
+                ctrlOptType = OPT_TYPE_SELECT;                                 //INJECT模式，可重复操作注液电机
+                break;
+        }
+    }
 }
 
 
@@ -308,7 +310,17 @@ void lcd_update( void )
     figure_num++;
 
     // 显示背景大圆圈 可选自己喜欢的颜色
-    _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_CIRCLE_GREEN_SERIAL_NUMBER, imgs[1].figure_no);
+    if ((error_bits_flag & 1<<POSITION_ERROR) ||
+        (error_bits_flag & 1<<WUBEI_ERROR) ||
+        (error_bits_flag & 1<<QIBEI_ERROR) ||
+        (error_bits_flag & 1<<ZHUSHUI_ERROR) ||
+        (error_bits_flag & 1<<WENDU_ERROR)) {           //错误，需停止工作
+        _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_CIRCLE_RED_2_SERIAL_NUMBER, imgs[1].figure_no);
+    } else if (error_bits_flag & 1<<SHUIWEI_ERROR) {    //告警提示，需人为操作清除
+        _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_CIRCLE_YELLOW_2_SERIAL_NUMBER, imgs[1].figure_no);
+    } else {   //
+        _u16_2_byte2_big_endian(IMAGES_MAIN_PICTURE_CIRCLE_GREEN_2_SERIAL_NUMBER, imgs[1].figure_no);
+    }
     _u16_2_byte2_big_endian(8, imgs[1].x_coordinate);
     _u16_2_byte2_big_endian(8, imgs[1].y_coordinate);
     figure_num++;
