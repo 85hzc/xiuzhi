@@ -128,13 +128,9 @@ void long_press_handle( void )
 void CCW_press_handle( void )
 {
 
-    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt == SETTING_OPTIONS_INJECT)) {                       //功能选择模式，逆时针旋转进入功能项
+    if ((ctrlOptType == OPT_TYPE_SELECT)) {                       //功能选择模式，逆时针旋转进入功能项
 
-        if (ctrlFuncOpt == SETTING_OPTIONS_INJECT) {
-            ctrlFuncOpt = SETTING_OPTIONS_TIME;
-        } else {
-            ctrlFuncOpt = (ctrlFuncOpt + 1) % SETTING_OPTIONS_MAX_NUM;
-        }
+        ctrlFuncOpt = (ctrlFuncOpt + 1) % SETTING_OPTIONS_MAX_NUM;
     } else if (ctrlOptType == OPT_TYPE_SET) {                   //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 
         switch (ctrlFuncOpt) {
@@ -194,12 +190,12 @@ void CCW_press_handle( void )
 void CW_press_handle( void )
 {
 
-    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt == SETTING_OPTIONS_INJECT)) {   //功能选择模式，厂按进入功能项
+    if ((ctrlOptType == OPT_TYPE_SELECT)) {   //功能选择模式，厂按进入功能项
 
         if (ctrlFuncOpt == SETTING_OPTIONS_TIME) {
             ctrlFuncOpt = SETTING_OPTIONS_INJECT;
         } else {
-            ctrlFuncOpt = (ctrlFuncOpt - 1) % SETTING_OPTIONS_MAX_NUM;
+            ctrlFuncOpt = ctrlFuncOpt - 1;
         }
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 

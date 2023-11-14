@@ -59,8 +59,9 @@ void hardware_config()
     nvic_config();
     gpio_config();
 
-    timer2_config();
-    timer7_config();
+    timer1_config();    //pwm：Step motor
+    timer2_config();    //定时器周期中断，LCD发包
+    timer7_config();    //pwm：蜂鸣器、加热器
     adc_config();
     i2c_init();
 
@@ -96,6 +97,11 @@ static void rcu_config(void)
 */
 static void gpio_config(void)
 {
+    //步进电机step信号输入
+    /*Configure PA1(TIMER1_CH1) as alternate function*/
+    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
+
+
     //加热丝  导通电流PWM控制
     /*Configure PC6(TIMER7_CH0) as alternate function*/
     gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
@@ -174,6 +180,50 @@ void timer2_config(void)
     timer_interrupt_enable(TIMER2, TIMER_INT_UP);
     /* enable a TIMER */
     timer_enable(TIMER2);
+}
+
+
+
+/*!
+    \brief      TIMER7 configuration, generator control timer
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void timer1_config(void)
+{
+    /*  TIMER1 configuration: generate PWM signals with different duty cycles:
+        TIMER1CLK = SystemCoreClock / 120 = 1MHz */
+    timer_parameter_struct       timer_initpara;
+    timer_oc_parameter_struct    timer_ocintpara;
+    timer_deinit(TIMER1);
+    //120 000 000
+    timer_initpara.prescaler         = 239;//1KHz
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;
+    timer_initpara.period            = 500;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
+    timer_initpara.repetitioncounter = 0;
+    timer_init(TIMER1, &timer_initpara);
+
+    /* TIMER1 output disable -- CH0 */
+    timer_ocintpara.outputstate  = TIMER_CCX_ENABLE;
+    timer_ocintpara.outputnstate = TIMER_CCXN_DISABLE;
+    timer_ocintpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;
+    timer_ocintpara.ocnpolarity  = TIMER_OCN_POLARITY_HIGH;
+    timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
+    timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
+
+    //CH1
+    timer_channel_output_config(TIMER1, TIMER_CH_1, &timer_ocintpara);
+    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 0);
+    timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
+
+    timer_primary_output_config(TIMER1, ENABLE);
+    /* auto-reload preload enable */
+    timer_auto_reload_shadow_enable(TIMER1);
+    timer_enable(TIMER1);
 }
 
 

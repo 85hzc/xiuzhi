@@ -150,6 +150,7 @@ OF SUCH DAMAGE.
 
 //////运杯模块//////
 /* 步进电机信号脚 */
+#if 0
 #define MOTOR_STEP_PIN_A_l                  GPIO_PIN_13
 #define MOTOR_STEP_PIN_B_l                  GPIO_PIN_14
 #define MOTOR_STEP_l_GPIO_CLK               RCU_GPIOB
@@ -159,8 +160,13 @@ OF SUCH DAMAGE.
 #define MOTOR_STEP_PIN_B_h                  GPIO_PIN_9
 #define MOTOR_STEP_h_GPIO_CLK               RCU_GPIOA
 #define MOTOR_STEP_h_GPIO_PORT              GPIOA
+#else
+#define STEP_DIR_GPIO_PORT                  GPIOB
+#define STEP_DIR_GPIO_PIN                   GPIO_PIN_8
 
-#define TIME_23_59_59 (0x00015180)
+#endif
+
+#define TIME_23_59_59                       (0x00015180)
 #define DEBUG_PRINT
 
 /* conflicting configuration */
@@ -234,7 +240,7 @@ extern PID_Parm pidParm;
 extern uint8_t state_youbei, state_t1, state_t2, self_diagnose, self_diag_first_time_flag;
 extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
-extern uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
+extern uint8_t g_exti_chubei_protet_position_flag, g_exti_qibei_position_flag, g_exti_luobei_position_flag;
 extern uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
 extern uint8_t state_enzyme_ok, state_water_ok;
 extern uint8_t state_qubei_timeout, state_position_error_timeout, \

@@ -6,6 +6,7 @@
 
 #include "global.h"
 
+#if 0
 #define MOVE_CYCLE   4
 
 #define MOVE_STEP_1  0
@@ -160,3 +161,51 @@ static void drv_motor_move_execute(uint8_t step)
     }
 }
 
+#else
+void step_motor_init(void)
+{
+    /* enable the clock of GPIO */
+    //rcu_periph_clock_enable(MOTOR_STEP_h_GPIO_CLK);
+    //rcu_periph_clock_enable(MOTOR_STEP_l_GPIO_CLK);
+
+    /* step motor direction gpio */
+    gpio_init(STEP_DIR_GPIO_PORT, GPIO_MODE_OUT_PP, GPIO_OSPEED_10MHZ, STEP_DIR_GPIO_PIN);
+    gpio_bit_reset(STEP_DIR_GPIO_PORT, STEP_DIR_GPIO_PIN);
+
+}
+
+/*
+** 步进电机
+*/
+void motor_on( void )
+{
+    /* configure TIMER channel output pulse value */
+    timer_channel_output_pulse_value_config(TIMER1,TIMER_CH_1, 250);
+}
+
+void motor_off( void )
+{
+    /* configure TIMER channel output pulse value */
+    timer_channel_output_pulse_value_config(TIMER1,TIMER_CH_1, 0);
+}
+
+void step_motor_move_stop()
+{
+    motor_off();
+}
+
+void step_motor_move_forward(uint16_t steps)
+{
+    //direct gpio set
+    gpio_bit_set(STEP_DIR_GPIO_PORT, STEP_DIR_GPIO_PIN);
+    motor_on();
+}
+
+void step_motor_move_reverse(uint16_t steps)
+{
+    //direct gpio reset
+    gpio_bit_reset(STEP_DIR_GPIO_PORT, STEP_DIR_GPIO_PIN);
+    motor_on();
+}
+
+#endif

@@ -159,15 +159,33 @@ void beep_off( void )
 void set_error(error_type_e err_bit)
 {
     warnning_loop = err_bit;    //用于屏幕提示告警信息
-#ifdef DEBUG_PRINT
-    printf("err:%d\r\n", err_bit);
-#endif
     if (!(error_bits_flag & (1<<err_bit))) {
         error_bits_flag |= 1<<err_bit;
         lcd_update_flag = 1;
         //printf("set ok bits:0x%x\r\n", error_bits_flag);
     }
-    //lcd_update_flag = 1;
+#ifdef DEBUG_PRINT
+    printf("err: 0x%x ", err_bit);
+    if (err_bit == POSITION_ERROR) {
+        printf(" %s\r\n", "POSITION_ERROR");
+    } else if (err_bit == WUBEI_ERROR) {
+        printf(" %s\r\n", "WUBEI_ERROR");
+    } else if (err_bit == QIBEI_ERROR) {
+        printf(" %s\r\n", "QIBEI_ERROR");
+    } else if (err_bit == ZHUSHUI_ERROR) {
+        printf(" %s\r\n", "ZHUSHUI_ERROR");
+    } else if (err_bit == WENDU_ERROR) {
+        printf(" %s\r\n", "WENDU_ERROR");
+    } else if (err_bit == READY_) {
+        printf(" %s\r\n", "READY");
+    } else if (err_bit == RESET_) {
+        printf(" %s\r\n", "RESET");
+    } else if (err_bit == CHUBEI_) {
+        printf(" %s\r\n", "CHUBEI");
+    } else if (err_bit == HUISHOU_) {
+        printf(" %s\r\n", "HUISHOU");
+    }
+#endif
 }
 
 void clear_error(error_type_e err_bit)
@@ -269,6 +287,11 @@ uint8_t serious_error_clear( void )
 }
 
 //四个中断信号脚
+uint8_t read_chubei_protect_position_switch()
+{
+    return (RESET == gpio_input_bit_get(CHUBEI_GPIO_PORT, CHUBEI_GPIO_PIN)) ? 1 : 0;
+}
+
 uint8_t read_qibei_position_switch()
 {
     return (RESET == gpio_input_bit_get(QIBEI_GPIO_PORT, QIBEI_GPIO_PIN)) ? 1 : 0;

@@ -170,6 +170,15 @@ void SysTick_Handler(void)
 */
 void EXTI5_9_IRQHandler(void)
 {
+    //出杯位置，限位控制开关中断
+    if(exti_interrupt_flag_get(EXTI_5) != RESET){
+        exti_interrupt_flag_clear(EXTI_5);
+        joggle_delay(10000);
+        if(read_chubei_protect_position_switch()){
+            g_exti_chubei_protet_position_flag = 1;
+        }
+    }
+
     //限位控制开关中断
     if(exti_interrupt_flag_get(EXTI_6) != RESET){
         exti_interrupt_flag_clear(EXTI_6);
@@ -190,6 +199,16 @@ void EXTI5_9_IRQHandler(void)
             luobei_retry += 1;   //完成一次落杯操作，作为二次尝试落杯判断依据（如果空杯情况）
             //luobei_motor_stop();
             lcd_update_flag = 1;
+        }
+    }
+
+    //脚踏开关信号中断
+    if(exti_interrupt_flag_get(EXTI_8) != RESET){
+        exti_interrupt_flag_clear(EXTI_8);
+        joggle_delay(10000);
+        if(SET == gpio_input_bit_get(PEDAL_GPIO_PORT, PEDAL_GPIO_PIN)){
+            led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+            start_work = 1;
         }
     }
 

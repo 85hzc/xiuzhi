@@ -122,6 +122,7 @@ int main(void)
 
             if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
                 work_loop();
+                step_work_check();
             }
         }
 

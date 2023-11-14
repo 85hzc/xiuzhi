@@ -43,7 +43,7 @@ void debug_msg_process(uint8_t *msg);
 uint8_t state_youbei, state_t1, state_t2, self_diagnose = 1, self_diag_first_time_flag = 1;
 uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \
     state_position_error_count_running, state_temperature_error_count_running;
-uint8_t g_exti_qibei_position_flag, g_exti_luobei_position_flag;
+uint8_t g_exti_chubei_protet_position_flag, g_exti_qibei_position_flag, g_exti_luobei_position_flag;
 uint8_t g_exti_zhushui_position_flag, g_exti_chubei_position_flag;
 uint8_t state_enzyme_ok = 0, state_water_ok = 0;
 uint8_t state_qubei_timeout = 0, state_position_error_timeout = 0, \
@@ -309,4 +309,46 @@ void work_loop( void )
         default:
             printf("invalid state.\r\n");
     }
+}
+
+void step_work_check( void )
+{
+    static uint8_t time_delay = 0;
+
+    if (g_exti_chubei_protet_position_flag) {
+        motor_off();
+    }
+
+    //出杯过程
+    if (((loop_state == LOOP_LUOBEI) && g_exti_luobei_position_flag ) ||
+        ((loop_state == LOOP_CHUBEI_DETECT) && g_exti_chubei_position_flag ) ||
+        ((loop_state == LOOP_ZHUYE) && g_exti_zhushui_position_flag ) ||
+        state_position_error_timeout ||
+        serious_error()) {
+
+        if (time_delay++ >= 2) {
+            clear_position_flags();
+            motor_off();
+            time_delay = 0;
+            //printf_exti_flags();
+            return;
+        }
+    }
+
+    //回收过程
+    if (g_exti_qibei_position_flag ||
+        state_position_error_timeout ||
+        ((loop_state == LOOP_LUOBEI) && self_diagnose && 
+            g_exti_luobei_position_flag && !self_diag_first_time_flag) ||
+        serious_error()) {
+
+        if (time_delay++ >= 2) {
+            clear_position_flags();
+            motor_off();
+            time_delay = 0;
+            //printf_exti_flags();
+            return;
+        }
+    }
+
 }
