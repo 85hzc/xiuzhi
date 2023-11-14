@@ -255,22 +255,30 @@ void report_operation_handle(uint8_t opt)
 
     switch (opt) {
         case COMM_OPT_BTN_OR_KNOBS_SHORT_PRESS: //short press
+            #ifdef DEBUG_PRINT
             printf("short press\r\n");
+            #endif
             short_press_handle();
             break;
 
         case COMM_OPT_BTN_OR_KNOBS_LONG_PRESS: //long press
+            #ifdef DEBUG_PRINT
             printf("long press\r\n");
+            #endif
             long_press_handle();
             break;
 
         case COMM_OPT_BTN_OR_KNOBS_CCW_ROTATE: //CCW
+            #ifdef DEBUG_PRINT
             printf("ccw press\r\n");
+            #endif
             CCW_press_handle();
             break;
 
         case COMM_OPT_BTN_OR_KNOBS_CW_ROTATE: //CW
+            #ifdef DEBUG_PRINT
             printf("cw press\r\n");
+            #endif
             CW_press_handle();
             break;
     }
@@ -280,16 +288,6 @@ void report_operation_handle(uint8_t opt)
 
 void lcd_update( void )
 {
-#if 0
-    lcd_display_update();
-    // 显示温度
-    lcd_temperature_display(lcd_temperature_set);
-    // 显示默认设置
-    lcd_setting_display(ctrlFuncOpt);
-    lcd_time_display(rtc_counter_get());
-    /* lcd status update */
-    lcd_status_display();
-#else
     //lcd display
     uint16_t sn = 0;
     uint8_t figure_num = 0;
@@ -300,7 +298,9 @@ void lcd_update( void )
         lcd_conn_opt(COMM_CONN);
         return;
     }
-    printf("fun:%s line:%d\n", __FUNCTION__, __LINE__);
+    #ifdef DEBUG_PRINT
+    printf("fun:%s\n", __FUNCTION__);
+    #endif
     figure_msg_t imgs[64];
 
     // 显示黑屏大背景
@@ -697,12 +697,10 @@ void lcd_update( void )
     //}
 
     lcd_fill_bg_and_icon_cmd(imgs, figure_num);
-    #endif
-
 }
 
 
-void lcd_update_flag_check( void )
+void lcd_update_timer_flag_check( void )
 {
     static uint16_t minutes_last = 0xff;
     uint32_t timestamp;

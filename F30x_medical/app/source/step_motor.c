@@ -79,17 +79,23 @@ void step_motor_init(void)
 void step_motor_move_forward(uint16_t steps)
 {
     uint16_t i;
+    static uint8_t time_delay = 0;
 
     for (i=0; i<steps; i++)
     {
         if (((loop_state == LOOP_LUOBEI) && g_exti_luobei_position_flag ) ||
             ((loop_state == LOOP_CHUBEI_DETECT) && g_exti_chubei_position_flag ) ||
             ((loop_state == LOOP_ZHUYE) && g_exti_zhushui_position_flag ) ||
-            state_position_error_timeout) {
-            //printf_exti_flags();
-            clear_position_flags();
-            drv_motor_move_execute(MOVE_STEP_S);
-            return;
+            state_position_error_timeout ||
+            serious_error()) {
+                        
+            if (time_delay++ >= 20) {
+                clear_position_flags();
+                drv_motor_move_execute(MOVE_STEP_S);
+                time_delay = 0;
+                //printf_exti_flags();
+                return;
+            }
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + MOVE_CYCLE - 1) % MOVE_CYCLE;
@@ -101,17 +107,23 @@ void step_motor_move_forward(uint16_t steps)
 void step_motor_move_reverse(uint16_t steps)
 {  
     uint16_t i;
+    static uint8_t time_delay = 0;
 
     for (i=0; i<steps; i++)
     {
         if (g_exti_qibei_position_flag ||
             state_position_error_timeout ||
             ((loop_state == LOOP_LUOBEI) && self_diagnose && 
-                g_exti_luobei_position_flag && !self_diag_first_time_flag)) {
-            //printf_exti_flags();
-            clear_position_flags();
-            drv_motor_move_execute(MOVE_STEP_S);
-            return;
+                g_exti_luobei_position_flag && !self_diag_first_time_flag) ||
+            serious_error()) {
+
+            if (time_delay++ >= 20) {
+                clear_position_flags();
+                drv_motor_move_execute(MOVE_STEP_S);
+                time_delay = 0;
+                //printf_exti_flags();
+                return;
+            }
         }
         drv_motor_move_execute(motor_steps[step]);
         step = (step + 1) % MOVE_CYCLE;

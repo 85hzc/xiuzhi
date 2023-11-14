@@ -202,6 +202,10 @@ void debug_msg_process(uint8_t *msg)
             printf("clear status:%d\r\n", msg[1]);
             clear_error(msg[1]);
             break;
+        
+        case 18:
+            print_error_bits();
+            break;
 
         default:
             break;

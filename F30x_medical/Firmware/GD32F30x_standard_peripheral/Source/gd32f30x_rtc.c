@@ -128,7 +128,7 @@ uint32_t rtc_counter_get(void)
     uint32_t temp = 0x0U;
     temp = RTC_CNTL;
     temp |= (RTC_CNTH << 16);
-    return temp;
+    return temp % 0x00015180;
 }
 
 /*!

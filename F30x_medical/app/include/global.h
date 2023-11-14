@@ -161,6 +161,7 @@ OF SUCH DAMAGE.
 #define MOTOR_STEP_h_GPIO_PORT              GPIOA
 
 #define TIME_23_59_59 (0x00015180)
+#define DEBUG_PRINT
 
 /* conflicting configuration */
 

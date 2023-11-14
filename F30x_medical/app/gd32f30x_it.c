@@ -295,6 +295,7 @@ void USART1_IRQHandler(void)
     }
 }
 
+#if 0
 /*!
     \brief      this function handles RTC global interrupt request
     \param[in]  none
@@ -311,14 +312,14 @@ void RTC_IRQHandler(void)
         /* wait until last write operation on RTC registers has finished */
         rtc_lwoff_wait();
         /* reset RTC counter when time is 23:59:59 */
-        if (rtc_counter_get() >= 0x00015180){
-            rtc_counter_set(0x0);
+        if (rtc_counter_get() >= TIME_23_59_59){
+            rtc_counter_set(rtc_counter_get() % TIME_23_59_59);
             /* wait until last write operation on RTC registers has finished */
             rtc_lwoff_wait();
         }
     }
 }
-
+#endif
 
 /**
   * @brief  This function handles TIMER2 interrupt request.

@@ -25,8 +25,10 @@ void config_init( void )
     water_count_signals = water_set * 8.5;  //每毫升信号数量  8.5次/ml
     enzyme_count_times = (water_set * enzyme_rate/1000.0f)  * 1000; //流速：1 ml/s
 
+#ifdef DEBUG_PRINT
     printf("water: %d ml(%d), enzyme rate: %d %%, temp_set: %d, cup_count: %d\r\n", water_set, water_count_signals, enzyme_rate
             , temperature_set, cup_count);
+#endif
 
     if (temperature_set == 0) {
         heat_disable = TEMPERATURE_NORMAL_VALUE;
@@ -34,7 +36,7 @@ void config_init( void )
 
     memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
-    pidParm.qInRef = temperature_set;
+    pidParm.qInRef = temperature_set-1;     //温度传感器采集滞后，加热目标温度降一度
     pidParm.qKp = 10.0;
     pidParm.qKi = 1.0;
     pidParm.qKc = 0.1;
@@ -94,7 +96,9 @@ void EBI_calcPI( PID_Parm *pParm)
 */
 void flash_value_flash(void)
 {
+#ifdef DEBUG_PRINT
     printf("flash update.\r\n");
+#endif
     fmc_erase_pages(MODE_PAGE);
     fmc_data_program(MODE_PAGE);
 }
@@ -117,20 +121,20 @@ void ebike_read_temperature(void)
     extern const float ntc_B3950_10k[];
     //小于0度 or 大于100度，无效数据过滤
     if ((Rt > ntc_B3950_10k[0]) || ( Rt < ntc_B3950_10k[100])) {
-        printf("res:%f over flow!\r\n", Rt);
+        //printf("res:%f over flow!\r\n", Rt);
         goto TODO;
     }
 
     temperature = 1 / (float)(1.0/T2+log(Rt/Rp) / 3950.0) - Ka + 0.5;
     HZC_LP_FAST(temperature_f, temperature, 0.1);
     pidParm.qInMeas = temperature_f;
-
+    /*
     for ( uint8_t i=0; i<=100; i++ ) {
         if ((Rt<ntc_B3950_10k[i]) && (Rt>ntc_B3950_10k[i+1])) {
             temperature_cb = i;
         }
     }
-
+    */
     TODO:
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
@@ -155,13 +159,15 @@ void beep_off( void )
 void set_error(error_type_e err_bit)
 {
     warnning_loop = err_bit;    //用于屏幕提示告警信息
-
-    //printf("bits:0x%x\r\n", error_bits_flag);
+#ifdef DEBUG_PRINT
+    printf("err:%d\r\n", err_bit);
+#endif
     if (!(error_bits_flag & (1<<err_bit))) {
         error_bits_flag |= 1<<err_bit;
         lcd_update_flag = 1;
         //printf("set ok bits:0x%x\r\n", error_bits_flag);
     }
+    //lcd_update_flag = 1;
 }
 
 void clear_error(error_type_e err_bit)
@@ -170,6 +176,11 @@ void clear_error(error_type_e err_bit)
         error_bits_flag &= ~(1<<err_bit);
         //lcd_update_flag = 1;
     //}
+}
+
+void print_error_bits()
+{
+    printf("error bits:0x%x", error_bits_flag);
 }
 
 /*
@@ -185,7 +196,6 @@ void heat_running( void )
     //0 ---- 500
     /* configure TIMER channel output pulse value */
     if (delay_heat_reset > 16) {
-        //printf("qout=%.1f\r\n", pidParm.qOut);
         timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
     }
 }
@@ -196,9 +206,11 @@ void ebike_check_warning()
         state_position_error_timeout = 0;
         //输出“走位错误”
         set_error(POSITION_ERROR);
+        lcd_update_flag = 1;
     } else if (state_jiazhu_error_timeout){
         //输出“加注失败”
         set_error(ZHUSHUI_ERROR);
+        lcd_update_flag = 1;
     }
 
     if (((uint8_t)temperature_f > temperature_set+3) && heat_disable != TEMPERATURE_NORMAL_VALUE) {
@@ -224,13 +236,36 @@ void ebike_check_warning()
     if (state_youbei) {
         clear_error(WUBEI_ERROR);
     }
-
-    if (error_bits_flag & 0xfff0) {   //
+    /*
+    if (error_bits_flag & 0x3f0) {   //
         clear_error(READY_);
         clear_error(RESET_);
         clear_error(CHUBEI_);
         clear_error(HUISHOU_);
+        lcd_update_flag = 1;
     }
+    */
+}
+
+uint8_t serious_error( void )
+{
+    if ((error_bits_flag & 1<<POSITION_ERROR) ||
+        (error_bits_flag & 1<<WUBEI_ERROR) ||
+        (error_bits_flag & 1<<QIBEI_ERROR) ||
+        (error_bits_flag & 1<<ZHUSHUI_ERROR) ||
+        (error_bits_flag & 1<<WENDU_ERROR)) {           //错误，需停止工作
+        return 1;
+    }
+
+    return 0;
+}
+
+uint8_t serious_error_clear( void )
+{
+    error_bits_flag &= 0x0F;
+    lcd_update_flag = 1;
+
+    return 1;
 }
 
 //四个中断信号脚

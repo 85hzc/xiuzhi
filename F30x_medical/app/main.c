@@ -131,9 +131,7 @@ int main(void)
 
             ebike_check_warning();
 
-            if (TEMPERATURE_NORMAL_VALUE != heat_disable) {
-                heat_running();
-            }
+            heat_running();
 
             if (lcd_check_conn_status() == COMM_DISCONN) {
                 // init knob screen display
@@ -150,8 +148,15 @@ int main(void)
                 flash_value_flash();
             }
 
-            lcd_update_flag_check();
+            lcd_update_timer_flag_check();
             //printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
+        
+            //发生错误，人为修之后，短按进入弃杯流程，重启设备,同时恢复错误标记位
+            if (start_work && serious_error()) {
+                start_work = 0;
+                loop_state = LOOP_QIBEI;
+                serious_error_clear();
+            }
         }
     }
 }

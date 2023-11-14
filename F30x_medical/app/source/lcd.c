@@ -1660,13 +1660,21 @@ void lcd_display_update(void)
 
 void lcd_display_inform()
 {
+    //开机启动过程，多刷新几次，保证屏幕能亮
+    static uint8_t start_display = 0;
     /* 
     **  response display pixels.
     */
-    if ((lcd_check_conn_status() == COMM_CONN) && lcd_update_flag) {
-        lcd_update_flag = 0;
-        lcd_update();
-        lcd_ok_flag = 1;
-    }
+   if (lcd_check_conn_status() == COMM_CONN) {
+        
+        if (lcd_update_flag) {
+            lcd_update_flag = 0;
+            lcd_update();
+        }
+
+        if (!lcd_ok_flag && start_display++ >= 3) {
+            lcd_ok_flag = 1;
+        }
+   }
 }
 
