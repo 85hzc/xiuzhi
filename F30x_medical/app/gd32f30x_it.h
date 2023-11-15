@@ -60,7 +60,7 @@ void PendSV_Handler(void);
 /* this function handles SysTick exception */
 void SysTick_Handler(void);
 /* this function handles TIMER2 exception */
-void TIMER2_IRQHandler(void);
+void TIMER1_IRQHandler(void);
 /* this function handles ADC0 and ADC1 exception */
 void ADC0_1_IRQHandler(void);
 /* this function handles DMA exception */
@@ -70,6 +70,6 @@ void EXTI10_15_IRQHandler(void);
 /*this function handles EXTI5_9 interrupts handler*/
 void EXTI5_9_IRQHandler(void);
 /* this function handles RTC global interrupt request */
-void RTC_IRQHandler(void);
+//void RTC_IRQHandler(void);
 
 #endif /* GD32F30X_IT_H */

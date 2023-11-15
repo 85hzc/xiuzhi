@@ -59,8 +59,8 @@ void hardware_config()
     nvic_config();
     gpio_config();
 
-    timer1_config();    //pwm：Step motor
-    timer2_config();    //定时器周期中断，LCD发包
+    timer1_config();    //定时器周期中断，LCD发包
+    timer2_config();    //pwm：Step motor
     timer7_config();    //pwm：蜂鸣器、加热器
     adc_config();
     i2c_init();
@@ -82,6 +82,7 @@ static void rcu_config(void)
     rcu_periph_clock_enable(RCU_GPIOC);
     rcu_periph_clock_enable(RCU_AF);
     
+    rcu_periph_clock_enable(RCU_TIMER1);
     rcu_periph_clock_enable(RCU_TIMER2);
     rcu_periph_clock_enable(RCU_TIMER7);
 
@@ -98,8 +99,8 @@ static void rcu_config(void)
 static void gpio_config(void)
 {
     //步进电机step信号输入
-    /*Configure PA1(TIMER1_CH1) as alternate function*/
-    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_1);
+    /*Configure PB0(TIMER2_CH2) as alternate function*/
+    gpio_init(GPIOB, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
 
 
     //加热丝  导通电流PWM控制
@@ -128,8 +129,8 @@ static void nvic_config(void)
     /* configure the NVIC Preemption Priority Bits */
     nvic_priority_group_set(NVIC_PRIGROUP_PRE2_SUB2);
 
-    /* configure timer2 interrupt priority */
-    nvic_irq_enable(TIMER2_IRQn, 0, 0);
+    /* configure timer1 interrupt priority */
+    nvic_irq_enable(TIMER1_IRQn, 0, 0);
 
     /* USART interrupt configuration */
     nvic_irq_enable(USART1_IRQn, 0, 0);
@@ -140,28 +141,25 @@ static void nvic_config(void)
 
 
 /**
-    \brief      configure the TIMER2 peripheral
+    \brief      configure the TIMER1 peripheral
     \param[in]  none
     \param[out] none
     \retval     none
   */
-void timer2_config(void)
+void timer1_config(void)
 {
     /* ----------------------------------------------------------------------------
-    TIMER2 Configuration:
-    TIMER2CLK = SystemCoreClock/8400(GD32F330)or 10800(GD32F350) = 10KHz.
+    TIMER1 Configuration:
+    TIMER1CLK = SystemCoreClock/8400(GD32F330)or 10800(GD32F350) = 10KHz.
     the period is 1s(10000/10000 = 1s).
     ---------------------------------------------------------------------------- */
     timer_parameter_struct timer_initpara;
 
-    /* enable the peripherals clock */
-    rcu_periph_clock_enable(RCU_TIMER2);
-
     /* deinit a TIMER */
-    timer_deinit(TIMER2);
+    timer_deinit(TIMER1);
     /* initialize TIMER init parameter struct */
     timer_struct_para_init(&timer_initpara);
-    /* TIMER2 configuration */
+    /* TIMER1 configuration */
 #if 1//def GD32F330
     timer_initpara.prescaler         = 8399;
 #endif /* GD32F330 */
@@ -172,16 +170,15 @@ void timer2_config(void)
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
     timer_initpara.period            = 4999;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
-    timer_init(TIMER2, &timer_initpara);
+    timer_init(TIMER1, &timer_initpara);
 
     /* clear channel 0 interrupt bit */
-    timer_interrupt_flag_clear(TIMER2, TIMER_INT_FLAG_UP);
+    timer_interrupt_flag_clear(TIMER1, TIMER_INT_FLAG_UP);
     /* enable the TIMER interrupt */
-    timer_interrupt_enable(TIMER2, TIMER_INT_UP);
+    timer_interrupt_enable(TIMER1, TIMER_INT_UP);
     /* enable a TIMER */
-    timer_enable(TIMER2);
+    timer_enable(TIMER1);
 }
-
 
 
 /*!
@@ -190,13 +187,13 @@ void timer2_config(void)
     \param[out] none
     \retval     none
 */
-void timer1_config(void)
+void timer2_config(void)
 {
-    /*  TIMER1 configuration: generate PWM signals with different duty cycles:
-        TIMER1CLK = SystemCoreClock / 120 = 1MHz */
+    /*  TIMER2 configuration: generate PWM signals with different duty cycles:
+        TIMER2CLK = SystemCoreClock / 120 = 1MHz */
     timer_parameter_struct       timer_initpara;
     timer_oc_parameter_struct    timer_ocintpara;
-    timer_deinit(TIMER1);
+    timer_deinit(TIMER2);
     //120 000 000
     timer_initpara.prescaler         = 239;//1KHz
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
@@ -204,7 +201,7 @@ void timer1_config(void)
     timer_initpara.period            = 500;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
-    timer_init(TIMER1, &timer_initpara);
+    timer_init(TIMER2, &timer_initpara);
 
     /* TIMER1 output disable -- CH0 */
     timer_ocintpara.outputstate  = TIMER_CCX_ENABLE;
@@ -214,16 +211,16 @@ void timer1_config(void)
     timer_ocintpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
     timer_ocintpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
 
-    //CH1
-    timer_channel_output_config(TIMER1, TIMER_CH_1, &timer_ocintpara);
-    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 0);
-    timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0);
-    timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
+    //CH2
+    timer_channel_output_config(TIMER2, TIMER_CH_2, &timer_ocintpara);
+    timer_channel_output_pulse_value_config(TIMER2, TIMER_CH_2, 0);
+    timer_channel_output_mode_config(TIMER2, TIMER_CH_2, TIMER_OC_MODE_PWM0);
+    timer_channel_output_shadow_config(TIMER2, TIMER_CH_2, TIMER_OC_SHADOW_DISABLE);
 
-    timer_primary_output_config(TIMER1, ENABLE);
+    timer_primary_output_config(TIMER2, ENABLE);
     /* auto-reload preload enable */
-    timer_auto_reload_shadow_enable(TIMER1);
-    timer_enable(TIMER1);
+    timer_auto_reload_shadow_enable(TIMER2);
+    timer_enable(TIMER2);
 }
 
 
