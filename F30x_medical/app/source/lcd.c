@@ -61,7 +61,7 @@ uint8_t lcd_check_conn_status()
 
 uint8_t lcd_conn_opt(uint8_t conn)
 {
-    printf("fun:%s line:%d conn:%d\n", __FUNCTION__, __LINE__,conn);
+    //printf("fun:%s line:%d conn:%d\n", __FUNCTION__, __LINE__,conn);
     // comm_msg_t's len + conn/disconn data's len + 1(crc)
     int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
     comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
@@ -81,17 +81,16 @@ uint8_t lcd_conn_opt(uint8_t conn)
     uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
     pbuf = pbuf + pMsg->payload_len+2;
     *pbuf = crc;
-
-    // pbuf = (uint8_t *)pMsg;
-    // printf("send data:\n");
-    // for (size_t i = 0; i < msg_len; i++)
-    // {
-    //     printf("%02x ", pbuf[i]);
-    // }
-    // printf("\n");
-
+    /*
+    pbuf = (uint8_t *)pMsg;
+    printf("\ntx:");
+    for (size_t i = 0; i < msg_len; i++)
+    {
+        printf("%02x ", pbuf[i]);
+    }
+    printf("\n");
+    */
     usart2_data_transfer((uint8_t *)pMsg, msg_len);
-
 #if 0
 
     int32_t time_send = 0;
@@ -402,17 +401,17 @@ uint8_t lcd_get_screen_info_cmd()
 
 void controller_msg_process(void)
 {
-    uint8_t head;
-    uint8_t cmd;
-    uint8_t payload_len;
-    uint8_t msg[COM_BUFFER_SIZE] = {0};
+    uint8_t head = 0x0;
+    uint8_t cmd = 0x0;
+    uint8_t payload_len = 0;
+    uint8_t msg[64] = {0};
     uint8_t *pbuf = msg;
     uint8_t cnt = 0;
     uint8_t opt = 0;
 
     if (!buffer_read(&head) || head != COMM_HEADER)
     {
-        // printf("fun:%s line:%d invalid header\r\n",__FUNCTION__,__LINE__);
+        printf("[IH] line:%d, %x\r\n", __LINE__, head);
         return;
     }
 
@@ -428,9 +427,12 @@ void controller_msg_process(void)
     // 经多次验证cmd为COMM_FILL_BG_AND_ICON_COMPLETE_CMD时,数据不按照协议实现 故需做特殊处理
     if (COMM_FILL_BG_AND_ICON_COMPLETE_CMD == cmd)
     {
+        //printf("fun:%s line:%d cmd[%x]\r\n",__FUNCTION__,__LINE__,cmd);
         cnt = buffer_reads(pbuf, 3);
         if (cnt == 3 && pbuf[0] == 0xF2 && pbuf[1] == 0x00 && pbuf[2] == 0x1A)
         {
+            // response to slave first then send cmd
+            //lcd_response_status(COMM_ACK_NORMAL);
             lcd_screen_display_ctrl(COMM_CTRL_DISPLAY_ON);
         }
         return;
@@ -518,7 +520,8 @@ void controller_msg_process(void)
                 }
             }
 
-            // response_status_handle(status);
+            // response to slave
+            //lcd_response_status(sg_lcd_status);
             break;
         case COMM_SOFTWARE_VER_REPORT_CMD:
             printf("Screen version info:%s\n",pdata->payload);
@@ -527,7 +530,6 @@ void controller_msg_process(void)
             opt = pdata->payload[0];
             //printf("fun:%s line:%d operation:%x\n",__FUNCTION__,__LINE__,pdata->payload[0]);
             report_operation_handle(opt);
-            lcd_response_delay_sync();
             break;
         case COMM_FILL_BG_AND_ICON_COMPLETE_CMD:
             printf("fill the graph ok\n");
@@ -1430,7 +1432,7 @@ void lcd_init_display(void)
     // 建立连接
     if (lcd_check_conn_status() == COMM_DISCONN)
     {
-        printf("lcd init conn req\r\n");
+        //printf("lcd init conn req\r\n");
         lcd_conn_opt(COMM_CONN);
         return;
     }
@@ -1658,6 +1660,42 @@ void lcd_display_update(void)
 }
 
 
+void lcd_response_status(uint8_t status)
+{
+    // printf("fun:%s line:%d status:%d\n", __FUNCTION__, __LINE__,status);
+    uint8_t data = COMM_ACK_NORMAL;
+
+    if (status != COMM_ACK_NORMAL)
+    {
+        return 0;
+    }
+
+    // comm_msg_t's len + response data's len + 1(crc)
+    int msg_len = sizeof(comm_msg_t) + sizeof(uint8_t) + 1;
+    comm_msg_t *pMsg = (comm_msg_t *)calloc(1, msg_len);
+    if (!pMsg)
+    {
+        printf("fun:%s line:%d calloc comm_msg_t fail\n", __FUNCTION__, __LINE__);
+        return 0;
+    }
+
+    pMsg->head = COMM_HEADER;
+    // response data's len
+    pMsg->payload_len = sizeof(uint8_t);
+    pMsg->cmd = COMM_RESPONSE_CMD;
+    memcpy(pMsg->payload, &data, sizeof(uint8_t));
+    uint8_t *pbuf = (uint8_t *)(&pMsg->cmd);
+    // crc not include head and crc len
+    uint8_t crc = _calc_CRC(pbuf, msg_len-1-1);
+    pbuf = pbuf + pMsg->payload_len+2;
+    *pbuf = crc;
+
+    usart2_data_transfer((uint8_t *)pMsg, msg_len);
+
+    free(pMsg);
+    return 1;
+}
+
 void lcd_display_inform()
 {
     //开机启动过程，多刷新几次，保证屏幕能亮
@@ -1667,7 +1705,8 @@ void lcd_display_inform()
     */
    if (lcd_check_conn_status() == COMM_CONN) {
         
-        if (lcd_update_flag) {
+        //设置模式时，提示已进入设置模式，显示闪烁
+        if (lcd_update_flag || ctrlOptType == OPT_TYPE_SET) {
             lcd_update_flag = 0;
             lcd_update();
         }

@@ -17,6 +17,7 @@ uint32_t lcd_timestamp_set;
 uint8_t lcd_enzyme_rate, lcd_temperature_set, heat_disable = 0;
 uint8_t lcd_update_flag = 1, lcd_ok_flag = 0, lcd_time_set_flag = 0;
 uint8_t warnning_loop = READY_;     //用于屏幕提示告警信息
+uint8_t twinkle_pool = 0;
 
 void short_press_handle( void )
 {
@@ -295,7 +296,7 @@ void lcd_update( void )
         return;
     }
     #ifdef DEBUG_PRINT
-    printf("fun:%s\n", __FUNCTION__);
+    //printf("fun:%s\n", __FUNCTION__);
     #endif
     figure_msg_t imgs[64];
 
@@ -386,32 +387,36 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(146, imgs[12].y_coordinate);
     figure_num++;
 
-    sn = lcd_get_image_serial_number(v1, IMAGE_TYPE_TOTAL_SET);
-    _u16_2_byte2_big_endian(sn, imgs[13].figure_no);
-    _u16_2_byte2_big_endian(139, imgs[13].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[13].y_coordinate);
-    figure_num++;
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_TATAL_VOLUME) ||
+        (ctrlFuncOpt == SETTING_OPTIONS_TATAL_VOLUME && twinkle_pool)) {
 
-    sn = lcd_get_image_serial_number(v10, IMAGE_TYPE_TOTAL_SET);
-    _u16_2_byte2_big_endian(sn, imgs[14].figure_no);
-    _u16_2_byte2_big_endian(120, imgs[14].x_coordinate);
-    _u16_2_byte2_big_endian(148, imgs[14].y_coordinate);
-    figure_num++;
-
-    if (v100 || v1000) {
-        sn = lcd_get_image_serial_number(v100, IMAGE_TYPE_TOTAL_SET);
-        _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
-        _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
-        _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
+        sn = lcd_get_image_serial_number(v1, IMAGE_TYPE_TOTAL_SET);
+        _u16_2_byte2_big_endian(sn, imgs[13].figure_no);
+        _u16_2_byte2_big_endian(139, imgs[13].x_coordinate);
+        _u16_2_byte2_big_endian(148, imgs[13].y_coordinate);
         figure_num++;
-    }
 
-    if (v1000) {
-        sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
-        _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
-        _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
-        _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
+        sn = lcd_get_image_serial_number(v10, IMAGE_TYPE_TOTAL_SET);
+        _u16_2_byte2_big_endian(sn, imgs[14].figure_no);
+        _u16_2_byte2_big_endian(120, imgs[14].x_coordinate);
+        _u16_2_byte2_big_endian(148, imgs[14].y_coordinate);
         figure_num++;
+
+        if (v100 || v1000) {
+            sn = lcd_get_image_serial_number(v100, IMAGE_TYPE_TOTAL_SET);
+            _u16_2_byte2_big_endian(sn, imgs[15].figure_no);
+            _u16_2_byte2_big_endian(101, imgs[15].x_coordinate);
+            _u16_2_byte2_big_endian(148, imgs[15].y_coordinate);
+            figure_num++;
+        }
+
+        if (v1000) {
+            sn = lcd_get_image_serial_number(v1000, IMAGE_TYPE_TOTAL_SET);
+            _u16_2_byte2_big_endian(sn, imgs[16].figure_no);
+            _u16_2_byte2_big_endian(81, imgs[16].x_coordinate);
+            _u16_2_byte2_big_endian(148, imgs[16].y_coordinate);
+            figure_num++;
+        }
     }
 
     // 显示稀释比例
@@ -423,29 +428,33 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
     figure_num++;
 
-    sn = lcd_get_image_serial_number(r_1, IMAGE_TYPE_DILUTE_SET);
-    _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(307, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
-    figure_num++;
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_DILUTE) ||
+        (ctrlFuncOpt == SETTING_OPTIONS_DILUTE && twinkle_pool)) {
 
-    _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_2_DOT_SERIAL_NUMBER, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(300, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(167, imgs[figure_num].y_coordinate);
-    figure_num++;
-
-    sn = lcd_get_image_serial_number(r1, IMAGE_TYPE_DILUTE_SET);
-    _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-    _u16_2_byte2_big_endian(280, imgs[figure_num].x_coordinate);
-    _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
-    figure_num++;
-
-    if (r10) {
-        sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
+        sn = lcd_get_image_serial_number(r_1, IMAGE_TYPE_DILUTE_SET);
         _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(260, imgs[figure_num].x_coordinate);
+        _u16_2_byte2_big_endian(307, imgs[figure_num].x_coordinate);
         _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
         figure_num++;
+
+        _u16_2_byte2_big_endian(IMAGES_DILUTE_SET_2_DOT_SERIAL_NUMBER, imgs[figure_num].figure_no);
+        _u16_2_byte2_big_endian(300, imgs[figure_num].x_coordinate);
+        _u16_2_byte2_big_endian(167, imgs[figure_num].y_coordinate);
+        figure_num++;
+
+        sn = lcd_get_image_serial_number(r1, IMAGE_TYPE_DILUTE_SET);
+        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+        _u16_2_byte2_big_endian(280, imgs[figure_num].x_coordinate);
+        _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
+        figure_num++;
+
+        if (r10) {
+            sn = lcd_get_image_serial_number(r10, IMAGE_TYPE_DILUTE_SET);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(260, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(147, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
     }
 
     // 显示出杯数量
@@ -480,10 +489,14 @@ void lcd_update( void )
     //temperature
     if (TEMPERATURE_NORMAL_VALUE == heat_disable)
     {
-        _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_NORMAL_TEMP_SERIAL_NUMBER, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(275, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(203, imgs[figure_num].y_coordinate);
-        figure_num++;
+        if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_TEMPERATURE) ||
+            (ctrlFuncOpt == SETTING_OPTIONS_TEMPERATURE && twinkle_pool)) {
+            
+            _u16_2_byte2_big_endian(IMAGES_TEMPERATURE_SHOW_NORMAL_TEMP_SERIAL_NUMBER, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(275, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(203, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
     }
     else
     {
@@ -492,22 +505,26 @@ void lcd_update( void )
         _u16_2_byte2_big_endian(203, imgs[figure_num].y_coordinate);
         figure_num++;
 
-        uint16_t sn = 0;
-        uint16_t t1 = lcd_temperature_set % 10;
-        uint16_t t10 = lcd_temperature_set / 10 % 10;
-        //uint16_t t100 = lcd_temperature_set / 100 % 10;
+        if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_TEMPERATURE) ||
+            (ctrlFuncOpt == SETTING_OPTIONS_TEMPERATURE && twinkle_pool)) {
 
-        sn = lcd_get_image_serial_number(t1, IMAGE_TYPE_TEMPERATURE_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(305, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(204, imgs[figure_num].y_coordinate);
-        figure_num++;
+            uint16_t sn = 0;
+            uint16_t t1 = lcd_temperature_set % 10;
+            uint16_t t10 = lcd_temperature_set / 10 % 10;
+            //uint16_t t100 = lcd_temperature_set / 100 % 10;
 
-        sn = lcd_get_image_serial_number(t10, IMAGE_TYPE_TEMPERATURE_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(286, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(204, imgs[figure_num].y_coordinate);
-        figure_num++;
+            sn = lcd_get_image_serial_number(t1, IMAGE_TYPE_TEMPERATURE_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(305, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(204, imgs[figure_num].y_coordinate);
+            figure_num++;
+
+            sn = lcd_get_image_serial_number(t10, IMAGE_TYPE_TEMPERATURE_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(286, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(204, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
     }
 
     //setting icon
@@ -561,36 +578,41 @@ void lcd_update( void )
     minutes = (timestamp % 3600) / 60;
     hours = timestamp / 3600;
 
-    if (minutes < 10)
-    {
-        sn = lcd_get_image_serial_number(minutes, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(237, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_TIME) ||
+        (ctrlFuncOpt == SETTING_OPTIONS_TIME && twinkle_pool) ||
+        (clockSetDomain == CLOCK_HOUR)) {
 
-        sn = lcd_get_image_serial_number(0, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(206, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
-    }
-    else
-    {
-        uint8_t m0 = minutes % 10;
-        uint8_t m1 = minutes / 10;
+        if (minutes < 10)
+        {
+            sn = lcd_get_image_serial_number(minutes, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(237, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
 
-        sn = lcd_get_image_serial_number(m0, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(237, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
+            sn = lcd_get_image_serial_number(0, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(206, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
+        else
+        {
+            uint8_t m0 = minutes % 10;
+            uint8_t m1 = minutes / 10;
 
-        sn = lcd_get_image_serial_number(m1, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(206, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
+            sn = lcd_get_image_serial_number(m0, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(237, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
+
+            sn = lcd_get_image_serial_number(m1, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(206, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
     }
 
     _u16_2_byte2_big_endian(IMAGES_TIME_DELIMITER_SERIAL_NUMBER, imgs[figure_num].figure_no);
@@ -598,99 +620,102 @@ void lcd_update( void )
     _u16_2_byte2_big_endian(71, imgs[figure_num].y_coordinate);
     figure_num++;
     
-    if (hours < 10)
-    {
-        sn = lcd_get_image_serial_number(hours, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(164, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
+    if ((ctrlOptType == OPT_TYPE_SELECT) || (ctrlFuncOpt != SETTING_OPTIONS_TIME) ||
+        (ctrlFuncOpt == SETTING_OPTIONS_TIME && twinkle_pool) ||
+        (clockSetDomain == CLOCK_MINUTE)
+        ) {
 
-        sn = lcd_get_image_serial_number(0, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(135, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
-    }
-    else
-    {
-        uint8_t h0 = hours % 10;
-        uint8_t h1 = hours / 10;
+        if (hours < 10)
+        {
+            sn = lcd_get_image_serial_number(hours, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(164, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
 
-        sn = lcd_get_image_serial_number(h0, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(164, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
-
-        sn = lcd_get_image_serial_number(h1, IMAGE_TYPE_TIME_SHOW);
-        _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
-        _u16_2_byte2_big_endian(135, imgs[figure_num].x_coordinate);
-        _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
-        figure_num++;
-    }
-
-    //warnning
-    //if (error_bits_flag & 1<<warnning_loop) {
-
-        switch (warnning_loop) {
-            case POSITION_ERROR:
-                //显示“走位错误”
-                lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case WUBEI_ERROR:
-                //显示“无纸杯”
-                lcd_running_status_display(IMAGES_STATUS_NO_CUP_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case QIBEI_ERROR:
-                //显示“弃杯错误”
-                lcd_running_status_display(IMAGES_STATUS_THROW_CUP_ERR_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case ZHUSHUI_ERROR:
-                //显示“加注失败”
-                lcd_running_status_display(IMAGES_STATUS_JIAZHU_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case WENDU_ERROR:
-                //显示“温度失控”
-                lcd_running_status_display(IMAGES_STATUS_HEAT_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case SHUIWEI_ERROR:
-                //显示“水位不足”
-                lcd_running_status_display(IMAGES_STATUS_LOW_WATER_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case RESET_:
-                //显示“复位”
-                lcd_running_status_display(IMAGES_STATUS_RESET_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case READY_:
-                //显示“待机”
-                lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case CHUBEI_:
-                //显示“出杯”
-                lcd_running_status_display(IMAGES_STATUS_OUT_CUP_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            case HUISHOU_:
-                //显示“回收”
-                lcd_running_status_display(IMAGES_STATUS_RECYCLE_SERIAL_NUMBER, &imgs[figure_num]);
-                break;
-
-            default: //STATUS_NULL
-                break;
-                figure_num--;
-                //显示空
+            sn = lcd_get_image_serial_number(0, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(135, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
         }
-        figure_num++;
-    //}
+        else
+        {
+            uint8_t h0 = hours % 10;
+            uint8_t h1 = hours / 10;
+
+            sn = lcd_get_image_serial_number(h0, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(164, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
+
+            sn = lcd_get_image_serial_number(h1, IMAGE_TYPE_TIME_SHOW);
+            _u16_2_byte2_big_endian(sn, imgs[figure_num].figure_no);
+            _u16_2_byte2_big_endian(135, imgs[figure_num].x_coordinate);
+            _u16_2_byte2_big_endian(59, imgs[figure_num].y_coordinate);
+            figure_num++;
+        }
+    }
+
+    switch (warnning_loop) {
+        case POSITION_ERROR:
+            //显示“走位错误”
+            lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case WUBEI_ERROR:
+            //显示“无纸杯”
+            lcd_running_status_display(IMAGES_STATUS_NO_CUP_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case QIBEI_ERROR:
+            //显示“弃杯错误”
+            lcd_running_status_display(IMAGES_STATUS_THROW_CUP_ERR_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case ZHUSHUI_ERROR:
+            //显示“加注失败”
+            lcd_running_status_display(IMAGES_STATUS_JIAZHU_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case WENDU_ERROR:
+            //显示“温度失控”
+            lcd_running_status_display(IMAGES_STATUS_HEAT_FAIL_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case SHUIWEI_ERROR:
+            //显示“水位不足”
+            lcd_running_status_display(IMAGES_STATUS_LOW_WATER_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case RESET_:
+            //显示“复位”
+            lcd_running_status_display(IMAGES_STATUS_RESET_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case READY_:
+            //显示“待机”
+            lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case CHUBEI_:
+            //显示“出杯”
+            lcd_running_status_display(IMAGES_STATUS_OUT_CUP_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        case HUISHOU_:
+            //显示“回收”
+            lcd_running_status_display(IMAGES_STATUS_RECYCLE_SERIAL_NUMBER, &imgs[figure_num]);
+            break;
+
+        default: //STATUS_NULL
+            break;
+            figure_num--;
+            //显示空
+    }
+    figure_num++;
+    twinkle_pool = !twinkle_pool;
 
     lcd_fill_bg_and_icon_cmd(imgs, figure_num);
 }

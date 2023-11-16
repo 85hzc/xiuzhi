@@ -236,6 +236,7 @@ extern flash_page_type page_type;
 /* debug varieble */
 extern usart_debug debug_data;
 extern PID_Parm pidParm;
+extern ctrl_opt_type_e ctrlOptType;
 
 extern uint8_t state_youbei, state_t1, state_t2, self_diagnose, self_diag_first_time_flag;
 extern uint8_t state_enzyme_count_running, state_qubei_count_running, state_jiazhu_error_count_running, \

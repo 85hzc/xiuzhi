@@ -129,15 +129,8 @@ int main(void)
         if (bTimeFlag_500ms)
         {
             bTimeFlag_500ms = 0;
-
             ebike_check_warning();
-
             heat_running();
-
-            if (lcd_check_conn_status() == COMM_DISCONN) {
-                // init knob screen display
-                lcd_init_display();
-            }
         }
 
         if (bTimeFlag_1s)
@@ -157,6 +150,11 @@ int main(void)
                 start_work = 0;
                 loop_state = LOOP_QIBEI;
                 serious_error_clear();
+            }
+
+            if (lcd_check_conn_status() == COMM_DISCONN) {
+                // init knob screen display
+                lcd_init_display();
             }
         }
     }

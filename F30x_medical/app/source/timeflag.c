@@ -60,14 +60,14 @@ void periodTask_1ms(void)
         g_rCounter_500ms = 0;
         bTimeFlag_500ms = 1;
     }
-/*
+    /*
     g_rCounter_200ms++;
     if (g_rCounter_200ms >= drCnt200ms)
     {
         g_rCounter_200ms = 0;
         bTimeFlag_200ms = 1;
     }
-*/
+    */
     g_rCounter_100ms++;
     if (g_rCounter_100ms >= drCnt100ms)
     {
@@ -81,11 +81,6 @@ void periodTask_1ms(void)
         g_rCounter_50ms = 0;
         bTimeFlag_50ms = 1;
     }
-}
-
-void lcd_response_delay_sync()
-{
-    g_rCounter_200ms = 0;
 }
 
 void temperature_error_timer_start(uint8_t secs)

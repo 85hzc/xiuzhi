@@ -311,5 +311,6 @@ void lcd_main_middle_bg_display(void);
 void lcd_main_cup_bg_display(void);
 void lcd_init_display(void);
 void lcd_display_update(void);
+void lcd_response_status(uint8_t status);
 
 #endif /* LCD_H */

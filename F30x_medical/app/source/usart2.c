@@ -70,14 +70,25 @@ void usart2_init(void)
 uint8_t len_ok()
 {
     if (sg_write_index > sg_read_index) {
-        if (sg_write_index - sg_read_index >= 5)
+        if (sg_write_index - sg_read_index >= 5) {
             return 1;
+        }
     } else if (sg_write_index < sg_read_index) {
-        if (sg_write_index + 128 - sg_read_index >= 5)
+        if (sg_write_index + COM_BUFFER_SIZE - sg_read_index >= 5) {
             return 1;
+        }
     }
 
     return 0;
+}
+
+uint8_t buffer_writes(uint8_t *chs, uint8_t len)
+{
+
+    for (uint8_t i=0; i<len; i++) {
+        buffer_write(*(chs+i));
+    }
+    return 1;
 }
 
 uint8_t buffer_write(uint8_t ch)

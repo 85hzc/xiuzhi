@@ -278,7 +278,7 @@ void work_loop( void )
                 }
             } else {
                 #ifdef DEBUG_PRINT
-                printf("chubei position detect fail.\r\n");
+                //printf("chubei position detect fail.\r\n");
                 #endif
             }
             break;

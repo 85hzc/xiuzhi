@@ -168,7 +168,7 @@ void timer1_config(void)
 #endif /* GD32F350 */
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 4999;
+    timer_initpara.period            = 8399;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_init(TIMER1, &timer_initpara);
 
