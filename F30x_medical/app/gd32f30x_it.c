@@ -273,8 +273,10 @@ void EXTI10_15_IRQHandler(void)
         }
     }
 }
-
-
+#if 1
+volatile uint8_t idx = 0, no_payload_len = 0;
+#endif
+static uint8_t lcd_buffer[32];
 /*!
     \brief      this function handles USART2 exception
     \param[in]  none
@@ -287,7 +289,44 @@ void USART2_IRQHandler(void)
         /* clear flag first */
         usart_interrupt_flag_clear(USART2, USART_INT_FLAG_RBNE);
         uint8_t ch = (uint8_t)usart_data_receive(USART2);
+        #if 0
         buffer_write(ch);
+        #else
+        //printf("%x ", ch);
+        if (ch == COMM_HEADER) {   //head
+            //head_flag = 1;
+            idx = 0;
+            no_payload_len = 0;
+        }
+        /*
+        **  0:head
+        **  1:cmd
+        **  2:len
+        **  3:payload....
+        **  n-1:crc
+        */
+        //if (head_flag) {
+        lcd_buffer[idx] = ch;
+        if (idx == 1 && lcd_buffer[1] == COMM_FILL_BG_AND_ICON_COMPLETE_CMD) {   //CMD
+            no_payload_len = 1;
+            //printf("#0xF3#\r\n");
+        }
+        
+        if (no_payload_len) {       //no payload len byte, only 5 bytes
+            //printf("no payload idx:%d\r\n", idx);
+            if (idx == 4) {
+                //printf("w\r\n");
+                buffer_writes(lcd_buffer, 5);
+                memset(lcd_buffer, 0, sizeof(lcd_buffer));
+            }
+        } else if (idx == 4) {      //payload rx ok
+            //printf("rx ok idx:%d\r\n", idx);
+            buffer_writes(lcd_buffer, 5);
+            memset(lcd_buffer, 0, sizeof(lcd_buffer));
+        }
+        idx++;
+        //}
+        #endif
     }
 }
 
