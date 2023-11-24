@@ -59,7 +59,7 @@ void rtc_configuration(void)
     /* reset backup domain */
     bkp_deinit();
 
-#if 0
+#if 0   //老板子
     /* enable LXTAL */
     rcu_osci_on(RCU_HXTAL);
     /* wait till LXTAL is ready */
@@ -91,8 +91,11 @@ void rtc_configuration(void)
     rtc_lwoff_wait();
 
     /* set RTC prescaler: set RTC period to 1s */
+    #if 0   //老板子
+    rtc_prescaler_set(62500);
+    #else
     rtc_prescaler_set(32767);
-    //rtc_prescaler_set(62500);
+    #endif
 
     /* wait until last write operation on RTC registers has finished */
     rtc_lwoff_wait();

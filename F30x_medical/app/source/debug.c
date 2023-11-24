@@ -134,6 +134,7 @@ void debug_msg_process(uint8_t *msg)
                 step_motor_move_reverse(STEP_MOTOR_STEPS);
             } else {
                 step_motor_move_stop();
+                printf("step motor stop\r\n");
             }
             break;
 

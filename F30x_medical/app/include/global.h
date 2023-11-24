@@ -161,7 +161,7 @@ OF SUCH DAMAGE.
 #define MOTOR_STEP_h_GPIO_CLK               RCU_GPIOA
 #define MOTOR_STEP_h_GPIO_PORT              GPIOA
 #else
-#define STEP_DIR_GPIO_PORT                  GPIOB
+#define STEP_DIR_GPIO_PORT                  GPIOA
 #define STEP_DIR_GPIO_PIN                   GPIO_PIN_8
 
 #endif
