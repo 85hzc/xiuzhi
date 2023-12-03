@@ -195,10 +195,10 @@ void timer2_config(void)
     timer_oc_parameter_struct    timer_ocintpara;
     timer_deinit(TIMER2);
     //120 000 000
-    timer_initpara.prescaler         = 239;//1KHz
+    timer_initpara.prescaler         = 119;//2KHz
     timer_initpara.alignedmode       = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection  = TIMER_COUNTER_UP;
-    timer_initpara.period            = 500;
+    timer_initpara.period            = 100;
     timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter = 0;
     timer_init(TIMER2, &timer_initpara);

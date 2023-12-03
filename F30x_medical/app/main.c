@@ -83,6 +83,9 @@ int main(void)
     self_test_init();
     ringbuff_init();
 
+    //判断两个限位开关的状态，是否为到位状态，避免损坏机器
+    //if(){}
+
     while(1){
 
         if (bTimeFlag_5ms)
@@ -108,6 +111,11 @@ int main(void)
         {
             bTimeFlag_50ms = 0;
             EBI_calcPI(&pidParm);
+
+            //step_motor_work_check();
+            if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
+                work_loop();
+            }
         }
 
         if (bTimeFlag_100ms)
@@ -119,11 +127,6 @@ int main(void)
             #endif
             /* key process routine */
             key_process();
-
-            if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
-                work_loop();
-                step_work_check();
-            }
         }
 
         if (bTimeFlag_500ms)

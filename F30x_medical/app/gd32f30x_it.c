@@ -175,17 +175,20 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_5);
         joggle_delay(10000);
         if(read_chubei_protect_position_switch()){
+            led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_chubei_protet_position_flag = 1;
+            step_work_stop_immediatly();
         }
     }
 
-    //限位控制开关中断
+    //弃杯位置，限位控制开关中断
     if(exti_interrupt_flag_get(EXTI_6) != RESET){
         exti_interrupt_flag_clear(EXTI_6);
         joggle_delay(10000);
         if(read_qibei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_qibei_position_flag = 1;
+            step_work_stop_immediatly();
         }
     }
 
@@ -247,6 +250,7 @@ void EXTI10_15_IRQHandler(void)
         if(read_luobei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_luobei_position_flag = 1;
+            step_work_stop_immediatly();
             exti_interrupt_disable(N1S_LUOBEI_EXTI_LINE);
         }
     }
@@ -258,6 +262,7 @@ void EXTI10_15_IRQHandler(void)
         if(read_zhushui_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_zhushui_position_flag = 1;
+            step_work_stop_immediatly();
             exti_interrupt_disable(N2S_ZHUSHUI_EXTI_LINE);
         }
     }
@@ -269,7 +274,8 @@ void EXTI10_15_IRQHandler(void)
         if(read_chubei_position_switch()){
             led_toggle(LED_RUNNING_GPIO_PORT, LED_RUNNING_PIN);
             g_exti_chubei_position_flag = 1;
-            exti_interrupt_disable(N3S_CHUBEI_EXTI_LINE);
+            step_work_stop_immediatly();
+            //exti_interrupt_disable(N3S_CHUBEI_EXTI_LINE);
         }
     }
 }
