@@ -217,8 +217,9 @@ typedef enum {
 } error_type_e;
 
 typedef enum {
-    FULL_WATER_LEVEL,
+    INIT_WATER_LEVEL = 0,
     EMPTY_WATER_LEVEL,
+    FULL_WATER_LEVEL,
 
 } water_level_e;
 

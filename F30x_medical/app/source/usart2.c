@@ -97,6 +97,7 @@ uint8_t buffer_write(uint8_t ch)
     {
         /* buffer is full */
         printf("[error]:buffer is full!\r\n");
+        ringbuff_init();
         return 0;
     }
 

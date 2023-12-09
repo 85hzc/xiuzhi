@@ -226,8 +226,10 @@ void ebike_check_warning()
         set_error(POSITION_ERROR);
         lcd_update_flag = 1;
     } else if (state_jiazhu_error_timeout){
+        state_jiazhu_error_timeout = 0;
         //输出“加注失败”
         set_error(ZHUSHUI_ERROR);
+        water_motor_stop();
         lcd_update_flag = 1;
     }
 
