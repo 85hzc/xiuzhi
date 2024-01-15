@@ -56,6 +56,27 @@ void qibei_exit_init(void)
 }
 
 
+void pedal_exit_init(void)
+{
+    /* enable the clock of GPIO */
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+
+    /* configure button pin A as input */
+    gpio_init(PEDAL_GPIO_PORT, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_2MHZ, PEDAL_GPIO_PIN);
+
+    /* connect key EXTI line to key GPIO pin */
+    gpio_exti_source_select(PEDAL_EXTI_SRC_PORT, PEDAL_EXTI_SRC_PIN);
+
+    /* configure key EXTI line */
+    exti_init(PEDAL_EXTI_LINE, EXTI_INTERRUPT, PEDAL_EXTI_LINE_EDGE);
+    exti_interrupt_flag_clear(PEDAL_EXTI_LINE);
+
+    /* enable and set key EXTI interrupt to the lowest priority */
+    nvic_irq_enable(PEDAL_EXTI_IRQ, 2U, 0U);
+}
+
+
 void position1_exit_init(void)
 {
     /* enable the clock of GPIO */

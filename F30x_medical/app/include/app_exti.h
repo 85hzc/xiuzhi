@@ -44,7 +44,7 @@
 #define CHUBEI_GPIO_PIN                 GPIO_PIN_5
 #define CHUBEI_GPIO_CLK                 RCU_GPIOA
 #define CHUBEI_EXTI_LINE                EXTI_5
-#define CHUBEI_EXTI_LINE_EDGE           EXTI_TRIG_RISING
+#define CHUBEI_EXTI_LINE_EDGE           EXTI_TRIG_FALLING
 #define CHUBEI_EXTI_SRC_PORT            GPIO_PORT_SOURCE_GPIOA
 #define CHUBEI_EXTI_SRC_PIN             GPIO_PIN_SOURCE_5
 #define CHUBEI_EXTI_IRQ                 EXTI5_9_IRQn
@@ -54,7 +54,7 @@
 #define PEDAL_GPIO_PIN                  GPIO_PIN_8
 #define PEDAL_GPIO_CLK                  RCU_GPIOB
 #define PEDAL_EXTI_LINE                 EXTI_8
-#define PEDAL_EXTI_LINE_EDGE            EXTI_TRIG_RISING
+#define PEDAL_EXTI_LINE_EDGE            EXTI_TRIG_FALLING
 #define PEDAL_EXTI_SRC_PORT             GPIO_PORT_SOURCE_GPIOB
 #define PEDAL_EXTI_SRC_PIN              GPIO_PIN_SOURCE_8
 #define PEDAL_EXTI_IRQ                  EXTI5_9_IRQn
