@@ -103,11 +103,7 @@ void flash_value_flash(void)
     fmc_data_program(MODE_PAGE);
 }
 
-//Rp上拉电阻值
-float Rp=10;//000;
-//T2为25摄氏度，折算为开尔文温度
-float T2=273.15+25;
-float Ka=273.15;
+
 // 100ms period
 void ebike_read_temperature(void)
 {
@@ -115,6 +111,8 @@ void ebike_read_temperature(void)
     float Rt=0.0, vol=0.0;
 
     vol = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0) * 3.3 / 4096.0f;
+
+    #if 0   //NTC 10K 3950
     //Rt=(3.3-vol)*10000/vol;
     Rt = vol * 10.0 / (3.3 - vol);
     //查表法判断Rt有效性
@@ -124,17 +122,13 @@ void ebike_read_temperature(void)
         //printf("res:%f over flow!\r\n", Rt);
         goto TODO;
     }
-
     temperature = 1 / (float)(1.0/T2+log(Rt/Rp) / 3950.0) - Ka + 0.5;
+    #else
+    Rt = vol * 200 / (3.3 - vol);
+    temperature = (Rt-100) / 0.385;
+    #endif
     HZC_LP_FAST(temperature_f, temperature, 0.1);
     pidParm.qInMeas = temperature_f;
-    /*
-    for ( uint8_t i=0; i<=100; i++ ) {
-        if ((Rt<ntc_B3950_10k[i]) && (Rt>ntc_B3950_10k[i+1])) {
-            temperature_cb = i;
-        }
-    }
-    */
     TODO:
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);

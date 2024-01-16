@@ -81,6 +81,10 @@ OF SUCH DAMAGE.
 #define SPEED_LOOP_KI                       (20U)                               /* the integral paramter of speed regulator in hall mode */
 
 
+#define Rp                                  (10)                                 //Rp上拉电阻值
+#define T2                                  (273.15+25)                          //T2为25摄氏度，折算为开尔文温度
+#define Ka                                  (273.15)
+
 /* debug function */
 /* debug buffer size configuration, 12 bytes per frame */
 #define DEBUG_BUFFER_SIZE                   (600U)
