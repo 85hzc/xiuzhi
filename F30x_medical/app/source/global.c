@@ -51,7 +51,7 @@ uint8_t state_qubei_timeout = 0, state_position_error_timeout = 0, \
 uint8_t temperature_set;
 uint8_t enzyme_rate;   //稀释比例，如： 1%=1，15%=15（整型数0--255） 最大25.5%
 uint8_t start_work = 0;     //机器开启运行指令（触摸屏控件启动），初始化为0
-uint8_t luobei_retry = 0, luobei_delay = 0;   //二次尝试取杯操作
+uint8_t luobei_retry = 0, qibei_error_delay = 0, luobei_delay = 0;   //二次尝试取杯操作
 uint16_t g_water_count = 0, water_count_signals = 0, enzyme_count_times = 0;
 uint32_t position_error_count_times = 0, temperature_error_count_times = 0, jiazhu_error_count_times = 0;
 water_level_e state_fuzi = INIT_WATER_LEVEL;
@@ -90,6 +90,27 @@ void self_test_init( void )
     loop_state = LOOP_QIBEI;
 }
 
+void start_signal()
+{
+    if (serious_error()) {
+
+        loop_state = LOOP_QIBEI;
+        if ((error_bits_flag & 1<<POSITION_ERROR) ||
+        (error_bits_flag & 1<<QIBEI_ERROR)) {
+            self_test_init();
+            clear_error(POSITION_ERROR);
+            clear_error(QIBEI_ERROR);
+        }
+        //serious_error_clear();
+        clear_error(WUBEI_ERROR);
+        clear_error(ZHUSHUI_ERROR);
+    }
+    printf("error_bits_flag=%x\r\n", error_bits_flag);
+    if (!(error_bits_flag & 1<<SHUIWEI_ERROR)) {
+        start_work = 1;
+    }
+}
+
 void work_loop( void )
 {
     static uint8_t lcd_flash_once = 0;
@@ -97,8 +118,10 @@ void work_loop( void )
     switch (loop_state) {
         case LOOP_IDLE:
             //弃杯微动开关位置，且弃杯成功状态
-            if (!state_youbei && read_qibei_position_switch()) {
-                clear_error(QIBEI_ERROR);
+            if (!state_youbei && read_qibei_position_switch() && !serious_error()) {
+                //clear_error(QIBEI_ERROR);
+                set_error(READY_);
+                qibei_error_delay = 0;
                 lcd_update_flag = 1;
 
                 //落杯位置信号中断
@@ -114,12 +137,16 @@ void work_loop( void )
                 lcd_flash_once = 1;
                 step_motor_move_forward(STEP_MOTOR_STEPS);
                 clear_position_flags();
-            } else if (read_qibei_position_switch()) {  //显示返回到位，重置超时预警定时器
+            } else if (read_qibei_position_switch() && (!(error_bits_flag & (1<<QIBEI_ERROR))) ) {  //显示返回到位，重置超时预警定时器
                 
                 position_error_timer_clear();
-                //弃杯不成功的告警提示
-                set_error(QIBEI_ERROR);
-                lcd_update_flag = 1;
+
+                qibei_error_delay++;
+                if(qibei_error_delay>=40) {
+                    //弃杯不成功的告警提示
+                    set_error(QIBEI_ERROR);
+                    lcd_update_flag = 1;
+                }
             }
             break;
 
@@ -145,6 +172,7 @@ void work_loop( void )
                     #endif
                 } else if (self_diagnose){          //自检流程
                     exti_interrupt_enable(N2S_ZHUSHUI_EXTI_LINE);
+                    start_work = 0;
                     loop_state = LOOP_ZHUYE;
                     delay_1ms(500);
                     position_error_timer_start(20);
@@ -153,9 +181,10 @@ void work_loop( void )
                     #endif
                     step_motor_move_forward(STEP_MOTOR_STEPS);
                 } else if (lcd_flash_once){
-                    set_error(READY_);
+                    //set_error(READY_);
+                    /*set_error(CHUBEI_);
                     clear_error(HUISHOU_);
-                    lcd_update_flag = 1;
+                    lcd_update_flag = 1;*/
                     lcd_flash_once = 0;
                 }
             }
@@ -174,6 +203,8 @@ void work_loop( void )
                 #ifdef DEBUG_PRINT
                 printf(">>>LOOP_LUOBEI_DETECT, go to LOOP_ZHUYE\r\n");
                 #endif
+                set_error(CHUBEI_);
+                lcd_update_flag = 1;
             }  else if (!self_diagnose && !state_youbei) {         //二次尝试取杯操作
 
                 //set_error(STATUS_NULL);
@@ -240,11 +271,11 @@ void work_loop( void )
             break;
 
         case LOOP_CHUBEI://出杯过程
-            if (!self_diagnose) {
+            /* (!self_diagnose) {
                 set_error(CHUBEI_);
                 clear_error(READY_);
-                clear_error(STATUS_NULL);
-            }
+                //clear_error(STATUS_NULL);
+            }*/
             exti_interrupt_enable(N3S_CHUBEI_EXTI_LINE);
             //delay_1ms(500);
             loop_state = LOOP_CHUBEI_DETECT;
@@ -276,6 +307,8 @@ void work_loop( void )
                     step_motor_move_reverse(STEP_MOTOR_STEPS);
                     self_diagnose = 0;          //自检流程结束
                     clear_position_flags();
+                    set_error(HUISHOU_);
+                    lcd_update_flag = 1;
                 } else if (start_work || state_qubei_timeout) { //按下启动/复位开关 or 取杯超时
                     #ifdef DEBUG_PRINT
                     printf(">>>LOOP_CHUBEI_DETECT, go to LOOP_QIBEI [%s]\r\n", start_work ? "start_work" : "qubei timeout");

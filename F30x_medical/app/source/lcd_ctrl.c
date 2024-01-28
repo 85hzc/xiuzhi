@@ -25,8 +25,7 @@ void short_press_handle( void )
     if (ctrlOptType == OPT_TYPE_SELECT) {                   //功能选择模式，短按进入功能项
 
         //  启动落杯
-        start_work = 1;
-
+        start_signal();
     } else if (ctrlOptType == OPT_TYPE_SET) {                                //功能设置模式，短按确认设置和保存参数，并且推出设置模式
 
         ctrlOptType = OPT_TYPE_SELECT;
@@ -296,7 +295,7 @@ void lcd_update( void )
         return;
     }
     #ifdef DEBUG_PRINT
-    //printf("fun:%s\n", __FUNCTION__);
+    printf("fun:%s\n", __FUNCTION__);
     #endif
     figure_msg_t imgs[64];
 
@@ -710,9 +709,14 @@ void lcd_update( void )
             break;
 
         default: //STATUS_NULL
-            break;
+            #if 1
             figure_num--;
             //显示空
+            #else
+            //默认显示ready
+            lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER, &imgs[figure_num]);
+            #endif
+            break;
     }
     figure_num++;
     twinkle_pool = !twinkle_pool;

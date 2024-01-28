@@ -66,10 +66,10 @@ OF SUCH DAMAGE.
 
 /* motor parameter check */
 #define TEMPERATURE_PWM_MIN                 (0)                                 /* the minimum value of mosfet temperature in centigrade */
-#define TEMPERATURE_PWM_MAX                 (200U)                              /* the maximum value of mosfet temperature in centigrade */
+#define TEMPERATURE_PWM_MAX                 (100U)                              /* the maximum value of mosfet temperature in centigrade */
 
 #define STEP_MOTOR_STEPS                    (0xFFFF)
-#define QIBEI_TIMEROUT_TIMER                (15*60*1000)                        /* 弃杯超时计时时间 1分钟/15分钟*/
+#define QIBEI_TIMEROUT_TIMER                (5*60*1000)                        /* 弃杯超时计时时间 1分钟/15分钟*/
 
 /* ADC sample time */
 #define ADC_SAMPLE_TIME                     (ADC_SAMPLETIME_41POINT5)           /* ADC sampling time configuration */
@@ -171,7 +171,10 @@ OF SUCH DAMAGE.
 #endif
 
 #define TIME_23_59_59                       (0x00015180)
-#define DEBUG_PRINT
+//#define DEBUG_PRINT
+
+#define MOTOR_STEP                          50
+#define MOTOR_PWM                           100
 
 /* conflicting configuration */
 
@@ -213,6 +216,7 @@ typedef enum {
     WUBEI_ERROR,
     QIBEI_ERROR,
     ZHUSHUI_ERROR,
+
     WENDU_ERROR,
     SHUIWEI_ERROR,
 

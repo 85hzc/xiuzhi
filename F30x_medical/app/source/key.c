@@ -165,6 +165,7 @@ void key_process(void)
                 fz = 0;
                 //输出“水位不足”
                 clear_error(SHUIWEI_ERROR);
+                lcd_update_flag = 1;
             }
         }
     } else {

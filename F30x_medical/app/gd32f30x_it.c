@@ -210,8 +210,8 @@ void EXTI5_9_IRQHandler(void)
         exti_interrupt_flag_clear(EXTI_8);
         joggle_delay(10000);
         if(RESET == gpio_input_bit_get(PEDAL_GPIO_PORT, PEDAL_GPIO_PIN)){
-           led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
-            start_work = 1;
+            led_toggle(LED_BRAKE_GPIO_PORT, LED_BRAKE_PIN);
+            start_signal();
         }
     }
 

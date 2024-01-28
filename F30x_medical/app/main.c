@@ -114,7 +114,7 @@ int main(void)
             EBI_calcPI(&pidParm);
 
             //step_motor_work_check();
-            if (lcd_ok_flag) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
+            if (lcd_ok_flag && !serious_error()) {  //因为开机启动自检流程，电机占用cpu资源，会阻塞屏幕显示
                 work_loop();
             }
         }
@@ -150,11 +150,11 @@ int main(void)
             //printf("[AD]temperature:%.1f  %.1f, pwm=%.1f  %d\r\n", temperature_f, temperature_cb, pidParm.qOut, (uint32_t)pidParm.qOut);
         
             //发生错误，人为修之后，短按进入弃杯流程，重启设备,同时恢复错误标记位
-            if (start_work && serious_error()) {
+            /*if (start_work && serious_error()) {
                 start_work = 0;
                 loop_state = LOOP_QIBEI;
                 serious_error_clear();
-            }
+            }*/
 
             if (lcd_check_conn_status() == COMM_DISCONN) {
                 // init knob screen display

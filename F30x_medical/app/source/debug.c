@@ -179,7 +179,7 @@ void debug_msg_process(uint8_t *msg)
             break;
 
         case 12:
-            start_work = 1;
+            start_signal();
             break;
 
         case 13:

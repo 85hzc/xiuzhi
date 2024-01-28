@@ -180,7 +180,7 @@ void step_motor_init(void)
 void motor_on( void )
 {
     /* configure TIMER channel output pulse value */
-    timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_2, 50);
+    timer_channel_output_pulse_value_config(TIMER2,TIMER_CH_2, MOTOR_STEP);
 }
 
 void motor_off( void )

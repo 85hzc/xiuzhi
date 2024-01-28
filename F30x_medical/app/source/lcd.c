@@ -542,63 +542,7 @@ void controller_msg_process(void)
         }
     }
 }
-#if 0
-void notice_flash(uint8_t idx)
-{
-    //printf("fun:%s line:%d idx:%d\n", __FUNCTION__, __LINE__,idx);
-    if (idx == POSITION_ERROR) {
-        //显示“走位错误”
-        lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER);
-    } else if (idx == WUBEI_ERROR) {
-        //显示“无纸杯”
-        lcd_running_status_display(IMAGES_STATUS_NO_CUP_SERIAL_NUMBER);
-    } else if (idx == QIBEI_ERROR) {
-        //显示“弃杯错误”
-        lcd_running_status_display(IMAGES_STATUS_THROW_CUP_ERR_SERIAL_NUMBER);
-    } else if (idx == ZHUSHUI_ERROR) {
-        //显示“加注失败”
-        lcd_running_status_display(IMAGES_STATUS_JIAZHU_FAIL_SERIAL_NUMBER);
-    } else if (idx == WENDU_ERROR) {
-        //显示“温度失控”
-        lcd_running_status_display(IMAGES_STATUS_HEAT_FAIL_SERIAL_NUMBER);
-    } else if (idx == SHUIWEI_ERROR) {
-        //显示“水位不足”
-        lcd_running_status_display(IMAGES_STATUS_LOW_WATER_SERIAL_NUMBER);
-    } else if (idx == RESET_) {
-        //显示“复位”
-        lcd_running_status_display(IMAGES_STATUS_RESET_SERIAL_NUMBER);
-    } else if (idx == READY_) {
-        //显示“待机”
-        lcd_running_status_display(IMAGES_STATUS_POSITION_ERR_SERIAL_NUMBER);
-    } else if (idx == CHUBEI_) {
-        //显示“出杯”
-        lcd_running_status_display(IMAGES_STATUS_STANDBY_SERIAL_NUMBER);
-    } else if (idx == HUISHOU_) {
-        //显示“回收”
-        lcd_running_status_display(IMAGES_STATUS_RECYCLE_SERIAL_NUMBER);
-    }
-}
 
-void lcd_status_display( void )
-{
-    uint8_t loop = 0;
-    static uint8_t next_warnning = 0;
-
-    loop = next_warnning;
-    while (!(error_bits_flag & 1<<loop)) {
-        loop++;
-        if (loop >= ERROR_max) {
-            next_warnning = 0;
-            return;
-        }
-    }
-
-    if (error_bits_flag & 1<<loop) {
-        notice_flash(loop);
-        next_warnning = loop+1;
-    }
-}
-#endif
 
 #if 1
 static uint16_t lcd_get_image_dilute_sn(uint8_t num)

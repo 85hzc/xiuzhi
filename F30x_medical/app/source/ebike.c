@@ -36,7 +36,7 @@ void config_init( void )
 
     memset(&pidParm, 0, sizeof(PID_Parm));
     //温控pid参数初始化
-    pidParm.qInRef = temperature_set-1;     //温度传感器采集滞后，加热目标温度降一度
+    pidParm.qInRef = temperature_set;     //温度传感器采集滞后，加热目标温度降一度
     pidParm.qKp = 10.0;
     pidParm.qKi = 1.0;
     pidParm.qKc = 0.1;
@@ -124,11 +124,14 @@ void ebike_read_temperature(void)
     }
     temperature = 1 / (float)(1.0/T2+log(Rt/Rp) / 3950.0) - Ka + 0.5;
     #else
-    Rt = vol * 200 / (3.3 - vol);
+    Rt = vol * 100 / (3.3 - vol);
     temperature = (Rt-100) / 0.385;
+    //校准
+    temperature = temperature-15;
     #endif
     HZC_LP_FAST(temperature_f, temperature, 0.1);
     pidParm.qInMeas = temperature_f;
+    //printf("vol = %.3f v", vol);
     TODO:
     /* ADC software trigger enable */
     adc_software_trigger_enable(ADC0, ADC_INSERTED_CHANNEL);
@@ -152,6 +155,11 @@ void beep_off( void )
 
 void set_error(error_type_e err_bit)
 {
+    if (serious_error() || normal_error()) {
+        printf("serious or normal err exist. exit without set.\r\n");
+        return;
+    }
+
     warnning_loop = err_bit;    //用于屏幕提示告警信息
     if (!(error_bits_flag & (1<<err_bit))) {
         error_bits_flag |= 1<<err_bit;
@@ -186,13 +194,19 @@ void clear_error(error_type_e err_bit)
 {
     //if (error_bits_flag & ~(1<<err_bit)) {
         error_bits_flag &= ~(1<<err_bit);
-        //lcd_update_flag = 1;
+    //    lcd_update_flag = 1;
     //}
+
+    //用于显示就绪状态，清除屏幕warnning
+    if (!error_bits_flag) {
+        warnning_loop = READY_;
+    }
+    printf("clear error bits:%d, err:0x%x, warnning:%d\r\n", err_bit, error_bits_flag, warnning_loop);
 }
 
 void print_error_bits()
 {
-    printf("error bits:0x%x", error_bits_flag);
+    printf("error bits:0x%x\r\n", error_bits_flag);
 }
 
 /*
@@ -244,11 +258,15 @@ void ebike_check_warning()
     } else {
         //温度正常，恢复告警
         temperature_error_timer_clear();
-        clear_error(WENDU_ERROR);
+        if (error_bits_flag & (1<<WENDU_ERROR)) {
+            clear_error(WENDU_ERROR);
+        }
     }
 
     if (state_youbei) {
-        clear_error(WUBEI_ERROR);
+        if (error_bits_flag & (1<<WUBEI_ERROR)) {
+            clear_error(WUBEI_ERROR);
+        }
     }
     /*
     if (error_bits_flag & 0x3f0) {   //
@@ -261,18 +279,44 @@ void ebike_check_warning()
     */
 }
 
-uint8_t serious_error( void )
+uint8_t serious_error( void )   //影响正常工作流程的错误
 {
     if ((error_bits_flag & 1<<POSITION_ERROR) ||
         (error_bits_flag & 1<<WUBEI_ERROR) ||
         (error_bits_flag & 1<<QIBEI_ERROR) ||
-        (error_bits_flag & 1<<ZHUSHUI_ERROR) ||
-        (error_bits_flag & 1<<WENDU_ERROR)) {           //错误，需停止工作
+        (error_bits_flag & 1<<ZHUSHUI_ERROR) /*||
+        (error_bits_flag & 1<<WENDU_ERROR) ||
+        (error_bits_flag & 1<<SHUIWEI_ERROR)*/) {           //错误，需停止工作
         return 1;
     }
 
     return 0;
 }
+
+
+uint8_t normal_error( void )    //不影响继续进行的错误
+{
+    if ((error_bits_flag & 1<<WENDU_ERROR) ||
+        (error_bits_flag & 1<<SHUIWEI_ERROR)) {           //错误，需停止工作
+        return 1;
+    }
+
+    return 0;
+}
+
+
+uint8_t loog_status( void )   //正常工作流程状态
+{
+    if ((error_bits_flag & 1<<READY_) ||
+        (error_bits_flag & 1<<RESET_) ||
+        (error_bits_flag & 1<<CHUBEI_) ||
+        (error_bits_flag & 1<<HUISHOU_)) {
+        return 1;
+    }
+
+    return 0;
+}
+
 
 uint8_t serious_error_clear( void )
 {
