@@ -172,6 +172,9 @@ OF SUCH DAMAGE.
 
 #define TIME_23_59_59                       (0x00015180)
 //#define DEBUG_PRINT
+#define NTC_10K_3950                        0
+#define PT_100                              1
+
 
 #define MOTOR_STEP                          50
 #define MOTOR_PWM                           100

@@ -112,7 +112,7 @@ void ebike_read_temperature(void)
 
     vol = adc_inserted_data_read(ADC0, ADC_INSERTED_CHANNEL_0) * 3.3 / 4096.0f;
 
-    #if 0   //NTC 10K 3950
+    #if NTC_10K_3950   //NTC_10K_3950
     //Rt=(3.3-vol)*10000/vol;
     Rt = vol * 10.0 / (3.3 - vol);
     //查表法判断Rt有效性
@@ -123,7 +123,7 @@ void ebike_read_temperature(void)
         goto TODO;
     }
     temperature = 1 / (float)(1.0/T2+log(Rt/Rp) / 3950.0) - Ka + 0.5;
-    #else
+    #elif PT_100
     Rt = vol * 100 / (3.3 - vol);
     temperature = (Rt-100) / 0.385;
     //校准
@@ -219,10 +219,14 @@ void heat_running( void )
     if (delay_heat_reset < 20)
         delay_heat_reset++;
 
-    //0 ---- 500
-    /* configure TIMER channel output pulse value */
-    if (delay_heat_reset > 16) {
-        timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
+    if (state_fuzi == FULL_WATER_LEVEL) {
+
+        //0 ---- 500
+        if (delay_heat_reset > 16) {
+            timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, (uint32_t) pidParm.qOut);
+        }
+    } else {
+        timer_channel_output_pulse_value_config(TIMER7,TIMER_CH_0, 0);
     }
 }
 
